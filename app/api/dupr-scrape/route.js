@@ -39,7 +39,7 @@ export async function POST(req) {
         accessToken = accessTokenCookie.value;
         console.log('✓ Using access token from saved cookies');
       }
-    } catch (error) {
+    } catch (_error) {
       console.log('No saved cookies found, using DUPR_FOUNDER_TOKEN');
     }
 

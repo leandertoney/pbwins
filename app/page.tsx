@@ -2,17 +2,9 @@
 
 import Image from "next/image";
 import Footer from "@/components/Footer";
-import { allSponsors, sponsorColors } from "@/data/sponsors";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
-import { getTextColor } from "@/lib/colorExtractor";
-
-// Get sponsors for each individual slot based on its own offset
-const getSponsorForSlot = (sponsors: typeof allSponsors, slotIndex: number, offsets: number[]) => {
-  const sponsorIndex = offsets[slotIndex] % sponsors.length;
-  return sponsors[sponsorIndex];
-};
 
 // Helper function to calculate age bracket from birth year
 const getAgeBracket = (birthYear: number | undefined): string | null => {
@@ -27,29 +19,10 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
 
 export default function Home() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [playerName, setPlayerName] = useState("");
   const [duprUrl, setDuprUrl] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isScraping, setIsScraping] = useState(false);
-  const [scrapedName, setScrapedName] = useState("");
-  const [manualNameEntry, setManualNameEntry] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  // Each slot has its own offset to track which sponsor it's showing (0-19)
-  const [sponsorOffsets, setSponsorOffsets] = useState<number[]>(
-    Array.from({length: 10}, (_, i) => i) // Initialize slots 0-9 to show sponsors 0-9
-  );
-  // Track which individual sponsor slots are currently fading
-  const [fadingSlots, setFadingSlots] = useState<Set<number>>(new Set());
-  // Store shuffled colors for each slot (0-9) - ensures all 10 colors are displayed
-  const [slotColors, setSlotColors] = useState<string[]>(() => {
-    const shuffled = [...sponsorColors];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  });
 
   // Filter state
   const [selectedGender, setSelectedGender] = useState<string>("");
@@ -70,63 +43,8 @@ export default function Home() {
     city: selectedCity || undefined,
   });
 
-  const players = filteredPlayers || [];
+  const players = useMemo(() => filteredPlayers || [], [filteredPlayers]);
   const savePlayer = useMutation(api.players.savePlayer);
-
-  // Staggered sponsor rotation - each slot rotates independently
-  useEffect(() => {
-    const rotationTimeouts: NodeJS.Timeout[] = [];
-    const rotationIntervals: NodeJS.Timeout[] = [];
-
-    // Create staggered rotation for each of the 10 slots
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((slotIndex) => {
-      // Random initial delay (0-10 seconds) to stagger the start
-      const initialDelay = Math.random() * 10000;
-
-      const initialTimeout = setTimeout(() => {
-        const rotateSlot = () => {
-          // Start fade animation for this slot
-          setFadingSlots(prev => new Set(prev).add(slotIndex));
-
-          // After fade animation, update this slot's offset to show next sponsor AND randomize color
-          setTimeout(() => {
-            setSponsorOffsets(prev => {
-              const next = [...prev];
-              // Jump forward by 10 to show a sponsor that wasn't visible before
-              next[slotIndex] = (next[slotIndex] + 10) % allSponsors.length;
-              return next;
-            });
-            // Reshuffle all colors to ensure all 10 are always displayed
-            setSlotColors(prev => {
-              const shuffled = [...sponsorColors];
-              for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-              }
-              return shuffled;
-            });
-            setFadingSlots(prev => {
-              const next = new Set(prev);
-              next.delete(slotIndex);
-              return next;
-            });
-          }, 600);
-        };
-
-        // Rotate this slot every 10 seconds
-        rotateSlot(); // First rotation
-        const interval = setInterval(rotateSlot, 10000);
-        rotationIntervals.push(interval);
-      }, initialDelay);
-
-      rotationTimeouts.push(initialTimeout);
-    });
-
-    return () => {
-      rotationTimeouts.forEach(timeout => clearTimeout(timeout));
-      rotationIntervals.forEach(interval => clearInterval(interval));
-    };
-  }, []);
 
   const sortedPlayers = useMemo(() => {
     if (!players) return [];
@@ -178,71 +96,6 @@ export default function Home() {
     }
     setSearchQuery("");
     setShowSearchResults(false);
-  };
-
-  // Get the current sponsors for each slot based on their individual offsets
-  const leftSponsors = useMemo(() =>
-    [0, 1, 2, 3, 4].map(i => getSponsorForSlot(allSponsors, i, sponsorOffsets)),
-    [sponsorOffsets]
-  );
-  const rightSponsors = useMemo(() =>
-    [5, 6, 7, 8, 9].map(i => getSponsorForSlot(allSponsors, i, sponsorOffsets)),
-    [sponsorOffsets]
-  );
-
-  const handleUrlInput = async () => {
-    const validFormats = [
-      "https://dashboard.dupr.com/dashboard/player/",
-      "https://dashboard.dupr.com/player/",
-    ];
-
-    if (!validFormats.some((prefix) => duprUrl.startsWith(prefix))) {
-      setError("Please enter a valid DUPR profile URL");
-      return;
-    }
-
-    setError("");
-    setIsScraping(true);
-    setManualNameEntry(false);
-
-    try {
-      // Check if player already exists
-      const existingPlayer = players.find(p => p.duprUrl === duprUrl);
-      if (existingPlayer) {
-        setError("This player is already on the leaderboard.");
-        setIsScraping(false);
-        return;
-      }
-
-      // Fetch player data from DUPR API to get name
-      const response = await fetch("/api/dupr-scrape", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: duprUrl }),
-      });
-
-      if (!response.ok) {
-        setError("Failed to fetch player data. Please enter the name manually.");
-        setManualNameEntry(true);
-        setIsScraping(false);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.player?.fullName) {
-        setScrapedName(data.player.fullName);
-        setPlayerName(data.player.fullName);
-      } else {
-        setError("Failed to fetch player name. Please enter it manually.");
-        setManualNameEntry(true);
-      }
-    } catch (err) {
-      setError("Failed to fetch player data. Please enter the name manually.");
-      setManualNameEntry(true);
-    } finally {
-      setIsScraping(false);
-    }
   };
 
   const handleVerify = async () => {
@@ -304,10 +157,7 @@ export default function Home() {
 
       if (result.success) {
         setSuccessMessage(result.message || "Player verified successfully!");
-        setPlayerName("");
         setDuprUrl("");
-        setScrapedName("");
-        setManualNameEntry(false);
         setShowVerifyModal(false);
 
         // Clear success message after 3 seconds
@@ -337,51 +187,14 @@ export default function Home() {
 
       <div className="relative flex flex-col lg:flex-row gap-4 h-screen overflow-hidden items-start px-4">
         {/* LEFT SIDEBAR */}
-        <aside className="hidden lg:flex flex-col justify-between h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
-          <div className="flex h-full flex-col justify-center items-center gap-4">
-            {leftSponsors.map((sponsor, index) => {
-              const isFading = fadingSlots.has(index);
-              const hasLogo = 'logo' in sponsor && sponsor.logo;
-              const slotColor = slotColors[index];
-              const textColor = getTextColor(slotColor);
-
-              return (
-                <a
-                  key={`left-${sponsorOffsets[index]}-${index}-${sponsor.name}`}
-                  href={sponsor.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center text-center rounded-full p-4 hover:brightness-110 transition-all shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:scale-105"
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    transform: isFading ? 'rotateY(90deg)' : 'rotateY(0deg)',
-                    opacity: isFading ? 0 : 1,
-                    transition: 'all 0.5s ease-in-out',
-                    backgroundColor: slotColor,
-                  }}
-                >
-                  {hasLogo && (
-                    <div className="flex items-center justify-center mb-2">
-                      <Image
-                        src={sponsor.logo}
-                        alt={sponsor.name}
-                        width={16}
-                        height={16}
-                        className="object-contain"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                  <h3 className="text-sm font-semibold mb-1" style={{ color: textColor }}>
-                    {sponsor.name}
-                  </h3>
-                  <p className="text-[10px] leading-snug" style={{ color: textColor, opacity: 0.8 }}>
-                    {sponsor.desc}
-                  </p>
-                </a>
-              );
-            })}
+        <aside className="hidden lg:flex flex-col h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
+          <div className="w-[200px] flex flex-col items-center justify-center gap-8 h-full px-4">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <div
+                key={`left-placeholder-${index}`}
+                className="w-full max-w-[160px] flex-grow rounded-full bg-[#2E3A4A]"
+              />
+            ))}
           </div>
         </aside>
 
@@ -559,15 +372,8 @@ export default function Home() {
                         disabled={!selectedState}
                       >
                         <option value="">All</option>
-                        {filterOptions?.cities
-                          .filter(city => {
-                            // Only show cities that match selected state if a state is selected
-                            if (!selectedState) return true;
-                            // This is a simple filter - you might want to enhance this
-                            return true;
-                          })
-                          .map(city => (
-                            <option key={city} value={city}>{city}</option>
+                        {filterOptions?.cities.map(cityOption => (
+                            <option key={cityOption} value={cityOption}>{cityOption}</option>
                           ))}
                       </select>
                     </div>
@@ -648,52 +454,14 @@ export default function Home() {
         </main>
 
         {/* RIGHT SIDEBAR */}
-        <aside className="hidden lg:flex flex-col justify-between h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
-          <div className="flex h-full flex-col justify-center items-center gap-4">
-            {rightSponsors.map((sponsor, index) => {
-              const slotIndex = index + 5; // Right sidebar uses slots 5-9
-              const isFading = fadingSlots.has(slotIndex);
-              const hasLogo = 'logo' in sponsor && sponsor.logo;
-              const slotColor = slotColors[slotIndex];
-              const textColor = getTextColor(slotColor);
-
-              return (
-                <a
-                  key={`right-${sponsorOffsets[slotIndex]}-${index}-${sponsor.name}`}
-                  href={sponsor.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center text-center rounded-full p-4 hover:brightness-110 transition-all shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:scale-105"
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    transform: isFading ? 'rotateY(90deg)' : 'rotateY(0deg)',
-                    opacity: isFading ? 0 : 1,
-                    transition: 'all 0.5s ease-in-out',
-                    backgroundColor: slotColor,
-                  }}
-                >
-                  {hasLogo && (
-                    <div className="flex items-center justify-center mb-2">
-                      <Image
-                        src={sponsor.logo}
-                        alt={sponsor.name}
-                        width={16}
-                        height={16}
-                        className="object-contain"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                  <h3 className="text-sm font-semibold mb-1" style={{ color: textColor }}>
-                    {sponsor.name}
-                  </h3>
-                  <p className="text-[10px] leading-snug" style={{ color: textColor, opacity: 0.8 }}>
-                    {sponsor.desc}
-                  </p>
-                </a>
-              );
-            })}
+        <aside className="hidden lg:flex flex-col h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
+          <div className="w-[200px] flex flex-col items-center justify-center gap-8 h-full px-4">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <div
+                key={`right-placeholder-${index}`}
+                className="w-full max-w-[160px] flex-grow rounded-full bg-[#2E3A4A]"
+              />
+            ))}
           </div>
         </aside>
       </div>
@@ -708,10 +476,7 @@ export default function Home() {
                 onClick={() => {
                   setShowVerifyModal(false);
                   setError("");
-                  setPlayerName("");
                   setDuprUrl("");
-                  setScrapedName("");
-                  setManualNameEntry(false);
                 }}
                 className="text-gray-400 hover:text-white transition"
               >

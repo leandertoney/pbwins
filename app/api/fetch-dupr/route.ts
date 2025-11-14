@@ -19,18 +19,6 @@ type DuprStatsResponse = {
   };
 };
 
-type DuprProfileResponse = {
-  status: string;
-  result: {
-    fullName: string;
-    image?: string;
-    ratings?: {
-      doubles?: number;
-      singles?: number;
-    };
-  };
-};
-
 export async function POST(req: Request) {
   try {
     const { duprUrl } = await req.json();
