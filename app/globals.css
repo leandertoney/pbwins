@@ -2,26 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --brand: #00FFB0;
+  }
+
+  body {
+    @apply min-h-screen bg-[#0a0a0a] text-white antialiased;
+  }
+
+  ::selection {
+    background: #00ffb0;
+    color: #050505;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .fade-in-smooth {
+    animation: fadeInSmooth 0.75s ease forwards;
+  }
+
+  .glow-surface {
+    box-shadow: 0 20px 45px rgba(0, 255, 176, 0.18);
+  }
+
+  .light-border {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .player-avatar-ani {
+    transition: transform 0.4s ease;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  @keyframes fadeInSmooth {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0px);
+    }
   }
 }
