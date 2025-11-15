@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Footer from "@/components/Footer";
+import PbWinsLogo from "@/components/PbWinsLogo";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // Helper function to calculate age bracket from birth year
 const getAgeBracket = (birthYear: number | undefined): string | null => {
@@ -16,6 +17,101 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
   if (age <= 64) return "50–64";
   return "65+";
 };
+
+// Dark Neon color palette function
+function getDarkNeonColor(index: number): string {
+  const palette = [
+    "#1E4AFF", // royal blue
+    "#0FD976", // emerald neon
+    "#D9376E", // ruby magenta
+    "#FF7A00", // amber fire
+    "#7B2FF7", // electric purple
+    "#00C2D1", // aqua neon
+    "#D12A2A", // dark red / maroon pop
+    "#FFC300", // gold neon
+    "#008D5E", // deep teal
+    "#3A4EFF"  // rich indigo
+  ];
+  return palette[index % palette.length];
+}
+
+// Sponsor pool (base sponsors with duplicates for rotation)
+const SPONSORS_POOL = [
+  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
+  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
+  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
+  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
+  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
+  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" },
+  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
+  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
+  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
+  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
+  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
+  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" },
+  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
+  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
+  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
+  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
+  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
+  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" }
+];
+
+// Sponsor Circle Component
+interface SponsorCircleProps {
+  slotIndex: number;
+  sponsor: { name: string; tagline: string; url: string };
+}
+
+function SponsorCircle({ slotIndex, sponsor }: SponsorCircleProps) {
+  return (
+    <div id={`sponsor-${slotIndex}`} className="sponsor-circle">
+      <a
+        href={sponsor.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center w-[140px] h-[140px] rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center px-4"
+        style={{
+          backgroundColor: getDarkNeonColor(slotIndex)
+        }}
+      >
+        <div className="flex flex-col items-center justify-center leading-tight">
+          <p
+            className="text-white font-semibold text-center leading-tight"
+            style={{
+              whiteSpace: "nowrap",
+              fontSize: "clamp(9px, 1.8vw, 18px)",
+              WebkitTextStroke: "1.1px rgba(0,0,0,0.65)",
+              paintOrder: "stroke fill",
+              textShadow: "0px 1px 2px rgba(0,0,0,0.55)",
+              paddingLeft: "3px",
+              paddingRight: "3px",
+            }}
+          >
+            {sponsor.name}
+          </p>
+          <p
+            className="text-white text-center leading-tight"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              fontSize: "clamp(9px, 1.4vw, 14px)",
+              WebkitTextStroke: "0.8px rgba(0,0,0,0.5)",
+              paintOrder: "stroke fill",
+              textShadow: "0px 1px 2px rgba(0,0,0,0.45)",
+              marginTop: "4px",
+            }}
+          >
+            {sponsor.tagline}
+          </p>
+        </div>
+      </a>
+    </div>
+  );
+}
+
 
 export default function Home() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -34,6 +130,22 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [highlightedPlayerId, setHighlightedPlayerId] = useState<string | null>(null);
+
+  // Sponsor rotation state
+  const [currentVisible, setCurrentVisible] = useState(() => SPONSORS_POOL.slice(0, 10));
+  const rotationIndexRef = useRef(10);
+  const lastSlotSponsorRef = useRef(
+    SPONSORS_POOL.slice(0, 10).map(s => s.name + s.url)
+  );
+
+  // Trigger flip animation helper
+  const triggerFlipAnimation = (i: number) => {
+    const el = document.getElementById(`sponsor-${i}`);
+    if (!el) return;
+    el.classList.remove("sponsor-flip");
+    void el.offsetWidth; // force reflow
+    el.classList.add("sponsor-flip");
+  };
 
   // Fetch filter options and filtered players
   const filterOptions = useQuery(api.players.getFilterOptions);
@@ -97,6 +209,58 @@ export default function Home() {
     setSearchQuery("");
     setShowSearchResults(false);
   };
+
+  // Sponsor rotation engine
+  useEffect(() => {
+    const rotateSponsors = () => {
+      const newVisible = [...currentVisible];
+      const used = new Set(newVisible.map(s => s.name + s.url));
+
+      for (let slot = 0; slot < 10; slot++) {
+        const lastSponsor = lastSlotSponsorRef.current[slot];
+        let nextSponsor = null;
+        let attempts = 0;
+
+        while (!nextSponsor && attempts < SPONSORS_POOL.length) {
+          const s = SPONSORS_POOL[rotationIndexRef.current];
+          rotationIndexRef.current = (rotationIndexRef.current + 1) % SPONSORS_POOL.length;
+          attempts++;
+
+          const id = s.name + s.url;
+
+          if (!used.has(id) && id !== lastSponsor) {
+            nextSponsor = s;
+            used.add(id);
+          }
+        }
+
+        if (nextSponsor) {
+          newVisible[slot] = nextSponsor;
+          lastSlotSponsorRef.current[slot] = nextSponsor.name + nextSponsor.url;
+        }
+      }
+
+      // Domino flip animation with 200ms stagger
+      for (let slot = 0; slot < 10; slot++) {
+        setTimeout(() => {
+          // Trigger flip animation
+          triggerFlipAnimation(slot);
+
+          // Update sponsor content at 50% of animation (500ms into 1s flip)
+          setTimeout(() => {
+            setCurrentVisible(prev => {
+              const updated = [...prev];
+              updated[slot] = newVisible[slot];
+              return updated;
+            });
+          }, 500);
+        }, slot * 200);
+      }
+    };
+
+    const interval = setInterval(rotateSponsors, 10000);
+    return () => clearInterval(interval);
+  }, [currentVisible, triggerFlipAnimation]);
 
   const handleVerify = async () => {
     if (!duprUrl.trim()) {
@@ -187,12 +351,13 @@ export default function Home() {
 
       <div className="relative flex flex-col lg:flex-row gap-4 h-screen overflow-hidden items-start px-4">
         {/* LEFT SIDEBAR */}
-        <aside className="hidden lg:flex flex-col h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
-          <div className="w-[200px] flex flex-col items-center justify-center gap-8 h-full px-4">
-            {[0, 1, 2, 3, 4].map((index) => (
-              <div
-                key={`left-placeholder-${index}`}
-                className="w-full max-w-[160px] flex-grow rounded-full bg-[#2E3A4A]"
+        <aside className="hidden lg:flex w-[200px] flex-shrink-0 overflow-hidden px-4">
+          <div className="flex flex-col justify-start items-center w-full py-10 gap-6">
+            {currentVisible.slice(0, 5).map((sponsor, idx) => (
+              <SponsorCircle
+                key={`left-${idx}`}
+                slotIndex={idx}
+                sponsor={sponsor}
               />
             ))}
           </div>
@@ -200,14 +365,9 @@ export default function Home() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 flex flex-col items-center justify-start py-8 lg:py-16 text-center overflow-y-auto h-screen w-full max-w-[95vw] lg:max-w-[90vw] scrollbar-hide">
-          {/* Logo/Icon above heading */}
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            </div>
-            <span className="text-[10px] uppercase tracking-[0.5em] text-white/40 font-medium">pbWins</span>
+          {/* Logo above heading */}
+          <div className="mb-4">
+            <PbWinsLogo size={64} />
           </div>
 
           <h1 className="text-[1.5rem] sm:text-[1.85rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-10 whitespace-nowrap tracking-tight w-full overflow-visible">
@@ -277,7 +437,8 @@ export default function Home() {
             {/* Standalone Verify button */}
             <button
               onClick={() => setShowVerifyModal(true)}
-              className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium transition hover:bg-emerald-500 shadow-lg hover:shadow-emerald-500/25 flex items-center gap-2 whitespace-nowrap"
+              className="rounded-full px-5 py-2.5 text-sm font-medium transition shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ backgroundColor: '#7BFF4A', color: '#000' }}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -393,7 +554,7 @@ export default function Home() {
                   <th className="px-4 py-4">Rank</th>
                   <th className="px-4 py-4">Player</th>
                   <th className="px-4 py-4">Rating</th>
-                  <th className="px-4 py-4 text-emerald-400 font-semibold">Wins</th>
+                  <th className="px-4 py-4 font-semibold" style={{ color: '#7BFF4A' }}>Wins</th>
                 </tr>
               </thead>
               <tbody>
@@ -443,7 +604,7 @@ export default function Home() {
                       <td className={`px-4 py-4 text-white/80 ${isTopThree ? 'text-base' : 'text-sm'}`}>
                         {player.rating ? player.rating.toFixed(2) : "—"}
                       </td>
-                      <td className={`px-4 py-4 font-bold text-emerald-400 ${isTopThree ? 'text-2xl' : 'text-lg'}`}>{player.wins ?? 0}</td>
+                      <td className={`px-4 py-4 font-bold ${isTopThree ? 'text-2xl' : 'text-lg'}`} style={{ color: '#7BFF4A' }}>{player.wins ?? 0}</td>
                     </tr>
                     );
                   })
@@ -454,12 +615,13 @@ export default function Home() {
         </main>
 
         {/* RIGHT SIDEBAR */}
-        <aside className="hidden lg:flex flex-col h-screen py-6 w-[200px] flex-shrink-0 overflow-hidden">
-          <div className="w-[200px] flex flex-col items-center justify-center gap-8 h-full px-4">
-            {[0, 1, 2, 3, 4].map((index) => (
-              <div
-                key={`right-placeholder-${index}`}
-                className="w-full max-w-[160px] flex-grow rounded-full bg-[#2E3A4A]"
+        <aside className="hidden lg:flex w-[200px] flex-shrink-0 overflow-hidden px-4">
+          <div className="flex flex-col justify-start items-center w-full py-10 gap-6">
+            {currentVisible.slice(5, 10).map((sponsor, idx) => (
+              <SponsorCircle
+                key={`right-${idx}`}
+                slotIndex={idx + 5}
+                sponsor={sponsor}
               />
             ))}
           </div>

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-nunito"
+});
 
 export const metadata: Metadata = {
   title: "pbWins - Verified Pickleball Wins Database",
@@ -17,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} ${nunito.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -10,7 +10,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: "#00FFB0",
+        brand: "#7BFF4A",
+        emerald: {
+          500: "#7BFF4A",
+          600: "#6DE639",
+          700: "#5FCC2F",
+        },
       },
     },
   },
