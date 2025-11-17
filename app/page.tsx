@@ -553,7 +553,7 @@ export default function Home() {
                     onClick={() => setDisplayedCount((prev) => Math.min(prev + 50, 100))}
                     className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs font-semibold uppercase tracking-[0.4em] text-white/70 hover:border-white/40 hover:text-white transition"
                   >
-                    Load 50 more players.
+                    Load 50 more players
                   </button>
                 </div>
               )}
