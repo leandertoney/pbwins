@@ -545,8 +545,8 @@ export default function Home() {
                             </td>
                             <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
                           </tr>
-                          {/* Insert Court Crowd ad after 5th player (index 4) */}
-                          {index === 4 && <InteractiveCourtCrowdAd key="court-crowd-ad" />}
+                          {/* Insert Court Crowd ad after every 25th player (25, 50, 75, 100) */}
+                          {(index + 1) % 25 === 0 && <InteractiveCourtCrowdAd key={`court-crowd-ad-${index + 1}`} />}
                         </>
                       );
                     })}
