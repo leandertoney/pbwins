@@ -147,7 +147,7 @@ function aggregateWinsByRange(wins: WinRecord[], range: TimeRange): DataPoint[] 
   // Convert to array and sort by date
   const dataPoints: DataPoint[] = Array.from(counts.entries())
     .sort(([a], [b]) => (a > b ? 1 : -1))
-    .map(([key, data]) => {
+    .map(([_key, data]) => {
       let dateRange: string;
       if (range === "7d") {
         dateRange = data.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });

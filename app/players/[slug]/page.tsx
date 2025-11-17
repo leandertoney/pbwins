@@ -80,7 +80,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const isPro = Boolean(player.isPro) || (typeof duprRating === "number" && duprRating >= 5.2);
 
   const profileImage = player.imageUrl || "/pbwins-logo.png";
-  const slug = createPlayerSlug(player);
 
   return (
     <div className="relative min-h-screen bg-[#050505] text-white">
