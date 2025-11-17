@@ -1,4 +1,9 @@
-export const leaderboardPlayers = [
+type LeaderboardPlayer = {
+  name: string;
+  duprUrl: string;
+};
+
+export const leaderboardPlayers: LeaderboardPlayer[] = [
   { name: "Leander Toney Jr", duprUrl: "https://dashboard.dupr.com/dashboard/player/8309056801" },
   { name: "Preston Moragne", duprUrl: "https://dashboard.dupr.com/dashboard/player/8092725845" },
   { name: "Justin Villa", duprUrl: "https://dashboard.dupr.com/dashboard/player/7987518948" },

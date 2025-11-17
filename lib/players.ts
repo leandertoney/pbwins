@@ -19,7 +19,8 @@ export async function fetchPlayerBySlug(slug: string): Promise<PlayerRecord | nu
 
 export function createPlayerSlug(player: PlayerRecord) {
   if (player.slug) return player.slug;
-  const baseName = player.firstName?
-    `${player.firstName} ${player.lastName ?? ""}` : player.name;
+  const baseName = player.firstName
+    ? `${player.firstName} ${player.lastName ?? ""}`
+    : player.name;
   return slugify(baseName || "player");
 }

@@ -14,7 +14,7 @@ async function fetchSession(sessionId?: string) {
   const stripe = new Stripe(stripeSecret, { apiVersion: "2023-10-16" });
   try {
     return await stripe.checkout.sessions.retrieve(sessionId);
-  } catch {
+  } catch (_error: unknown) {
     return null;
   }
 }

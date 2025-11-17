@@ -23,13 +23,6 @@ function formatDate(value?: string | null) {
   return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function safeNumber(value?: number | null, fallback = "—") {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value.toFixed(2).replace(/\.00$/, "");
-  }
-  return fallback;
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const player = await fetchPlayerBySlug(params.slug);
   if (!player) {
