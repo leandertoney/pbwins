@@ -21,6 +21,10 @@ export default defineSchema({
     losses: v.optional(v.number()),        // Doubles losses
     singlesRating: v.optional(v.number()), // Singles rating
     isPro: v.optional(v.boolean()),        // Derived: DUPR >= 5.20
+    // Premium bio fields
+    verifiedSince: v.optional(v.string()), // ISO date of earliest verified match
+    yearsActive: v.optional(v.number()),   // Computed years active
+    bio: v.optional(v.string()),           // Premium generated bio
   })
     .index("by_slug", ["slug"])
     .index("by_duprUrl", ["duprUrl"])

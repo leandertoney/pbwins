@@ -29,6 +29,10 @@ export const savePlayer = mutation({
     locationRaw: v.optional(v.string()),
     losses: v.optional(v.number()),
     singlesRating: v.optional(v.number()),
+    // Premium bio fields
+    verifiedSince: v.optional(v.string()),
+    yearsActive: v.optional(v.number()),
+    bio: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Generate slug from name
@@ -47,7 +51,8 @@ export const savePlayer = mutation({
 
     if (existing) {
       // Update existing player record with all new fields
-      await ctx.db.patch(existing._id, {
+      // Only update verifiedSince if not already set or if explicitly provided
+      const patchData: Record<string, unknown> = {
         name: args.name,
         wins: args.wins,
         rating: args.rating,
@@ -61,7 +66,17 @@ export const savePlayer = mutation({
         losses: args.losses,
         singlesRating: args.singlesRating,
         isPro,
-      });
+      };
+      if (args.verifiedSince !== undefined && !existing.verifiedSince) {
+        patchData.verifiedSince = args.verifiedSince;
+      }
+      if (args.yearsActive !== undefined) {
+        patchData.yearsActive = args.yearsActive;
+      }
+      if (args.bio !== undefined) {
+        patchData.bio = args.bio;
+      }
+      await ctx.db.patch(existing._id, patchData);
       console.log("Updated existing player:", args.name);
       return { success: true, updated: true, message: "Player stats updated!" };
     }
@@ -85,6 +100,9 @@ export const savePlayer = mutation({
       losses: args.losses,
       singlesRating: args.singlesRating,
       isPro,
+      verifiedSince: args.verifiedSince,
+      yearsActive: args.yearsActive,
+      bio: args.bio,
     });
 
     console.log("Inserted new player:", args.name);
@@ -228,5 +246,41 @@ export const recalculateProStatus = mutation({
       }
     }
     return { updated };
+  },
+});
+
+// Update player with verified_since and years_active
+export const updatePlayerMetrics = mutation({
+  args: {
+    playerId: v.id("players"),
+    verifiedSince: v.optional(v.string()),
+    yearsActive: v.optional(v.number()),
+    bio: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const player = await ctx.db.get(args.playerId);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    const patchData: Record<string, unknown> = {};
+
+    // Only update verifiedSince if not already set
+    if (args.verifiedSince !== undefined && !player.verifiedSince) {
+      patchData.verifiedSince = args.verifiedSince;
+    }
+
+    if (args.yearsActive !== undefined) {
+      patchData.yearsActive = args.yearsActive;
+    }
+
+    if (args.bio !== undefined) {
+      patchData.bio = args.bio;
+    }
+
+    await ctx.db.patch(args.playerId, patchData);
+
+    const updatedPlayer = await ctx.db.get(args.playerId);
+    return updatedPlayer;
   },
 });
