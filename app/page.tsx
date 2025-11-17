@@ -638,15 +638,76 @@ export default function Home() {
 
       {/* FAQ Section - Pickleball Rankings & Ratings */}
       <section className="mt-24 border-t border-white/10 pt-16 max-w-4xl mx-auto px-6">
+        {/* JSON-LD Schema for FAQ Rich Snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "What is a pickleball ranking?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A pickleball ranking is a score or position that measures a player's skill level compared to others. Most rankings are based on match results, competition level, and win/loss performance. On pbWins, rankings are built from verified wins only, giving players a clean, trusted way to compare themselves without inflated rec-play numbers."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do pickleball ratings work?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Pickleball ratings estimate a player's overall skill level. The most commonly known system is DUPR, which calculates a rating from match history and opponent strength. On pbWins, ratings are shown alongside your verified wins so players can easily see how performance trends over time."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What does a 3.5 pickleball rating mean?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A 3.5 rating usually means the player has solid fundamentals, good consistency, and can control pace in rallies. They recognize strategy, understand court positioning, and win points through placement rather than power. On pbWins, you can track how your confirmed wins trend as you move toward the next rating level."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How are pickleball player rankings calculated?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Player rankings depend on verified match results, rating changes, and recent performance. pbWins builds rankings from official, confirmed wins so players can see an accurate picture of who's performing the best in their city, state, or division."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What is Parris Todd's pickleball ranking?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Parris Todd is consistently ranked among the top professional pickleball players in the world, known for her speed, precision, and tournament performance. While pbWins focuses on verified wins for everyday players, top pros like Parris demonstrate how important accurate results are for understanding real skill level."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What's the difference between pickleball rankings and pickleball ratings?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ratings measure your individual skill. Rankings measure your position compared to other players. pbWins blends both—your verified wins improve your ranking, while your rating helps others understand your competitive level."
+                  }
+                }
+              ]
+            })
+          }}
+        />
+
         <h2 className="text-2xl font-semibold mb-8">Pickleball Rankings & Ratings: FAQ</h2>
 
-        <div className="space-y-6">
-          <details className="group">
+        <div className="space-y-4">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What is a pickleball ranking?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               A pickleball ranking is a score or position that measures a player's skill level compared
               to others. Most rankings are based on match results, competition level, and win/loss
               performance. On pbWins, rankings are built from <strong>verified wins only</strong>, giving
@@ -654,12 +715,12 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               How do pickleball ratings work?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               Pickleball ratings estimate a player's overall skill level. The most commonly known system
               is DUPR, which calculates a rating from match history and opponent strength. On pbWins,
               ratings are shown alongside your verified wins so players can easily see how performance
@@ -667,12 +728,12 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What does a 3.5 pickleball rating mean?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               A 3.5 rating usually means the player has solid fundamentals, good consistency, and
               can control pace in rallies. They recognize strategy, understand court positioning,
               and win points through placement rather than power. On pbWins, you can track how your
@@ -680,24 +741,24 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               How are pickleball player rankings calculated?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               Player rankings depend on verified match results, rating changes, and recent performance.
               pbWins builds rankings from official, confirmed wins so players can see an accurate picture
               of who's performing the best in their city, state, or division.
             </p>
           </details>
 
-          <details className="group">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What is Parris Todd's pickleball ranking?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               Parris Todd is consistently ranked among the top professional pickleball players in the
               world, known for her speed, precision, and tournament performance. While pbWins focuses on
               verified wins for everyday players, top pros like Parris demonstrate how important accurate
@@ -705,12 +766,12 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group">
+          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What's the difference between pickleball rankings and pickleball ratings?
-              <span className="transition-transform group-open:rotate-180">⌄</span>
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
             </summary>
-            <p className="mt-3 text-white/70 leading-relaxed">
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
               Ratings measure <em>your individual skill</em>. Rankings measure <em>your position</em>
               compared to other players. pbWins blends both—your verified wins improve your ranking,
               while your rating helps others understand your competitive level.
