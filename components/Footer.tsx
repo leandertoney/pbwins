@@ -45,14 +45,14 @@ export default function Footer() {
       <footer className="border-t border-white/10 bg-[#050505] text-sm text-gray-400">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-center text-xs uppercase tracking-[0.4em] text-white/60">
-            Designed and developed by UNIVERSOLE APP STUDIOS —&nbsp;
+            Designed and developed by 
             <Link
               href="https://universalappstudios.com"
-              className="text-brand font-semibold hover:text-brand-light"
+              className="ml-2 text-brand font-semibold hover:text-brand-light"
               target="_blank"
               rel="noreferrer"
             >
-              universalappstudios.com
+              UNIVERSOLE APP STUDIOS
             </Link>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
