@@ -7,7 +7,7 @@ import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import WinsOverTime from "@/components/player/WinsOverTime";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
-import { fetchPlayerBySlug, fetchAllPlayers, createPlayerSlug } from "@/lib/players";
+import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
 
@@ -73,7 +73,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
 
   // Calculate state-level ranking
   let stateRank: number | null = null;
-  let stateRankTotal = 0;
   if (player.state) {
     const statePlayers = allPlayers.filter((p) => p.state === player.state);
     const sortedByWinsInState = [...statePlayers].sort((a, b) => {
@@ -84,7 +83,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     const stateRankIndex = sortedByWinsInState.findIndex((p) => p._id === player._id);
     if (stateRankIndex >= 0) {
       stateRank = stateRankIndex + 1;
-      stateRankTotal = sortedByWinsInState.length;
     }
   }
 
@@ -101,8 +99,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const isPro = Boolean(player.isPro) || (typeof duprRating === "number" && duprRating >= 5.2);
 
   const profileImage = player.imageUrl || "/pbwins-logo.png";
-  const slug = createPlayerSlug(player);
-
   return (
     <div className="relative min-h-screen bg-[#050505] text-white">
       <div className="pointer-events-none absolute inset-0">

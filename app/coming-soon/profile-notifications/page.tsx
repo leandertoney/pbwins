@@ -93,7 +93,7 @@ export default function ProfileNotificationsComingSoon() {
 
           {/* Feature Preview */}
           <div className="mb-16 rounded-2xl border border-white/10 bg-white/5 p-8 text-left">
-            <h2 className="mb-6 text-2xl font-semibold">What's Coming</h2>
+            <h2 className="mb-6 text-2xl font-semibold">What&apos;s Coming</h2>
 
             <div className="space-y-6">
               <div className="flex gap-4">
@@ -103,7 +103,7 @@ export default function ProfileNotificationsComingSoon() {
                 <div>
                   <h3 className="mb-1 font-semibold">Get Instant Updates</h3>
                   <p className="text-sm text-white/60">
-                    Receive notifications when a player's win count or DUPR rating changes
+                    Receive notifications when a player&apos;s win count or DUPR rating changes
                   </p>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function ProfileNotificationsComingSoon() {
                 Be the First to Know
               </h2>
               <p className="mb-6 text-white/60">
-                Join the waitlist and we'll notify you when profile notifications launch
+                Join the waitlist and we&apos;ll notify you when profile notifications launch
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -189,9 +189,9 @@ export default function ProfileNotificationsComingSoon() {
           ) : (
             <div className="mx-auto max-w-md rounded-xl border border-green-500/30 bg-green-500/10 p-6">
               <div className="mb-2 text-4xl">✓</div>
-              <h2 className="mb-2 text-2xl font-semibold">You're on the list!</h2>
+              <h2 className="mb-2 text-2xl font-semibold">You&apos;re on the list!</h2>
               <p className="text-white/70">
-                We'll send you an email as soon as profile notifications are ready.
+                We&apos;ll send you an email as soon as profile notifications are ready.
               </p>
               <Link
                 href="/"
