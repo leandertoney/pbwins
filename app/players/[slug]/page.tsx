@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import WinsOverTime from "@/components/player/WinsOverTime";
 import { fetchPlayerBySlug, fetchAllPlayers, createPlayerSlug } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -173,6 +174,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
               </div>
             </div>
           </div>
+
+          <WinsOverTime wins={orderedWins} />
 
           <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
             <div className="flex items-center justify-between mb-4">
