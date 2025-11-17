@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import { PlayerRecord } from "@/types/player";
+import { trackFAQToggle } from "@/lib/analytics";
 
 // Helper function to calculate age bracket from birth year
 const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
@@ -150,6 +151,12 @@ export default function Home() {
     }
     setSearchQuery("");
     setShowSearchResults(false);
+  };
+
+  // FAQ tracking handler
+  const handleFAQToggle = (question: string) => (event: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const isOpen = event.currentTarget.open;
+    trackFAQToggle(question, isOpen, 'leaderboard');
   };
 
   const handleVerify = async () => {
@@ -693,6 +700,30 @@ export default function Home() {
                     "@type": "Answer",
                     "text": "Ratings measure your individual skill. Rankings measure your position compared to other players. pbWins blends both—your verified wins improve your ranking, while your rating helps others understand your competitive level."
                   }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I claim my pickleball player profile on pbWins?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "To claim your pbWins profile, click the Verify button on the homepage and enter your DUPR profile URL. pbWins will automatically pull your verified wins, rating, and stats. Your profile updates hourly to reflect new tournament results and rating changes."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What counts as a verified win in pickleball?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A verified win is any official match result recorded in your DUPR profile. This includes sanctioned tournament matches, league play, and rated matches. Recreational or casual play does not count as verified wins unless officially recorded through DUPR."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I track my pickleball tournament results on pbWins?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! pbWins automatically syncs your tournament results from DUPR. Once you verify your profile, all your sanctioned tournament wins, losses, and rating changes appear on your pbWins player page. The leaderboard updates hourly to reflect your latest performance."
+                  }
                 }
               ]
             })
@@ -702,7 +733,7 @@ export default function Home() {
         <h2 className="text-2xl font-semibold mb-8">Pickleball Rankings & Ratings: FAQ</h2>
 
         <div className="space-y-4">
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("What is a pickleball ranking?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What is a pickleball ranking?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -715,7 +746,7 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("How do pickleball ratings work?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               How do pickleball ratings work?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -728,7 +759,7 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("What does a 3.5 pickleball rating mean?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What does a 3.5 pickleball rating mean?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -741,7 +772,7 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("How are pickleball player rankings calculated?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               How are pickleball player rankings calculated?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -753,7 +784,7 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("What is Parris Todd's pickleball ranking?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What is Parris Todd's pickleball ranking?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -766,7 +797,7 @@ export default function Home() {
             </p>
           </details>
 
-          <details className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+          <details onToggle={handleFAQToggle("What's the difference between pickleball rankings and pickleball ratings?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
             <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
               What's the difference between pickleball rankings and pickleball ratings?
               <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
@@ -775,6 +806,42 @@ export default function Home() {
               Ratings measure <em>your individual skill</em>. Rankings measure <em>your position</em>
               compared to other players. pbWins blends both—your verified wins improve your ranking,
               while your rating helps others understand your competitive level.
+            </p>
+          </details>
+
+          <details onToggle={handleFAQToggle("How do I claim my pickleball player profile on pbWins?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+            <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
+              How do I claim my pickleball player profile on pbWins?
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
+            </summary>
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
+              To claim your pbWins profile, click the <strong>&quot;Verify&quot;</strong> button on the homepage and enter
+              your DUPR profile URL. pbWins will automatically pull your verified wins, rating, and stats. Your profile
+              updates hourly to reflect new tournament results and rating changes.
+            </p>
+          </details>
+
+          <details onToggle={handleFAQToggle("What counts as a verified win in pickleball?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+            <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
+              What counts as a verified win in pickleball?
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
+            </summary>
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
+              A verified win is any official match result recorded in your DUPR profile. This includes sanctioned
+              tournament matches, league play, and rated matches. Recreational or casual play does <em>not</em> count
+              as verified wins unless officially recorded through DUPR.
+            </p>
+          </details>
+
+          <details onToggle={handleFAQToggle("Can I track my pickleball tournament results on pbWins?")} className="group bg-black/20 rounded-xl border border-white/5 p-5 transition-all duration-300 hover:bg-black/30 hover:border-brand-muted/20">
+            <summary className="cursor-pointer text-lg font-medium flex justify-between items-center">
+              Can I track my pickleball tournament results on pbWins?
+              <span className="transition-transform duration-300 group-open:rotate-180">⌄</span>
+            </summary>
+            <p className="mt-3 text-white/70 leading-relaxed animate-fadeIn">
+              Yes! pbWins automatically syncs your tournament results from DUPR. Once you verify your profile,
+              all your sanctioned tournament wins, losses, and rating changes appear on your pbWins player page.
+              The leaderboard updates hourly to reflect your latest performance.
             </p>
           </details>
         </div>
