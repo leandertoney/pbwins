@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ShieldCheck, Star, Trophy } from "lucide-react";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import WinsOverTime from "@/components/player/WinsOverTime";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
+import MetaPill from "@/components/MetaPill";
 import { fetchPlayerBySlug, fetchAllPlayers, createPlayerSlug } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -69,6 +71,23 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   });
   const rankingIndex = sortedByWins.findIndex((p) => p._id === player._id);
 
+  // Calculate state-level ranking
+  let stateRank: number | null = null;
+  let stateRankTotal = 0;
+  if (player.state) {
+    const statePlayers = allPlayers.filter((p) => p.state === player.state);
+    const sortedByWinsInState = [...statePlayers].sort((a, b) => {
+      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+      return bw - aw;
+    });
+    const stateRankIndex = sortedByWinsInState.findIndex((p) => p._id === player._id);
+    if (stateRankIndex >= 0) {
+      stateRank = stateRankIndex + 1;
+      stateRankTotal = sortedByWinsInState.length;
+    }
+  }
+
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
   const duprRating = typeof player.duprRating === "number" ? player.duprRating : player.rating;
@@ -117,16 +136,40 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <p className="text-xs uppercase tracking-[0.8em] text-brand-light/80">pbwins.com verified</p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
+                  <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {player.verifiedSince && (
+                      <MetaPill
+                        icon={ShieldCheck}
+                        iconColor="text-green-400"
+                        text="Verified"
+                        subtext="pbWins.com"
+                        glow
+                        glowColor="rgba(180,255,180,0.12)"
+                      />
+                    )}
                     {isPro && (
-                      <span className="inline-flex items-center justify-center rounded-full border border-white/25 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-3 py-[3px] text-[0.55rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_16px_rgba(0,0,0,0.65)]">
-                        PRO
-                      </span>
+                      <MetaPill
+                        icon={Star}
+                        iconColor="text-yellow-300"
+                        text="Pro Player"
+                      />
+                    )}
+                    {rankingIndex >= 0 && (
+                      <MetaPill
+                        icon={Trophy}
+                        iconColor="text-brand-light"
+                        text={`#${rankingIndex + 1} Overall`}
+                      />
+                    )}
+                    {stateRank !== null && stateRank <= 10 && player.state && (
+                      <MetaPill
+                        iconColor="text-blue-400"
+                        text={`#${stateRank} in ${player.state}`}
+                      />
                     )}
                   </div>
-                  <p className="text-white/70 text-base">
+                  <p className="text-white/70 text-base mt-2">
                     {[cityState || "Location TBD", genderLabel].filter(Boolean).join(" • ")}
                   </p>
                 </div>
