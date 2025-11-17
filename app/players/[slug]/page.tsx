@@ -78,7 +78,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
   const duprRating = typeof player.duprRating === "number" ? player.duprRating : player.rating;
-  const yearsActive = determineYearsActive(orderedWins, player.createdAt);
+  const yearsActive = player.yearsActive ?? determineYearsActive(orderedWins, player.createdAt, player.verifiedSince);
+  const verifiedSinceYear = player.verifiedSince ? new Date(player.verifiedSince).getFullYear() : null;
   const winRate = player.losses ? totalWins / (totalWins + player.losses) : null;
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
@@ -137,11 +138,16 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                 </div>
               </div>
               <div className="w-full max-w-xs rounded-2xl border border-brand-muted/60 bg-gradient-to-br from-black/80 to-brand-glow/15 p-6 shadow-[0_10px_40px_rgba(149,232,75,0.15)]">
-                <p className="text-xs uppercase tracking-[0.5em] text-brand-light/80">DUPR rating</p>
-                <p className="mt-4 text-5xl font-bold text-brand-light">
+                <p className="text-[0.5rem] uppercase tracking-[0.3em] text-white/40">dupr</p>
+                <p className="mt-2 text-6xl font-bold text-brand-light">
                   {typeof duprRating === "number" ? duprRating.toFixed(2) : "—"}
                 </p>
-                <p className="mt-2 text-xs text-white/60">Verified wins: {verifiedWins}</p>
+                <div className="mt-4 space-y-1">
+                  <p className="text-xs text-white/60">Verified Wins: <span className="font-semibold text-white">{verifiedWins}</span></p>
+                  {verifiedSinceYear && (
+                    <p className="text-xs text-white/60">Verified Since: <span className="font-semibold text-white">{verifiedSinceYear}</span></p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -157,10 +163,10 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
               <h2 className="text-lg font-semibold text-white mb-4">Quick Facts</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {[
-                  { label: "Total wins", value: totalWins.toString() },
+                  { label: "Verified Wins", value: verifiedWins.toString() },
+                  { label: "Years Active", value: yearsActive ? `${yearsActive}` : "<1" },
+                  ...(verifiedSinceYear ? [{ label: "Verified Since", value: verifiedSinceYear.toString() }] : []),
                   { label: "Win rate", value: winRate ? `${Math.round(winRate * 100)}%` : "—" },
-                  { label: "DUPR rating", value: typeof duprRating === "number" ? duprRating.toFixed(2) : "—" },
-                  { label: "Years active", value: yearsActive ? `${yearsActive}+` : "<1" },
                   { label: "Last match", value: formatDate(orderedWins[0]?.date) },
                   { label: "Leaderboard rank", value: rankingIndex >= 0 ? `#${rankingIndex + 1}` : "—" },
                 ].map((stat) => (

@@ -25,4 +25,8 @@ export type PlayerRecord = {
   imageUrl?: string;
   createdAt?: number;
   isPro?: boolean;
+  verifiedSince?: string | null;
+  yearsActive?: number | null;
+  bio?: string | null;
+  totalWins?: number;
 };
