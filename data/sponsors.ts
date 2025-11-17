@@ -17,6 +17,16 @@ const SPONSORS = [
   { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
   { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
   { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" },
+  { name: "Your Ad Here", tagline: "Your Ad Here" },
+  { name: "Sponsor This Spot", tagline: "Sponsor This Spot" },
+  { name: "Advertise Here", tagline: "Advertise Here" },
+  { name: "Place Your Brand Here", tagline: "Place Your Brand Here" },
+  { name: "Premium Placement Available", tagline: "Premium Placement Available" },
+  { name: "Reach Pickleball Players", tagline: "Reach Pickleball Players" },
+  { name: "Promote Your Business", tagline: "Promote Your Business" },
+  { name: "Your Brand, Featured Daily", tagline: "Your Brand, Featured Daily" },
+  { name: "Get Seen Every Day", tagline: "Get Seen Every Day" },
+  { name: "High-Visibility Ad Slot", tagline: "High-Visibility Ad Slot" },
 ];
 
 export default SPONSORS;

@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SponsorCircle from "./SponsorCircle";
 import SPONSORS_POOL from "@/data/sponsors";
 
+const getSponsorId = (sponsor: { name: string; tagline: string; url?: string }) =>
+  `${sponsor.name}|${sponsor.tagline}|${sponsor.url ?? ""}`;
+
 interface SponsorRailsFixedProps {
   leftClassName?: string;
   rightClassName?: string;
@@ -17,7 +20,7 @@ export default function SponsorRailsFixed({
 }: SponsorRailsFixedProps) {
   const [currentVisible, setCurrentVisible] = useState(() => SPONSORS_POOL.slice(0, 10));
   const rotationIndexRef = useRef(10);
-  const lastSlotSponsorRef = useRef(SPONSORS_POOL.slice(0, 10).map((s) => s.name + s.url));
+  const lastSlotSponsorRef = useRef(SPONSORS_POOL.slice(0, 10).map((s) => getSponsorId(s)));
   const currentVisibleRef = useRef(currentVisible);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function SponsorRailsFixed({
   useEffect(() => {
     const rotateSponsors = () => {
       const newVisible = [...currentVisibleRef.current];
-      const used = new Set(newVisible.map((s) => s.name + s.url));
+      const used = new Set(newVisible.map((s) => getSponsorId(s)));
 
       for (let slot = 0; slot < 10; slot++) {
         const lastSponsor = lastSlotSponsorRef.current[slot];
@@ -50,7 +53,7 @@ export default function SponsorRailsFixed({
           rotationIndexRef.current = (rotationIndexRef.current + 1) % SPONSORS_POOL.length;
           attempts++;
 
-          const id = s.name + s.url;
+          const id = getSponsorId(s);
 
           if (!used.has(id) && id !== lastSponsor) {
             nextSponsor = s;
@@ -60,7 +63,7 @@ export default function SponsorRailsFixed({
 
         if (nextSponsor) {
           newVisible[slot] = nextSponsor;
-          lastSlotSponsorRef.current[slot] = nextSponsor.name + nextSponsor.url;
+          lastSlotSponsorRef.current[slot] = getSponsorId(nextSponsor);
         }
       }
 

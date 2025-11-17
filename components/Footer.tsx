@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 
 const footerLinks = [
@@ -12,6 +12,12 @@ export default function Footer() {
   const [showAdvertise, setShowAdvertise] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowAdvertise(true);
+    window.addEventListener("open-sponsor-modal", handler);
+    return () => window.removeEventListener("open-sponsor-modal", handler);
+  }, []);
 
   const handleCheckout = async () => {
     if (!email) {
