@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import WinsOverTime from "@/components/player/WinsOverTime";
+import SuggestedPlayers from "@/components/SuggestedPlayers";
 import { fetchPlayerBySlug, fetchAllPlayers, createPlayerSlug } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -199,6 +200,11 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
               </div>
             )}
           </div>
+
+          <section className="mt-20">
+            <h2 className="text-2xl font-semibold mb-6">Suggested Players</h2>
+            <SuggestedPlayers player={player} />
+          </section>
         </section>
       </div>
     </div>
