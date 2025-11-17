@@ -46,4 +46,28 @@ export default defineSchema({
     .index("by_subscription", ["stripeSubscriptionId"])
     .index("by_checkout", ["checkoutSessionId"])
     .index("by_email_month", ["email", "month"]),
+  // Feature interest tracking for coming soon features
+  featureInterest: defineTable({
+    featureName: v.string(),           // e.g., "profile-notifications"
+    email: v.string(),                 // User email for waitlist
+    createdAt: v.number(),
+    metadata: v.optional(v.object({    // Additional context
+      referrer: v.optional(v.string()),
+      userAgent: v.optional(v.string()),
+    })),
+  })
+    .index("by_feature", ["featureName"])
+    .index("by_email", ["email"])
+    .index("by_feature_email", ["featureName", "email"]),
+  // Page view analytics for coming soon pages
+  featurePageViews: defineTable({
+    featureName: v.string(),           // e.g., "profile-notifications"
+    viewedAt: v.number(),
+    metadata: v.optional(v.object({
+      referrer: v.optional(v.string()),
+      userAgent: v.optional(v.string()),
+    })),
+  })
+    .index("by_feature", ["featureName"])
+    .index("by_viewed_at", ["viewedAt"]),
 });

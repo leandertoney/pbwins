@@ -8,6 +8,14 @@ export default function AdminPage() {
   const cleanupInvalidPlayers = useMutation(api.admin.cleanupInvalidPlayers);
   const deleteAllPlayers = useMutation(api.admin.deleteAllPlayers);
 
+  // Feature interest tracking
+  const featureAnalytics = useQuery(api.featureInterest.getFeatureAnalytics, {
+    featureName: "profile-notifications",
+  });
+  const featureSignups = useQuery(api.featureInterest.getFeatureSignups, {
+    featureName: "profile-notifications",
+  });
+
   const handleCleanup = async () => {
     if (confirm("Delete all players with 'Unknown Player' name or 0 wins?")) {
       const result = await cleanupInvalidPlayers();
@@ -26,6 +34,50 @@ export default function AdminPage() {
     <div className="min-h-screen p-8 bg-gray-950 text-white">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Admin Panel</h1>
+
+        {/* Feature Interest Section */}
+        <div className="mb-12 p-6 bg-gray-900 rounded-lg border border-gray-800">
+          <h2 className="text-2xl font-bold mb-4">Profile Notifications - Feature Interest</h2>
+
+          {featureAnalytics && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-gray-800 rounded-lg">
+                <div className="text-3xl font-bold text-blue-400">
+                  {featureAnalytics.totalPageViews}
+                </div>
+                <div className="text-sm text-gray-400 mt-1">Page Views</div>
+              </div>
+              <div className="p-4 bg-gray-800 rounded-lg">
+                <div className="text-3xl font-bold text-green-400">
+                  {featureAnalytics.totalSignups}
+                </div>
+                <div className="text-sm text-gray-400 mt-1">Email Signups</div>
+              </div>
+              <div className="p-4 bg-gray-800 rounded-lg">
+                <div className="text-3xl font-bold text-purple-400">
+                  {featureAnalytics.conversionRate}%
+                </div>
+                <div className="text-sm text-gray-400 mt-1">Conversion Rate</div>
+              </div>
+            </div>
+          )}
+
+          {featureSignups && featureSignups.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Waitlist Emails ({featureSignups.length})</h3>
+              <div className="max-h-64 overflow-y-auto bg-gray-950 rounded-lg p-4">
+                <ul className="space-y-2">
+                  {featureSignups.map((signup, idx) => (
+                    <li key={idx} className="flex justify-between text-sm">
+                      <span className="text-gray-300">{signup.email}</span>
+                      <span className="text-gray-500">{signup.createdAtFormatted}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-4 mb-8">
           <button
