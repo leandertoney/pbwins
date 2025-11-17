@@ -11,7 +11,7 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY;
 
 async function fetchSession(sessionId?: string) {
   if (!sessionId || !stripeSecret) return null;
-  const stripe = new Stripe(stripeSecret, { apiVersion: "2023-10-16" });
+  const stripe = new Stripe(stripeSecret);
   try {
     return await stripe.checkout.sessions.retrieve(sessionId);
   } catch (_error: unknown) {

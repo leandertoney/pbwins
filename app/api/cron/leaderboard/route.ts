@@ -5,11 +5,6 @@ import { leaderboardPlayers, extractPlayerId } from "@/lib/leaderboardPlayers";
 import { scrapeDupPlayer } from "@/lib/dupr";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-if (!convexUrl) {
-  throw new Error("NEXT_PUBLIC_CONVEX_URL must be set to run the leaderboard updater.");
-}
-
-const convexClient = new ConvexHttpClient(convexUrl);
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
@@ -17,6 +12,14 @@ function getErrorMessage(error: unknown) {
 }
 
 export async function GET() {
+  if (!convexUrl) {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_CONVEX_URL must be set to run the leaderboard updater." },
+      { status: 500 }
+    );
+  }
+
+  const convexClient = new ConvexHttpClient(convexUrl);
   const completed: Array<{ player: string; status: string; details?: string }> = [];
 
   for (const entry of leaderboardPlayers) {

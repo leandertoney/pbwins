@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2023-10-16" }) : null;
+const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 const convex = convexUrl ? new ConvexHttpClient(convexUrl) : null;
 
 const PRICE_ID = "price_1STno3LrimuP3B0hfHREG54m";

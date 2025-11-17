@@ -3,14 +3,14 @@ import { getConvexClient } from "./convexClient";
 import slugify from "./slugify";
 import { PlayerRecord } from "@/types/player";
 
-const convex = getConvexClient();
-
 export async function fetchAllPlayers(): Promise<PlayerRecord[]> {
+  const convex = getConvexClient();
   const players = await convex.query(api.players.getAll, {});
   return players as PlayerRecord[];
 }
 
 export async function fetchPlayerBySlug(slug: string): Promise<PlayerRecord | null> {
+  const convex = getConvexClient();
   const player = await convex.query(api.players.getBySlug, { slug });
   if (player) return player;
   const players = await fetchAllPlayers();

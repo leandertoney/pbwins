@@ -1,5 +1,5 @@
 import { WinRecord, PlayerRecord } from "@/types/player";
-import differenceInYears from "date-fns/differenceInYears";
+import { differenceInYears } from "date-fns/differenceInYears";
 
 export function determineYearsActive(wins: WinRecord[], createdAt?: number, verifiedSince?: string | null): number {
   // Prefer verifiedSince if available
@@ -27,7 +27,7 @@ export function generatePlayerBio(player: PlayerRecord, wins: WinRecord[]): stri
   // Use stored yearsActive if available, otherwise compute it
   const yearsActive = player.yearsActive ?? determineYearsActive(wins, player.createdAt, player.verifiedSince);
   const totalWins = wins.length || player.totalWins || (typeof player.wins === 'number' ? player.wins : 0);
-  const duprRating = player.duprRating || player.rating || 0;
+  const duprRating = player.rating || 0;
   const city = player.city || "";
   const playerName = player.name || `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim();
   const firstName = player.firstName || player.name?.split(' ')[0] || "this player";

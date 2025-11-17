@@ -19,11 +19,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: withOpacityValue("--brand-green"),
-        "brand-light": withOpacityValue("--brand-green-light"),
-        "brand-dark": withOpacityValue("--brand-green-dark"),
-        "brand-muted": withOpacityValue("--brand-green-muted"),
-        "brand-glow": withOpacityValue("--brand-green-glow"),
+        brand: withOpacityValue("--brand-green") as any,
+        "brand-light": withOpacityValue("--brand-green-light") as any,
+        "brand-dark": withOpacityValue("--brand-green-dark") as any,
+        "brand-muted": withOpacityValue("--brand-green-muted") as any,
+        "brand-glow": withOpacityValue("--brand-green-glow") as any,
       },
     },
   },

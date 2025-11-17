@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { getEarliestMatch } from "@/lib/dupr/getEarliestMatch";
 import { Id } from "@/convex/_generated/dataModel";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -60,6 +60,14 @@ function generatePremiumBio(
  */
 export async function POST(req: Request) {
   try {
+    if (!convexUrl) {
+      return NextResponse.json(
+        { error: "NEXT_PUBLIC_CONVEX_URL is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const convex = new ConvexHttpClient(convexUrl);
     const body = await req.json();
     const { slug, playerId } = body;
 

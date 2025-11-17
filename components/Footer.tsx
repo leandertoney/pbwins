@@ -39,7 +39,12 @@ export default function Footer() {
         return;
       }
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      await stripe!.redirectToCheckout({ sessionId: data.id });
+      if (!stripe) {
+        throw new Error("Stripe failed to load");
+      }
+      // Type assertion needed for @stripe/stripe-js v8 compatibility
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (stripe as any).redirectToCheckout({ sessionId: data.id });
     } catch (error: unknown) {
       alert("Unable to start checkout. Please try again.");
       console.error(error);

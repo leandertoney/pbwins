@@ -2,10 +2,18 @@ import { NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 
-const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
 export async function POST(req: Request) {
   try {
+    if (!convexUrl) {
+      return NextResponse.json(
+        { error: "NEXT_PUBLIC_CONVEX_URL is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const client = new ConvexHttpClient(convexUrl);
     const body = await req.json();
     const {
       name,

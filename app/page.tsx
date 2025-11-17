@@ -11,6 +11,8 @@ import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import { PlayerRecord } from "@/types/player";
 import InteractiveCourtCrowdAd from "@/components/InteractiveCourtCrowdAd";
 
+export const dynamic = 'force-dynamic';
+
 // Helper function to calculate age bracket from birth year
 const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
 const getAgeBracket = (birthYear: number | undefined): string | null => {

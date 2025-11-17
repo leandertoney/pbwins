@@ -5,6 +5,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export default function ProfileNotificationsComingSoon() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);

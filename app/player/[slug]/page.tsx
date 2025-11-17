@@ -41,7 +41,7 @@ export default function PlayerPage() {
 
   const heroImageSrc = player.imageUrl || "/ads/pickleball-central.jpg";
   const heroImageUnoptimized = !!(player.imageUrl && /^https?:\/\//.test(player.imageUrl));
-  const baseRating = player.rating ?? player.duprRating ?? player.singlesRating;
+  const baseRating = player.rating ?? player.singlesRating;
   const isPro = Boolean(player.isPro) || (typeof baseRating === "number" && baseRating >= 5.2);
 
   return (
