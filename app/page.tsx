@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import { PlayerRecord } from "@/types/player";
 
 // Helper function to calculate age bracket from birth year
 const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
@@ -21,7 +22,7 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
   return "65+";
 };
 
-const isProPlayer = (player: any) => {
+const isProPlayer = (player: PlayerRecord) => {
   if (player?.isPro) return true;
   const rating = player?.rating ?? player?.duprRating ?? player?.singlesRating;
   return typeof rating === "number" && rating >= 5.2;
@@ -211,7 +212,7 @@ export default function Home() {
       } else {
         setError("Failed to save player data.");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Verification error:", err);
       setError("Failed to verify player. Please try again.");
     } finally {

@@ -124,7 +124,7 @@ export async function POST(req: Request) {
     console.log("Extracted player data:", playerData);
 
     return NextResponse.json(playerData);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("DUPR fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch DUPR profile" },

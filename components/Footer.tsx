@@ -39,7 +39,7 @@ export default function Footer() {
       }
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
       await stripe!.redirectToCheckout({ sessionId: data.id });
-    } catch (error) {
+    } catch (error: unknown) {
       alert("Unable to start checkout. Please try again.");
       console.error(error);
       setLoading(false);

@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Save player error:", error);
     return NextResponse.json(
       { error: "Failed to save player", details: error instanceof Error ? error.message : String(error) },
