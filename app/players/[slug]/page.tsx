@@ -131,17 +131,19 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   </p>
                 </div>
               </div>
-              <div className="w-full max-w-xs rounded-2xl border border-brand-muted/60 bg-gradient-to-br from-black/80 to-brand-glow/15 p-6 shadow-[0_10px_40px_rgba(149,232,75,0.15)]">
-                <p className="text-[0.5rem] uppercase tracking-[0.3em] text-white/40">dupr</p>
-                <p className="mt-2 text-6xl font-bold text-brand-light">
-                  {typeof duprRating === "number" ? duprRating.toFixed(2) : "—"}
+              <div className="w-full max-w-xs rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 shadow-[0_0_30px_rgba(0,0,0,0.2)]">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-green-400/80 mb-2">
+                  P B W I N S . C O M   V E R I F I E D
                 </p>
-                <div className="mt-4 space-y-1">
-                  <p className="text-xs text-white/60">Verified Wins: <span className="font-semibold text-white">{verifiedWins}</span></p>
-                  {verifiedSinceYear && (
-                    <p className="text-xs text-white/60">Verified Since: <span className="font-semibold text-white">{verifiedSinceYear}</span></p>
-                  )}
-                </div>
+                <p className="text-5xl font-semibold text-green-400 leading-none">
+                  {verifiedWins}
+                </p>
+                <p className="text-white/60 text-sm mt-1">
+                  Verified Wins
+                </p>
+                <p className="text-white/40 text-xs mt-3">
+                  DUPR Rating: {typeof duprRating === "number" ? duprRating.toFixed(2) : "—"}
+                </p>
               </div>
             </div>
           </div>
