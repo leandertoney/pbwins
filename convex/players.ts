@@ -284,3 +284,13 @@ export const updatePlayerMetrics = mutation({
     return updatedPlayer;
   },
 });
+
+// Get total verified wins across all players
+export const getTotalVerifiedWins = query({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    const total = players.reduce((sum, player) => sum + player.wins, 0);
+    return { total };
+  },
+});
