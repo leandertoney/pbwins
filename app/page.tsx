@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import { PlayerRecord } from "@/types/player";
+import InteractiveCourtCrowdAd from "@/components/InteractiveCourtCrowdAd";
 
 // Helper function to calculate age bracket from birth year
 const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
@@ -481,69 +482,75 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : (
-                  limitedPlayers.map((player, index) => {
-                    const rank = index + 1;
-                    const medalEmojis = ['🥇', '🥈', '🥉'];
-                    const displayRank = rank <= 3 ? medalEmojis[index] : rank;
-                    const isHighlighted = highlightedPlayerId === player._id;
+                  <>
+                    {limitedPlayers.map((player, index) => {
+                      const rank = index + 1;
+                      const medalEmojis = ['🥇', '🥈', '🥉'];
+                      const displayRank = rank <= 3 ? medalEmojis[index] : rank;
+                      const isHighlighted = highlightedPlayerId === player._id;
 
-                    const locationParts = [];
-                    if (player.city) locationParts.push(player.city);
-                    if (player.state) locationParts.push(player.state);
-                    const locationDisplay = locationParts.join(", ");
-                    const identityParts = [];
-                    if (player.gender) identityParts.push(player.gender);
-                    if (player.birthYear) identityParts.push(getAgeBracket(player.birthYear));
-                    if (locationDisplay) identityParts.push(locationDisplay);
-                    const isPro = isProPlayer(player);
+                      const locationParts = [];
+                      if (player.city) locationParts.push(player.city);
+                      if (player.state) locationParts.push(player.state);
+                      const locationDisplay = locationParts.join(", ");
+                      const identityParts = [];
+                      if (player.gender) identityParts.push(player.gender);
+                      if (player.birthYear) identityParts.push(getAgeBracket(player.birthYear));
+                      if (locationDisplay) identityParts.push(locationDisplay);
+                      const isPro = isProPlayer(player);
 
-                  return (
-                    <tr
-                      key={player._id}
-                      id={`player-row-${player._id}`}
-                        className={`border-b border-white/5 hover:bg-white/5 transition ${isHighlighted ? 'bg-brand/20 ring-2 ring-brand/40' : ''}`}
-                      >
-                        <td className="px-4 py-4 text-sm text-white/70">{displayRank}</td>
-                        <td className="px-4 py-4 flex items-center gap-3">
-                        <div className="overflow-hidden rounded-full border h-8 w-8 border-white/10">
-                          <Image
-                            src={player.imageUrl || "/ads/pickleball-central.jpg"}
-                            alt={player.name}
-                            width={32}
-                            height={32}
-                            unoptimized={isExternalImage(player.imageUrl)}
-                            className="object-cover h-8 w-8"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Link
-                              href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
-                              className="font-medium text-sm hover:text-brand-light transition"
-                              aria-label={`Open profile for ${player.name || "player"}`}
-                            >
-                              {player.name || "Unknown"}
-                            </Link>
-                            {isPro && (
-                              <span className="inline-flex items-center justify-center rounded-full border border-white/20 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-2 py-[1px] text-[0.5rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_10px_rgba(0,0,0,0.6)]">
-                                PRO
-                              </span>
-                            )}
-                          </div>
-                          {identityParts.length > 0 && (
-                            <span className="text-xs text-gray-400">
-                              {identityParts.join(" • ")}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-white/80 text-sm">
-                        {player.rating ? player.rating.toFixed(2) : "—"}
-                      </td>
-                      <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
-                    </tr>
-                    );
-                  })
+                      return (
+                        <>
+                          <tr
+                            key={player._id}
+                            id={`player-row-${player._id}`}
+                            className={`border-b border-white/5 hover:bg-white/5 transition ${isHighlighted ? 'bg-brand/20 ring-2 ring-brand/40' : ''}`}
+                          >
+                            <td className="px-4 py-4 text-sm text-white/70">{displayRank}</td>
+                            <td className="px-4 py-4 flex items-center gap-3">
+                              <div className="overflow-hidden rounded-full border h-8 w-8 border-white/10">
+                                <Image
+                                  src={player.imageUrl || "/ads/pickleball-central.jpg"}
+                                  alt={player.name}
+                                  width={32}
+                                  height={32}
+                                  unoptimized={isExternalImage(player.imageUrl)}
+                                  className="object-cover h-8 w-8"
+                                />
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Link
+                                    href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
+                                    className="font-medium text-sm hover:text-brand-light transition"
+                                    aria-label={`Open profile for ${player.name || "player"}`}
+                                  >
+                                    {player.name || "Unknown"}
+                                  </Link>
+                                  {isPro && (
+                                    <span className="inline-flex items-center justify-center rounded-full border border-white/20 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-2 py-[1px] text-[0.5rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+                                      PRO
+                                    </span>
+                                  )}
+                                </div>
+                                {identityParts.length > 0 && (
+                                  <span className="text-xs text-gray-400">
+                                    {identityParts.join(" • ")}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 text-white/80 text-sm">
+                              {player.rating ? player.rating.toFixed(2) : "—"}
+                            </td>
+                            <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
+                          </tr>
+                          {/* Insert Court Crowd ad after 5th player (index 4) */}
+                          {index === 4 && <InteractiveCourtCrowdAd key="court-crowd-ad" />}
+                        </>
+                      );
+                    })}
+                  </>
                 )}
               </tbody>
               </table>
