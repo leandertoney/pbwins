@@ -1,5 +1,14 @@
 import type { Config } from "tailwindcss";
 
+const withOpacityValue = (variable: string) => {
+  return ({ opacityValue }: { opacityValue?: string }) => {
+    if (opacityValue !== undefined) {
+      return `rgba(var(${variable}) / ${opacityValue})`;
+    }
+    return `rgb(var(${variable}))`;
+  };
+};
+
 const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,12 +19,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: "#7BFF4A",
-        emerald: {
-          500: "#7BFF4A",
-          600: "#6DE639",
-          700: "#5FCC2F",
-        },
+        brand: withOpacityValue("--brand-green"),
+        "brand-light": withOpacityValue("--brand-green-light"),
+        "brand-dark": withOpacityValue("--brand-green-dark"),
+        "brand-muted": withOpacityValue("--brand-green-muted"),
+        "brand-glow": withOpacityValue("--brand-green-glow"),
       },
     },
   },

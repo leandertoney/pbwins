@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+const isProRating = (rating?: number | null) => typeof rating === "number" && rating >= 5.2;
+
 // Delete all players (use with caution!)
 export const deleteAllPlayers = mutation({
   args: {},
@@ -36,5 +38,22 @@ export const getAllPlayersDebug = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("players").collect();
+  },
+});
+
+export const recalculateProStatus = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    let updated = 0;
+    for (const player of players) {
+      const rating = player.rating ?? player.singlesRating;
+      const nextIsPro = isProRating(rating);
+      if (player.isPro !== nextIsPro) {
+        await ctx.db.patch(player._id, { isPro: nextIsPro });
+        updated += 1;
+      }
+    }
+    return { updated };
   },
 });

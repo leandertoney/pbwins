@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as migrations from "../migrations.js";
 import type * as players from "../players.js";
+import type * as sponsorSlots from "../sponsorSlots.js";
 
 import type {
   ApiFromModules,
@@ -22,6 +23,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   migrations: typeof migrations;
   players: typeof players;
+  sponsorSlots: typeof sponsorSlots;
 }>;
 
 /**

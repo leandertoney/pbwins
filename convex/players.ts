@@ -1,6 +1,10 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+const isProRating = (rating?: number | null) => {
+  return typeof rating === "number" && rating >= 5.2;
+};
+
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
@@ -39,6 +43,8 @@ export const savePlayer = mutation({
       .withIndex("by_duprUrl", (q) => q.eq("duprUrl", args.duprUrl))
       .unique();
 
+    const isPro = isProRating(args.rating);
+
     if (existing) {
       // Update existing player record with all new fields
       await ctx.db.patch(existing._id, {
@@ -54,6 +60,7 @@ export const savePlayer = mutation({
         locationRaw: args.locationRaw,
         losses: args.losses,
         singlesRating: args.singlesRating,
+        isPro,
       });
       console.log("Updated existing player:", args.name);
       return { success: true, updated: true, message: "Player stats updated!" };
@@ -77,6 +84,7 @@ export const savePlayer = mutation({
       locationRaw: args.locationRaw,
       losses: args.losses,
       singlesRating: args.singlesRating,
+      isPro,
     });
 
     console.log("Inserted new player:", args.name);
@@ -107,6 +115,16 @@ export const getOthers = query({
 });
 
 // NEW: Get all unique values for filter dropdowns
+const getAgeBracket = (birthYear: number | undefined): string | null => {
+  if (!birthYear) return null;
+  const age = new Date().getFullYear() - birthYear;
+  if (age < 18) return "U18";
+  if (age <= 34) return "18–34";
+  if (age <= 49) return "35–49";
+  if (age <= 64) return "50–64";
+  return "65+";
+};
+
 export const getFilterOptions = query({
   args: {},
   handler: async (ctx) => {
@@ -116,19 +134,24 @@ export const getFilterOptions = query({
     const countries = new Set<string>();
     const states = new Set<string>();
     const cities = new Set<string>();
+    const ageBrackets = new Set<string>();
 
     players.forEach(player => {
       if (player.gender) genders.add(player.gender);
       if (player.country) countries.add(player.country);
       if (player.state) states.add(player.state);
       if (player.city) cities.add(player.city);
+      const bracket = getAgeBracket(player.birthYear);
+      if (bracket) ageBrackets.add(bracket);
     });
 
+    const orderedBrackets = ["U18", "18–34", "35–49", "50–64", "65+"];
     return {
       genders: Array.from(genders).sort(),
       countries: Array.from(countries).sort(),
       states: Array.from(states).sort(),
       cities: Array.from(cities).sort(),
+      ageBrackets: orderedBrackets.filter(bracket => ageBrackets.has(bracket)),
     };
   },
 });
@@ -142,6 +165,7 @@ export const getFiltered = query({
     city: v.optional(v.string()),
     minAge: v.optional(v.number()),
     maxAge: v.optional(v.number()),
+    includePros: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     let players = await ctx.db.query("players").collect();
@@ -181,7 +205,28 @@ export const getFiltered = query({
       });
     }
 
+    if (args.includePros === false) {
+      players = players.filter((p) => !p.isPro);
+    }
+
     // Sort by wins (descending)
     return players.sort((a, b) => b.wins - a.wins);
+  },
+});
+
+export const recalculateProStatus = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    let updated = 0;
+    for (const player of players) {
+      const derivedRating = player.rating ?? player.singlesRating;
+      const nextIsPro = isProRating(derivedRating);
+      if (player.isPro !== nextIsPro) {
+        await ctx.db.patch(player._id, { isPro: nextIsPro });
+        updated += 1;
+      }
+    }
+    return { updated };
   },
 });

@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 
 export default function PlayerPage() {
   const params = useParams();
@@ -40,17 +41,31 @@ export default function PlayerPage() {
 
   const heroImageSrc = player.imageUrl || "/ads/pickleball-central.jpg";
   const heroImageUnoptimized = !!(player.imageUrl && /^https?:\/\//.test(player.imageUrl));
+  const baseRating = player.rating ?? player.duprRating ?? player.singlesRating;
+  const isPro = Boolean(player.isPro) || (typeof baseRating === "number" && baseRating >= 5.2);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-white">
-      <div className="relative flex-1">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(0,255,176,0.25),_transparent_60%)] blur-3xl opacity-70" />
+    <div className="relative flex min-h-screen flex-col bg-[#0a0a0a] text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(0,255,176,0.25),_transparent_60%)] blur-3xl opacity-70" />
+      <SponsorRailsFixed idPrefix="legacy-player" />
+      <div className="relative z-0 flex-1 w-full pl-[200px] pr-[200px]">
         <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10">
           <Link
             href="/"
             className="self-start rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:border-brand"
           >
             ← Back to Leaderboard
+          </Link>
+
+          <Link href="/" className="flex items-center justify-center lg:justify-start">
+            <Image
+              src="/pbwins-logo.png"
+              alt="pbWins"
+              width={160}
+              height={160}
+              className="mb-4 h-20 w-20 rounded-full"
+              priority
+            />
           </Link>
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -69,7 +84,14 @@ export default function PlayerPage() {
                   </div>
                   <div>
                     <p className="text-sm uppercase tracking-[0.5em] text-white/60">Profile</p>
-                    <h1 className="text-4xl font-semibold text-white">{player.name}</h1>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h1 className="text-4xl font-semibold text-white">{player.name}</h1>
+                      {isPro && (
+                        <span className="inline-flex items-center justify-center rounded-full border border-white/25 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-3 py-[3px] text-[0.55rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_16px_rgba(0,0,0,0.65)]">
+                          PRO
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-brand">
                       DUPR {player.rating ? player.rating.toFixed(2) : "—"}
                     </div>

@@ -1,13 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import Footer from "@/components/Footer";
-import PbWinsLogo from "@/components/PbWinsLogo";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import slugify from "@/lib/slugify";
+import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 
 // Helper function to calculate age bracket from birth year
+const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
 const getAgeBracket = (birthYear: number | undefined): string | null => {
   if (!birthYear) return null;
   const age = new Date().getFullYear() - birthYear;
@@ -18,100 +21,11 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
   return "65+";
 };
 
-// Dark Neon color palette function
-function getDarkNeonColor(index: number): string {
-  const palette = [
-    "#1E4AFF", // royal blue
-    "#0FD976", // emerald neon
-    "#D9376E", // ruby magenta
-    "#FF7A00", // amber fire
-    "#7B2FF7", // electric purple
-    "#00C2D1", // aqua neon
-    "#D12A2A", // dark red / maroon pop
-    "#FFC300", // gold neon
-    "#008D5E", // deep teal
-    "#3A4EFF"  // rich indigo
-  ];
-  return palette[index % palette.length];
-}
-
-// Sponsor pool (base sponsors with duplicates for rotation)
-const SPONSORS_POOL = [
-  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
-  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
-  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
-  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
-  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
-  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" },
-  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
-  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
-  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
-  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
-  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
-  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" },
-  { name: "Court Crowd", url: "https://courtcrowd.com/", tagline: "Know who's on the court" },
-  { name: "PA MedSpas", url: "https://pamedspas.com/", tagline: "Find trusted med spas in PA" },
-  { name: "Epic Drone Pilots", url: "https://epicdronepilots.com/", tagline: "Nationwide drone services" },
-  { name: "Seasonal Activities Guide", url: "https://seasonalactivitiesguide.com/", tagline: "Discover things to do year-round" },
-  { name: "Universole App Studios", url: "https://universoleappstudios.com/", tagline: "Digital creations that scale" },
-  { name: "laani", url: "https://uselaani.com/", tagline: "Salon & spa AI assistant" }
-];
-
-// Sponsor Circle Component
-interface SponsorCircleProps {
-  slotIndex: number;
-  sponsor: { name: string; tagline: string; url: string };
-}
-
-function SponsorCircle({ slotIndex, sponsor }: SponsorCircleProps) {
-  return (
-    <div id={`sponsor-${slotIndex}`} className="sponsor-circle">
-      <a
-        href={sponsor.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center w-[140px] h-[140px] rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center px-4"
-        style={{
-          backgroundColor: getDarkNeonColor(slotIndex)
-        }}
-      >
-        <div className="flex flex-col items-center justify-center leading-tight">
-          <p
-            className="text-white font-semibold text-center leading-tight"
-            style={{
-              whiteSpace: "nowrap",
-              fontSize: "clamp(9px, 1.8vw, 18px)",
-              WebkitTextStroke: "1.1px rgba(0,0,0,0.65)",
-              paintOrder: "stroke fill",
-              textShadow: "0px 1px 2px rgba(0,0,0,0.55)",
-              paddingLeft: "3px",
-              paddingRight: "3px",
-            }}
-          >
-            {sponsor.name}
-          </p>
-          <p
-            className="text-white text-center leading-tight"
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              fontSize: "clamp(9px, 1.4vw, 14px)",
-              WebkitTextStroke: "0.8px rgba(0,0,0,0.5)",
-              paintOrder: "stroke fill",
-              textShadow: "0px 1px 2px rgba(0,0,0,0.45)",
-              marginTop: "4px",
-            }}
-          >
-            {sponsor.tagline}
-          </p>
-        </div>
-      </a>
-    </div>
-  );
-}
-
+const isProPlayer = (player: any) => {
+  if (player?.isPro) return true;
+  const rating = player?.rating ?? player?.duprRating ?? player?.singlesRating;
+  return typeof rating === "number" && rating >= 5.2;
+};
 
 export default function Home() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -124,38 +38,46 @@ export default function Home() {
   const [selectedGender, setSelectedGender] = useState<string>("");
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
+  const [selectedAgeBracket, setSelectedAgeBracket] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
+  const [includePros, setIncludePros] = useState(true);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [highlightedPlayerId, setHighlightedPlayerId] = useState<string | null>(null);
 
-  // Sponsor rotation state
-  const [currentVisible, setCurrentVisible] = useState(() => SPONSORS_POOL.slice(0, 10));
-  const rotationIndexRef = useRef(10);
-  const lastSlotSponsorRef = useRef(
-    SPONSORS_POOL.slice(0, 10).map(s => s.name + s.url)
-  );
-
-  // Trigger flip animation helper
-  const triggerFlipAnimation = (i: number) => {
-    const el = document.getElementById(`sponsor-${i}`);
-    if (!el) return;
-    el.classList.remove("sponsor-flip");
-    void el.offsetWidth; // force reflow
-    el.classList.add("sponsor-flip");
-  };
-
   // Fetch filter options and filtered players
   const filterOptions = useQuery(api.players.getFilterOptions);
+  const ageBracketRange = useMemo(() => {
+    switch (selectedAgeBracket) {
+      case "U18":
+        return { minAge: undefined, maxAge: 17 };
+      case "18–34":
+        return { minAge: 18, maxAge: 34 };
+      case "35–49":
+        return { minAge: 35, maxAge: 49 };
+      case "50–64":
+        return { minAge: 50, maxAge: 64 };
+      case "65+":
+        return { minAge: 65, maxAge: undefined };
+      default:
+        return { minAge: undefined, maxAge: undefined };
+    }
+  }, [selectedAgeBracket]);
   const filteredPlayers = useQuery(api.players.getFiltered, {
     gender: selectedGender || undefined,
     state: selectedState || undefined,
     city: selectedCity || undefined,
+    minAge: ageBracketRange.minAge,
+    maxAge: ageBracketRange.maxAge,
   });
 
-  const players = useMemo(() => filteredPlayers || [], [filteredPlayers]);
+  const players = useMemo(() => {
+    const base = filteredPlayers || [];
+    if (includePros) return base;
+    return base.filter((player) => !isProPlayer(player));
+  }, [filteredPlayers, includePros]);
   const savePlayer = useMutation(api.players.savePlayer);
 
   const sortedPlayers = useMemo(() => {
@@ -175,13 +97,32 @@ export default function Home() {
     return `${filters.join(" • ")} Leaderboard`;
   }, [selectedGender, selectedCity, selectedState]);
 
-  const hasActiveFilters = selectedGender || selectedState || selectedCity;
+  const hasActiveFilters =
+    selectedGender ||
+    selectedState ||
+    selectedCity ||
+    selectedAgeBracket ||
+    includePros === false;
 
   const clearFilters = () => {
     setSelectedGender("");
     setSelectedState("");
     setSelectedCity("");
+    setSelectedAgeBracket("");
+    setIncludePros(true);
   };
+
+  const [displayedCount, setDisplayedCount] = useState(50);
+  const limitedPlayers = useMemo(() => {
+    const maxDisplay = Math.min(displayedCount, 100);
+    return sortedPlayers.slice(0, maxDisplay);
+  }, [sortedPlayers, displayedCount]);
+
+  const canLoadMore = displayedCount < 100 && sortedPlayers.length > displayedCount;
+
+  useEffect(() => {
+    setDisplayedCount(50);
+  }, [selectedGender, selectedState, selectedCity, selectedAgeBracket, includePros]);
 
   // Search functionality with debounce
   const searchResults = useMemo(() => {
@@ -210,58 +151,6 @@ export default function Home() {
     setShowSearchResults(false);
   };
 
-  // Sponsor rotation engine
-  useEffect(() => {
-    const rotateSponsors = () => {
-      const newVisible = [...currentVisible];
-      const used = new Set(newVisible.map(s => s.name + s.url));
-
-      for (let slot = 0; slot < 10; slot++) {
-        const lastSponsor = lastSlotSponsorRef.current[slot];
-        let nextSponsor = null;
-        let attempts = 0;
-
-        while (!nextSponsor && attempts < SPONSORS_POOL.length) {
-          const s = SPONSORS_POOL[rotationIndexRef.current];
-          rotationIndexRef.current = (rotationIndexRef.current + 1) % SPONSORS_POOL.length;
-          attempts++;
-
-          const id = s.name + s.url;
-
-          if (!used.has(id) && id !== lastSponsor) {
-            nextSponsor = s;
-            used.add(id);
-          }
-        }
-
-        if (nextSponsor) {
-          newVisible[slot] = nextSponsor;
-          lastSlotSponsorRef.current[slot] = nextSponsor.name + nextSponsor.url;
-        }
-      }
-
-      // Domino flip animation with 200ms stagger
-      for (let slot = 0; slot < 10; slot++) {
-        setTimeout(() => {
-          // Trigger flip animation
-          triggerFlipAnimation(slot);
-
-          // Update sponsor content at 50% of animation (500ms into 1s flip)
-          setTimeout(() => {
-            setCurrentVisible(prev => {
-              const updated = [...prev];
-              updated[slot] = newVisible[slot];
-              return updated;
-            });
-          }, 500);
-        }, slot * 200);
-      }
-    };
-
-    const interval = setInterval(rotateSponsors, 10000);
-    return () => clearInterval(interval);
-  }, [currentVisible, triggerFlipAnimation]);
-
   const handleVerify = async () => {
     if (!duprUrl.trim()) {
       setError("Please enter your DUPR profile URL");
@@ -274,13 +163,6 @@ export default function Home() {
 
     try {
       // Check if player already exists
-      const existingPlayer = players.find(p => p.duprUrl === duprUrl);
-      if (existingPlayer) {
-        setError("This player is already on the leaderboard.");
-        setIsVerifying(false);
-        return;
-      }
-
       // Fetch player data from DUPR API
       const response = await fetch("/api/dupr-scrape", {
         method: "POST",
@@ -343,39 +225,33 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0d0d0d] text-white relative">
+    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-white relative">
       {/* Central glow effect */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-glow/15 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative flex flex-col lg:flex-row gap-4 h-screen overflow-hidden items-start px-4">
-        {/* LEFT SIDEBAR */}
-        <aside className="hidden lg:flex w-[200px] flex-shrink-0 overflow-hidden px-4">
-          <div className="flex flex-col justify-start items-center w-full py-10 gap-6">
-            {currentVisible.slice(0, 5).map((sponsor, idx) => (
-              <SponsorCircle
-                key={`left-${idx}`}
-                slotIndex={idx}
-                sponsor={sponsor}
-              />
-            ))}
-          </div>
-        </aside>
+      <SponsorRailsFixed />
 
-        {/* MAIN CONTENT */}
-        <main className="flex-1 flex flex-col items-center justify-start py-8 lg:py-16 text-center overflow-y-auto h-screen w-full max-w-[95vw] lg:max-w-[90vw] scrollbar-hide">
-          {/* Logo above heading */}
-          <div className="mb-4">
-            <PbWinsLogo size={64} />
-          </div>
+      {/* MAIN CONTENT */}
+      <div className="relative z-0 pl-[200px] pr-[200px]">
+        <main className="flex-1 flex flex-col items-center justify-start pt-0 pb-6 lg:pt-1 lg:pb-12 text-center overflow-visible w-full max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide">
+        {/* Logo above heading */}
+          <Image
+            src="/pbwins-logo.png"
+            alt="pbWins"
+            width={200}
+            height={200}
+            className="mx-auto mt-1 mb-4 rounded-full bg-transparent"
+            priority
+          />
 
-          <h1 className="text-[1.5rem] sm:text-[1.85rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-10 whitespace-nowrap tracking-tight w-full overflow-visible">
+          <h1 className="text-[1.5rem] sm:text-[1.85rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-6 whitespace-nowrap tracking-tight w-full overflow-visible">
             The database of verified pickleball wins
           </h1>
 
           {/* Player search bar and verify button */}
-          <div className="flex w-full max-w-full gap-3 mb-3 items-center justify-center">
+          <div className="flex w-full max-w-full gap-3 mb-2 items-center justify-center">
             {/* Search bar for existing players - 55-60% width, centered */}
             <div className="relative w-full max-w-[60%]">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -389,7 +265,7 @@ export default function Home() {
                 placeholder="Search players..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition"
+                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-2 text-sm focus:outline-none focus:border-brand focus:bg-white/10 transition"
               />
               {searchQuery && (
                 <button
@@ -437,8 +313,7 @@ export default function Home() {
             {/* Standalone Verify button */}
             <button
               onClick={() => setShowVerifyModal(true)}
-              className="rounded-full px-5 py-2.5 text-sm font-medium transition shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ backgroundColor: '#7BFF4A', color: '#000' }}
+              className="rounded-full px-5 py-2.5 text-sm font-medium transition shadow-lg flex items-center gap-2 whitespace-nowrap bg-brand text-black hover:bg-brand-light/90"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -447,24 +322,24 @@ export default function Home() {
             </button>
           </div>
 
-          {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
-          {successMessage && <p className="text-xs text-emerald-400 mb-4">{successMessage}</p>}
+          {error && <p className="text-xs text-red-400 mb-3">{error}</p>}
+          {successMessage && <p className="text-xs text-brand-light mb-3">{successMessage}</p>}
 
-          <p className="text-xs uppercase tracking-[0.4em] text-gray-600 mb-10">
-            Auto-updating • Live
+          <p className="text-xs uppercase tracking-[0.4em] text-gray-600 mb-6">
+            Updated hourly • Live
           </p>
 
           {/* Leaderboard with outline/shadow */}
-          <div className="w-full bg-black/20 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-8">
+          <div className="w-full bg-black/20 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-6">
             {/* Filter UI - Inside Container */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-semibold text-white">{leaderboardTitle}</h2>
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
-                      className="text-xs text-gray-400 hover:text-emerald-400 transition flex items-center gap-1"
+                      className="text-xs text-gray-400 hover:text-brand-light transition flex items-center gap-1"
                     >
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -473,34 +348,75 @@ export default function Home() {
                     </button>
                   )}
                 </div>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:border-emerald-500/30 transition"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 12h12M3 20h6" />
-                  </svg>
-                  Filters
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIncludePros((prev) => !prev)}
+                    aria-pressed={includePros}
+                    className={`flex items-center gap-3 rounded-full border px-4 py-1.5 text-[0.6rem] font-semibold tracking-[0.35em] transition ${
+                      includePros
+                        ? "border-brand-muted/60 bg-brand-muted/15 text-brand-light/80"
+                        : "border-white/10 bg-white/5 text-white/50"
+                    }`}
+                  >
+                    Include Pros
+                    <span
+                      className={`relative inline-flex h-5 w-10 items-center rounded-full border border-white/20 bg-black/40 transition ${
+                        includePros ? "pl-5" : "pl-1"
+                      }`}
+                    >
+                      <span
+                        className={`h-3.5 w-3.5 rounded-full transition ${
+                          includePros
+                            ? "bg-gradient-to-r from-gray-200 via-white to-brand-light/80 shadow-[0_0_8px_rgba(149,232,75,0.35)]"
+                            : "bg-gradient-to-r from-gray-500 to-gray-700"
+                        }`}
+                      />
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:border-brand-muted/40 transition"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 12h12M3 20h6" />
+                    </svg>
+                    Filters
+                  </button>
+                </div>
               </div>
 
               {/* Filter Controls */}
               {showFilters && (
                 <div className="bg-black/30 rounded-xl border border-white/5 p-4 space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     {/* Gender Filter */}
                     <div>
                       <label className="block text-xs text-gray-400 mb-1.5">Gender</label>
                       <select
                         value={selectedGender}
                         onChange={(e) => setSelectedGender(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
                       >
                         <option value="">All</option>
                         {filterOptions?.genders.map(gender => (
                           <option key={gender} value={gender}>
                             {gender === "M" ? "Male" : gender === "F" ? "Female" : gender}
                           </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Age Filter */}
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1.5">Age</label>
+                      <select
+                        value={selectedAgeBracket}
+                        onChange={(e) => setSelectedAgeBracket(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
+                      >
+                        <option value="">All</option>
+                        {AGE_BRACKETS.map(bracket => (
+                          <option key={bracket} value={bracket}>{bracket}</option>
                         ))}
                       </select>
                     </div>
@@ -512,9 +428,9 @@ export default function Home() {
                         value={selectedState}
                         onChange={(e) => {
                           setSelectedState(e.target.value);
-                          setSelectedCity(""); // Reset city when state changes
+                          setSelectedCity("");
                         }}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
                       >
                         <option value="">All</option>
                         {filterOptions?.states.map(state => (
@@ -529,32 +445,31 @@ export default function Home() {
                       <select
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition"
-                        disabled={!selectedState}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
                       >
                         <option value="">All</option>
                         {filterOptions?.cities.map(cityOption => (
-                            <option key={cityOption} value={cityOption}>{cityOption}</option>
-                          ))}
+                          <option key={cityOption} value={cityOption}>{cityOption}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
 
                   {hasActiveFilters && (
                     <div className="text-xs text-gray-400">
-                      Showing {sortedPlayers.length} player{sortedPlayers.length !== 1 ? 's' : ''}
+                      Showing {Math.min(sortedPlayers.length, displayedCount)} of {sortedPlayers.length} player{sortedPlayers.length !== 1 ? 's' : ''}
                     </div>
                   )}
                 </div>
               )}
             </div>
-            <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm">
               <thead className="text-gray-500 text-xs uppercase tracking-[0.3em] border-b border-white/5">
                 <tr>
                   <th className="px-4 py-4">Rank</th>
                   <th className="px-4 py-4">Player</th>
                   <th className="px-4 py-4">Rating</th>
-                  <th className="px-4 py-4 font-semibold" style={{ color: '#7BFF4A' }}>Wins</th>
+                  <th className="px-4 py-4 font-semibold text-brand">Wins</th>
                 </tr>
               </thead>
               <tbody>
@@ -565,67 +480,84 @@ export default function Home() {
                     </td>
                   </tr>
                 ) : (
-                  sortedPlayers.map((player, index) => {
+                  limitedPlayers.map((player, index) => {
                     const rank = index + 1;
                     const medalEmojis = ['🥇', '🥈', '🥉'];
                     const displayRank = rank <= 3 ? medalEmojis[index] : rank;
-                    const isTopThree = rank <= 3;
                     const isHighlighted = highlightedPlayerId === player._id;
 
-                    return (
-                      <tr
-                        key={player._id}
-                        id={`player-row-${player._id}`}
-                        className={`border-b border-white/5 hover:bg-white/5 transition ${isTopThree ? 'bg-emerald-500/5' : ''} ${isHighlighted ? 'bg-emerald-500/20 ring-2 ring-emerald-500/50' : ''}`}
+                    const locationParts = [];
+                    if (player.city) locationParts.push(player.city);
+                    if (player.state) locationParts.push(player.state);
+                    const locationDisplay = locationParts.join(", ");
+                    const identityParts = [];
+                    if (player.gender) identityParts.push(player.gender);
+                    if (player.birthYear) identityParts.push(getAgeBracket(player.birthYear));
+                    if (locationDisplay) identityParts.push(locationDisplay);
+                    const isPro = isProPlayer(player);
+
+                  return (
+                    <tr
+                      key={player._id}
+                      id={`player-row-${player._id}`}
+                        className={`border-b border-white/5 hover:bg-white/5 transition ${isHighlighted ? 'bg-brand/20 ring-2 ring-brand/40' : ''}`}
                       >
-                        <td className={`px-4 py-4 text-sm ${isTopThree ? 'text-xl' : 'text-white/70'}`}>{displayRank}</td>
+                        <td className="px-4 py-4 text-sm text-white/70">{displayRank}</td>
                         <td className="px-4 py-4 flex items-center gap-3">
-                        <div className={`overflow-hidden rounded-full border ${isTopThree ? 'h-10 w-10 border-emerald-400/30' : 'h-8 w-8 border-white/10'}`}>
+                        <div className="overflow-hidden rounded-full border h-8 w-8 border-white/10">
                           <Image
                             src={player.imageUrl || "/ads/pickleball-central.jpg"}
                             alt={player.name}
-                            width={isTopThree ? 40 : 32}
-                            height={isTopThree ? 40 : 32}
+                            width={32}
+                            height={32}
                             unoptimized={isExternalImage(player.imageUrl)}
-                            className={`object-cover ${isTopThree ? 'h-10 w-10' : 'h-8 w-8'}`}
+                            className="object-cover h-8 w-8"
                           />
                         </div>
-                        <div className="flex flex-col">
-                          <span className={`font-medium ${isTopThree ? 'text-base' : 'text-sm'}`}>{player.name || "Unknown"}</span>
-                          {(player.gender || player.birthYear) && (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link
+                              href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
+                              className="font-medium text-sm hover:text-brand-light transition"
+                              aria-label={`Open profile for ${player.name || "player"}`}
+                            >
+                              {player.name || "Unknown"}
+                            </Link>
+                            {isPro && (
+                              <span className="inline-flex items-center justify-center rounded-full border border-white/20 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-2 py-[1px] text-[0.5rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+                                PRO
+                              </span>
+                            )}
+                          </div>
+                          {identityParts.length > 0 && (
                             <span className="text-xs text-gray-400">
-                              {player.gender && player.gender}
-                              {player.gender && player.birthYear && " • "}
-                              {player.birthYear && getAgeBracket(player.birthYear)}
+                              {identityParts.join(" • ")}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className={`px-4 py-4 text-white/80 ${isTopThree ? 'text-base' : 'text-sm'}`}>
+                      <td className="px-4 py-4 text-white/80 text-sm">
                         {player.rating ? player.rating.toFixed(2) : "—"}
                       </td>
-                      <td className={`px-4 py-4 font-bold ${isTopThree ? 'text-2xl' : 'text-lg'}`} style={{ color: '#7BFF4A' }}>{player.wins ?? 0}</td>
+                      <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
                     </tr>
                     );
                   })
                 )}
               </tbody>
-            </table>
-          </div>
+              </table>
+              {canLoadMore && (
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={() => setDisplayedCount((prev) => Math.min(prev + 50, 100))}
+                    className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs font-semibold uppercase tracking-[0.4em] text-white/70 hover:border-white/40 hover:text-white transition"
+                  >
+                    Load 50 more
+                  </button>
+                </div>
+              )}
+            </div>
         </main>
-
-        {/* RIGHT SIDEBAR */}
-        <aside className="hidden lg:flex w-[200px] flex-shrink-0 overflow-hidden px-4">
-          <div className="flex flex-col justify-start items-center w-full py-10 gap-6">
-            {currentVisible.slice(5, 10).map((sponsor, idx) => (
-              <SponsorCircle
-                key={`right-${idx}`}
-                slotIndex={idx + 5}
-                sponsor={sponsor}
-              />
-            ))}
-          </div>
-        </aside>
       </div>
 
       {/* Verify Player Modal */}
@@ -665,7 +597,7 @@ export default function Home() {
                   onChange={(e) => setDuprUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && duprUrl && !isVerifying && handleVerify()}
                   autoFocus
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-[#7BFF4A] focus:bg-white/10 transition"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-brand focus:bg-white/10 transition"
                 />
               </div>
 
@@ -689,7 +621,7 @@ export default function Home() {
               <button
                 onClick={handleVerify}
                 disabled={isVerifying || !duprUrl}
-                className="w-full rounded-lg bg-[#7BFF4A] text-black px-6 py-3 text-sm font-semibold transition hover:bg-[#6EE83D] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full rounded-lg bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {isVerifying ? "Verifying..." : "Verify"}
               </button>

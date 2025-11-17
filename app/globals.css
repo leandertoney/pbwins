@@ -5,7 +5,16 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --brand: #00FFB0;
+    --brand-green-hex: #95e84b;
+    --brand-green-light-hex: #a4d578;
+    --brand-green-dark-hex: #4f8123;
+    --brand-green-muted-hex: #78a94d;
+    --brand-green-glow-hex: #abe577;
+    --brand-green: 149 232 75;
+    --brand-green-light: 164 213 120;
+    --brand-green-dark: 79 129 35;
+    --brand-green-muted: 120 169 77;
+    --brand-green-glow: 171 229 119;
   }
 
   body {
@@ -13,7 +22,7 @@
   }
 
   ::selection {
-    background: #00ffb0;
+    background: var(--brand-green-hex);
     color: #050505;
   }
 }
@@ -24,7 +33,7 @@
   }
 
   .glow-surface {
-    box-shadow: 0 20px 45px rgba(0, 255, 176, 0.18);
+    box-shadow: 0 20px 45px rgba(var(--brand-green-glow) / 0.25);
   }
 
   .light-border {
