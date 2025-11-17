@@ -6,6 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 
 const footerLinks = [
   { label: "Contact", href: "mailto:support@pbwins.com" },
+  { label: "Profile Notifications (Coming Soon)", href: "/coming-soon/profile-notifications" },
 ];
 
 export default function Footer() {
