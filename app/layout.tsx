@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 const nunito = Nunito({
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} ${nunito.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );
