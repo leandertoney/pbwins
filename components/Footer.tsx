@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 
 const footerLinks = [
   { label: "Contact", href: "mailto:support@pbwins.com" },
@@ -11,41 +10,12 @@ const footerLinks = [
 
 export default function Footer() {
   const [showAdvertise, setShowAdvertise] = useState(false);
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handler = () => setShowAdvertise(true);
     window.addEventListener("open-sponsor-modal", handler);
     return () => window.removeEventListener("open-sponsor-modal", handler);
   }, []);
-
-  const handleCheckout = async () => {
-    if (!email) {
-      alert("Enter an email to continue.");
-      return;
-    }
-    try {
-      setLoading(true);
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        alert(data.error);
-        setLoading(false);
-        return;
-      }
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      await stripe!.redirectToCheckout({ sessionId: data.id });
-    } catch (error: unknown) {
-      alert("Unable to start checkout. Please try again.");
-      console.error(error);
-      setLoading(false);
-    }
-  };
 
   return (
     <>
@@ -129,21 +99,13 @@ export default function Footer() {
                 If your ad doesn’t receive meaningful impressions in December, we extend your placement at no extra cost until it performs.
               </p>
             </div>
-            <div className="mt-6 space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand focus:outline-none"
-              />
-              <button
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full rounded-full border border-brand/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-brand-light transition hover:bg-brand/15 disabled:cursor-not-allowed disabled:opacity-50"
+            <div className="mt-6">
+              <Link
+                href="/upgrade"
+                className="block w-full rounded-full border border-brand/70 px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.3em] text-brand-light transition hover:bg-brand/15"
               >
-                {loading ? "Processing..." : "Lock Your Spot — $499"}
-              </button>
+                Lock Your Spot — $499
+              </Link>
             </div>
           </div>
         </div>
