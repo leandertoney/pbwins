@@ -8,6 +8,7 @@ export default defineSchema({
     duprUrl: v.string(),
     wins: v.number(),
     rating: v.number(),
+    duprRating: v.optional(v.number()),    // DUPR rating (optional)
     verified: v.boolean(),
     createdAt: v.number(),
     imageUrl: v.optional(v.string()),

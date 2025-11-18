@@ -19,6 +19,7 @@ export const savePlayer = mutation({
     duprUrl: v.string(),
     wins: v.number(),
     rating: v.number(),
+    duprRating: v.optional(v.number()),
     imageUrl: v.optional(v.string()),
     // NEW: Demographic fields
     gender: v.optional(v.string()),
@@ -56,6 +57,7 @@ export const savePlayer = mutation({
         name: args.name,
         wins: args.wins,
         rating: args.rating,
+        duprRating: args.duprRating,
         imageUrl: args.imageUrl,
         gender: args.gender,
         birthYear: args.birthYear,
@@ -88,6 +90,7 @@ export const savePlayer = mutation({
       duprUrl: args.duprUrl,
       wins: args.wins,
       rating: args.rating,
+      duprRating: args.duprRating,
       imageUrl: args.imageUrl,
       verified: true,
       createdAt: Date.now(),
@@ -238,7 +241,7 @@ export const recalculateProStatus = mutation({
     const players = await ctx.db.query("players").collect();
     let updated = 0;
     for (const player of players) {
-      const derivedRating = player.rating ?? player.singlesRating;
+      const derivedRating = player.rating ?? player.duprRating ?? player.singlesRating;
       const nextIsPro = isProRating(derivedRating);
       if (player.isPro !== nextIsPro) {
         await ctx.db.patch(player._id, { isPro: nextIsPro });
