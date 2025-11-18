@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2023-10-16" }) : null;
+const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2025-10-29.clover" }) : null;
 const convex = convexUrl ? new ConvexHttpClient(convexUrl) : null;
 
 export async function POST(req: Request) {
