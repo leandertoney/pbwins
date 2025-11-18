@@ -13,6 +13,15 @@ export const getAll = query({
   },
 });
 
+export const getTotalVerifiedWins = query({
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    return players
+      .filter((p) => p.verified === true)
+      .reduce((sum, p) => sum + (p.wins ?? 0), 0);
+  },
+});
+
 export const savePlayer = mutation({
   args: {
     name: v.string(),
@@ -249,24 +258,6 @@ export const recalculateProStatus = mutation({
       }
     }
     return { updated };
-  },
-});
-
-export const getTotalVerifiedWins = query({
-  args: {},
-  handler: async (ctx) => {
-    const players = await ctx.db.query("players").collect();
-    const total = players.reduce((sum, player) => {
-      const winsValue = (player as { wins: number | unknown[] }).wins;
-      if (typeof winsValue === "number") {
-        return sum + winsValue;
-      }
-      if (Array.isArray(winsValue)) {
-        return sum + winsValue.length;
-      }
-      return sum;
-    }, 0);
-    return { total };
   },
 });
 

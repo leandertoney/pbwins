@@ -15,6 +15,7 @@ export default defineSchema({
     // NEW: Demographic and performance fields for filtering
     gender: v.optional(v.string()),        // "M" or "F"
     birthYear: v.optional(v.number()),     // Player birth year (e.g., 1989)
+    age: v.optional(v.float64()),
     city: v.optional(v.string()),          // e.g., "Lancaster"
     state: v.optional(v.string()),         // e.g., "PA"
     country: v.optional(v.string()),       // e.g., "US"
