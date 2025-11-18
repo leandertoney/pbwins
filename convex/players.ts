@@ -252,6 +252,24 @@ export const recalculateProStatus = mutation({
   },
 });
 
+export const getTotalVerifiedWins = query({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    const total = players.reduce((sum, player) => {
+      const winsValue = (player as { wins: number | unknown[] }).wins;
+      if (typeof winsValue === "number") {
+        return sum + winsValue;
+      }
+      if (Array.isArray(winsValue)) {
+        return sum + winsValue.length;
+      }
+      return sum;
+    }, 0);
+    return { total };
+  },
+});
+
 // Update player with verified_since and years_active
 export const updatePlayerMetrics = mutation({
   args: {
@@ -285,15 +303,5 @@ export const updatePlayerMetrics = mutation({
 
     const updatedPlayer = await ctx.db.get(args.playerId);
     return updatedPlayer;
-  },
-});
-
-// Get total verified wins across all players
-export const getTotalVerifiedWins = query({
-  args: {},
-  handler: async (ctx) => {
-    const players = await ctx.db.query("players").collect();
-    const total = players.reduce((sum, player) => sum + player.wins, 0);
-    return { total };
   },
 });
