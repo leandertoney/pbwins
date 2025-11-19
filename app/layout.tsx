@@ -6,6 +6,16 @@ import Header from "@/components/Header";
 export const metadata: Metadata = {
   title: "pbWins - Verified Pickleball Wins Database",
   description: "Track every verified DUPR win in real time. Add your profile to see where you rank.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
