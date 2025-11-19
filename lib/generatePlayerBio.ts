@@ -1,5 +1,5 @@
 import { WinRecord, PlayerRecord } from "@/types/player";
-import differenceInYears from "date-fns/differenceInYears";
+import { differenceInYears } from "date-fns";
 
 export function determineYearsActive(wins: WinRecord[], createdAt?: number, verifiedSince?: string | null): number {
   // Prefer verifiedSince if available
