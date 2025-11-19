@@ -295,3 +295,30 @@ export const updatePlayerMetrics = mutation({
     return updatedPlayer;
   },
 });
+
+// Migration: Populate duprRating from rating for existing players
+export const migrateDuprRatings = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+    let updated = 0;
+    let skipped = 0;
+
+    for (const player of players) {
+      // If duprRating is not set but rating exists and is > 0, copy rating to duprRating
+      if ((player.duprRating === undefined || player.duprRating === null) && player.rating && player.rating > 0) {
+        await ctx.db.patch(player._id, { duprRating: player.rating });
+        updated++;
+      } else {
+        skipped++;
+      }
+    }
+
+    return {
+      total: players.length,
+      updated,
+      skipped,
+      message: `Migration complete: ${updated} players updated, ${skipped} players skipped`
+    };
+  },
+});
