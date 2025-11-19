@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import { getPlayerRating, getFormattedPlayerRating } from "@/lib/playerUtils";
 
 export default function PlayerPage() {
   const params = useParams();
@@ -41,8 +42,8 @@ export default function PlayerPage() {
 
   const heroImageSrc = player.imageUrl || "/ads/pickleball-central.jpg";
   const heroImageUnoptimized = !!(player.imageUrl && /^https?:\/\//.test(player.imageUrl));
-  const baseRating = player.rating ?? player.duprRating ?? player.singlesRating;
-  const isPro = Boolean(player.isPro) || (typeof baseRating === "number" && baseRating >= 5.2);
+  const baseRating = getPlayerRating(player);
+  const isPro = Boolean(player.isPro) || (baseRating !== null && baseRating >= 5.2);
 
   return (
     <div className="relative flex min-h-screen flex-col bg-[#0a0a0a] text-white">
@@ -93,7 +94,7 @@ export default function PlayerPage() {
                       )}
                     </div>
                     <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-brand">
-                      DUPR {player.rating ? player.rating.toFixed(2) : "—"}
+                      DUPR {getFormattedPlayerRating(player)}
                     </div>
                   </div>
                 </div>
@@ -110,7 +111,7 @@ export default function PlayerPage() {
               <div className="mt-8 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/60">Rating</p>
-                  <p className="text-3xl font-semibold text-brand">{player.rating ? player.rating.toFixed(2) : "—"}</p>
+                  <p className="text-3xl font-semibold text-brand">{getFormattedPlayerRating(player)}</p>
                   <p className="text-xs text-white/60">Current verified DUPR value</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
@@ -152,7 +153,7 @@ export default function PlayerPage() {
                       <h3 className="text-lg font-semibold text-white">{p.name}</h3>
                       <span className="text-xs uppercase tracking-[0.3em] text-white/50">Wins</span>
                     </div>
-                    <p className="text-sm text-white/60">Rating {p.rating ? p.rating.toFixed(2) : "—"}</p>
+                    <p className="text-sm text-white/60">Rating {getFormattedPlayerRating(p)}</p>
                     <p className="text-2xl font-bold text-brand">{p.wins ?? 0} wins</p>
                   </Link>
                 ))}

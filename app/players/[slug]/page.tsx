@@ -10,6 +10,7 @@ import MetaPill from "@/components/MetaPill";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
+import { getPlayerRating, formatRating } from "@/lib/playerUtils";
 
 export const revalidate = 900;
 
@@ -88,7 +89,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
 
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
-  const duprRating = typeof player.duprRating === "number" ? player.duprRating : player.rating;
+  const duprRating = getPlayerRating(player);
   const yearsActive = player.yearsActive ?? determineYearsActive(orderedWins, player.createdAt, player.verifiedSince);
   const verifiedSinceYear = player.verifiedSince ? new Date(player.verifiedSince).getFullYear() : null;
   const winRate = player.losses ? totalWins / (totalWins + player.losses) : null;
@@ -96,7 +97,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
   const biography = player.bio || generatePlayerBio(player, orderedWins);
-  const isPro = Boolean(player.isPro) || (typeof duprRating === "number" && duprRating >= 5.2);
+  const isPro = Boolean(player.isPro) || (duprRating !== null && duprRating >= 5.2);
 
   const profileImage = player.imageUrl || "/pbwins-logo.png";
   return (
@@ -181,7 +182,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   Verified Wins
                 </p>
                 <p className="text-white/40 text-xs mt-3">
-                  DUPR Rating: {typeof duprRating === "number" ? duprRating.toFixed(2) : "—"}
+                  DUPR Rating: {formatRating(duprRating)}
                 </p>
               </div>
             </div>
