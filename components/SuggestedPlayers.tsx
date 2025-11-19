@@ -105,7 +105,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="flex gap-6 pb-4 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      <div className="flex gap-6 pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
         {suggestions.map((suggestedPlayer) => {
           const slug = createPlayerSlug(suggestedPlayer);
           const playerName =
@@ -120,7 +120,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
             <Link
               key={suggestedPlayer._id}
               href={`/players/${slug}`}
-              className="group relative flex min-w-[200px] flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur transition-all duration-300 hover:border-white/20 hover:bg-white/10 lg:aspect-square lg:min-w-0"
+              className="group relative flex min-w-[200px] flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur transition-all duration-300 hover:border-white/20 hover:bg-white/10 lg:aspect-[3/2] lg:min-w-0"
             >
               {/* Profile Image */}
               <div className="relative h-20 w-20 flex-shrink-0">
