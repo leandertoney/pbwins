@@ -26,3 +26,28 @@ export const removeAgeField = mutation({
     };
   },
 });
+
+// Migration to backfill duprRating from rating field for existing players
+export const backfillDuprRating = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const players: PlayerDoc[] = await ctx.db.query("players").collect();
+    let migratedCount = 0;
+
+    for (const player of players) {
+      // If duprRating is not set but rating exists, copy rating to duprRating
+      if (!player.duprRating && player.rating) {
+        await ctx.db.patch(player._id, { duprRating: player.rating });
+        migratedCount++;
+        console.log(`Migrated ${player.name}: set duprRating to ${player.rating}`);
+      }
+    }
+
+    return {
+      success: true,
+      migratedCount,
+      totalPlayers: players.length,
+      message: `Migrated ${migratedCount} out of ${players.length} players`
+    };
+  },
+});

@@ -26,7 +26,7 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
 
 const isProPlayer = (player: PlayerRecord) => {
   if (player?.isPro) return true;
-  const rating = player?.rating ?? player?.duprRating ?? player?.singlesRating;
+  const rating = player?.duprRating ?? player?.rating ?? player?.singlesRating;
   return typeof rating === "number" && rating >= 5.2;
 };
 
@@ -200,6 +200,7 @@ export default function Home() {
         duprUrl: duprUrl,
         wins: data.player.totalWins,
         rating: data.player.doublesRating,
+        duprRating: data.player.doublesRating,
         imageUrl: data.player.imageUrl || undefined,
         gender: data.player.gender || undefined,
         birthYear: data.player.birthYear || undefined,
@@ -315,7 +316,7 @@ export default function Home() {
                       )}
                       <div className="flex-1">
                         <div className="text-sm font-medium text-white">{player.name}</div>
-                        <div className="text-xs text-gray-400">{player.wins} wins • {player.rating.toFixed(2)} rating</div>
+                        <div className="text-xs text-gray-400">{player.wins} wins • {getFormattedPlayerRating(player)} rating</div>
                       </div>
                     </button>
                   ))}

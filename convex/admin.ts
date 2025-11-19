@@ -47,7 +47,7 @@ export const recalculateProStatus = mutation({
     const players = await ctx.db.query("players").collect();
     let updated = 0;
     for (const player of players) {
-      const rating = player.rating ?? player.singlesRating;
+      const rating = player.duprRating ?? player.rating ?? player.singlesRating;
       const nextIsPro = isProRating(rating);
       if (player.isPro !== nextIsPro) {
         await ctx.db.patch(player._id, { isPro: nextIsPro });
