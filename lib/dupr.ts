@@ -80,10 +80,38 @@ export async function scrapeDupPlayer(playerId: string): Promise<DupPlayerRespon
     const age = profileData.result?.age ? parseInt(profileData.result.age, 10) : null;
     const birthYear = age ? new Date().getFullYear() - age : null;
 
-    const doublesRating = parseFloat(statsData.result.doubles?.rating) || 0;
-    const singlesRating = statsData.result.singles?.rating
+    let doublesRating = parseFloat(statsData.result.doubles?.rating) || 0;
+    let singlesRating = statsData.result.singles?.rating
       ? parseFloat(statsData.result.singles.rating)
       : null;
+
+    // FALLBACK: If API doesn't return a rating, scrape it from the HTML
+    if (!doublesRating || doublesRating === 0) {
+      try {
+        console.log(`[Scraper] No rating from API for player ${playerId}, trying HTML fallback...`);
+        const pageResponse = await fetch(`https://dashboard.dupr.com/dashboard/player/${playerId}`);
+        const html = await pageResponse.text();
+
+        // Extract doubles rating from HTML
+        const doublesMatch = html.match(/Doubles\s+Rating[^\d]*(\d+\.?\d*)/i);
+        if (doublesMatch) {
+          doublesRating = parseFloat(doublesMatch[1]);
+          console.log(`[Scraper] ✓ Found doubles rating ${doublesRating} via HTML fallback for player ${playerId}`);
+        }
+
+        // Extract singles rating from HTML if not found via API
+        if (!singlesRating) {
+          const singlesMatch = html.match(/Singles\s+Rating[^\d]*(\d+\.?\d*)/i);
+          if (singlesMatch) {
+            singlesRating = parseFloat(singlesMatch[1]);
+            console.log(`[Scraper] ✓ Found singles rating ${singlesRating} via HTML fallback for player ${playerId}`);
+          }
+        }
+      } catch (htmlError) {
+        console.error(`[Scraper] ✗ HTML fallback failed for player ${playerId}:`, htmlError);
+        // Continue with API data even if HTML scraping fails
+      }
+    }
 
     const location = parseLocation(profileData);
 
