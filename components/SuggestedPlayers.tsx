@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PlayerRecord, WinRecord } from "@/types/player";
 import { fetchAllPlayers, createPlayerSlug } from "@/lib/players";
+import { getPlayerRating, formatRating } from "@/lib/playerUtils";
 
 interface SuggestedPlayersProps {
   player: PlayerRecord;
@@ -18,10 +19,6 @@ function getWinCount(player: PlayerRecord): number {
   return wins.length || (typeof player.wins === "number" ? player.wins : 0);
 }
 
-function getDuprRating(player: PlayerRecord): number | null {
-  return typeof player.duprRating === "number" ? player.duprRating : player.rating ?? null;
-}
-
 function getSuggestedPlayers(currentPlayer: PlayerRecord, allPlayers: PlayerRecord[]): PlayerRecord[] {
   // Exclude the current player
   const otherPlayers = allPlayers.filter((p) => p._id !== currentPlayer._id);
@@ -30,7 +27,7 @@ function getSuggestedPlayers(currentPlayer: PlayerRecord, allPlayers: PlayerReco
 
   const currentCity = currentPlayer.city?.toLowerCase().trim();
   const currentState = currentPlayer.state?.toLowerCase().trim();
-  const currentRating = getDuprRating(currentPlayer);
+  const currentRating = getPlayerRating(currentPlayer);
 
   // Primary filter: same city OR state
   const sameLocation = otherPlayers.filter((p) => {
@@ -42,7 +39,7 @@ function getSuggestedPlayers(currentPlayer: PlayerRecord, allPlayers: PlayerReco
   // Secondary filter: similar DUPR rating (±0.25)
   const similarRating = otherPlayers.filter((p) => {
     if (currentRating === null) return false;
-    const pRating = getDuprRating(p);
+    const pRating = getPlayerRating(p);
     if (pRating === null) return false;
     return Math.abs(pRating - currentRating) <= 0.25;
   });
@@ -116,7 +113,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
               ? `${suggestedPlayer.firstName ?? ""} ${suggestedPlayer.lastName ?? ""}`.trim()
               : suggestedPlayer.name;
           const cityState = [suggestedPlayer.city, suggestedPlayer.state].filter(Boolean).join(", ");
-          const duprRating = getDuprRating(suggestedPlayer);
+          const duprRating = getPlayerRating(suggestedPlayer);
           const profileImage = suggestedPlayer.imageUrl || "/pbwins-logo.png";
 
           return (
@@ -148,7 +145,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
                 {duprRating !== null && (
                   <div className="mt-2 rounded-lg border border-brand-muted/40 bg-gradient-to-br from-black/60 to-brand-glow/10 px-3 py-1">
                     <p className="text-[0.65rem] font-semibold text-brand-light">
-                      {duprRating.toFixed(2)} DUPR
+                      {formatRating(duprRating)} DUPR
                     </p>
                   </div>
                 )}

@@ -10,6 +10,7 @@ import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import { PlayerRecord } from "@/types/player";
 import InteractiveCourtCrowdAd from "@/components/InteractiveCourtCrowdAd";
+import { getFormattedPlayerRating } from "@/lib/playerUtils";
 
 // Helper function to calculate age bracket from birth year
 const AGE_BRACKETS = ["U18", "18–34", "35–49", "50–64", "65+"];
@@ -551,7 +552,7 @@ export default function Home() {
                               </div>
                             </td>
                             <td className="px-4 py-4 text-white/80 text-sm">
-                              {player.rating ? player.rating.toFixed(2) : "—"}
+                              {getFormattedPlayerRating(player)}
                             </td>
                             <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
                           </tr>
