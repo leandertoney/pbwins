@@ -16,9 +16,8 @@ export const getAll = query({
 export const getTotalVerifiedWins = query({
   handler: async (ctx) => {
     const players = await ctx.db.query("players").collect();
-    return players
-      .filter((p) => p.verified === true)
-      .reduce((sum, p) => sum + (p.wins ?? 0), 0);
+    const total = players.reduce((sum, p) => sum + (p.wins ?? 0), 0);
+    return { total };
   },
 });
 
