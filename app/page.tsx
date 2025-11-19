@@ -166,8 +166,8 @@ export default function Home() {
 
     try {
       // Check if player already exists
-      // Fetch player data from DUPR API
-      const response = await fetch("/api/dupr-scrape", {
+      // Fetch player data from DUPR via Browserless
+      const response = await fetch("/api/dupr-browserless", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: duprUrl }),
