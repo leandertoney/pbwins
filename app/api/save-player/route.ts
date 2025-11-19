@@ -12,6 +12,7 @@ export async function POST(req: Request) {
       duprUrl,
       wins,
       rating,
+      duprRating,
       imageUrl,
       gender,
       birthYear,
@@ -30,13 +31,14 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log('Saving player to Convex:', { name, wins, rating, gender, birthYear, city, state, country });
+    console.log('Saving player to Convex:', { name, wins, rating, duprRating, gender, birthYear, city, state, country });
 
     const result = await client.mutation(api.players.savePlayer, {
       name,
       duprUrl,
       wins,
       rating,
+      duprRating: duprRating !== undefined ? duprRating : rating,
       imageUrl: imageUrl || undefined,
       gender: gender || undefined,
       birthYear: birthYear || undefined,
