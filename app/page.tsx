@@ -187,6 +187,13 @@ export default function Home() {
       }
 
       // Save player to Convex with all demographic data
+      console.log('[Verify] Saving player to database:', {
+        name: data.player.fullName,
+        wins: data.player.totalWins,
+        rating: data.player.doublesRating,
+        convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL
+      });
+
       const result = await savePlayer({
         name: data.player.fullName,
         duprUrl: duprUrl,
@@ -203,6 +210,8 @@ export default function Home() {
         singlesRating: data.player.singlesRating || undefined,
       });
 
+      console.log('[Verify] Database save result:', result);
+
       if (result.success) {
         setSuccessMessage(result.message || "Player verified successfully!");
         setDuprUrl("");
@@ -211,6 +220,7 @@ export default function Home() {
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(""), 3000);
       } else {
+        console.error('[Verify] Failed to save player:', result);
         setError("Failed to save player data.");
       }
     } catch (err: unknown) {
