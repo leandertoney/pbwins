@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 
@@ -13,9 +13,6 @@ export default function ProfileNotificationsComingSoon() {
 
   const recordPageView = useMutation(api.featureInterest.recordPageView);
   const recordInterest = useMutation(api.featureInterest.recordInterest);
-  const analytics = useQuery(api.featureInterest.getFeatureAnalytics, {
-    featureName: "profile-notifications",
-  });
 
   // Track page view on mount
   useEffect(() => {
@@ -178,13 +175,6 @@ export default function ProfileNotificationsComingSoon() {
                   {loading ? "Joining..." : "Join the Waitlist"}
                 </button>
               </form>
-
-              {/* Social Proof */}
-              {analytics && analytics.totalSignups > 0 && (
-                <p className="mt-6 text-sm text-white/50">
-                  {analytics.totalSignups} {analytics.totalSignups === 1 ? "person has" : "people have"} joined the waitlist
-                </p>
-              )}
             </div>
           ) : (
             <div className="mx-auto max-w-md rounded-xl border border-green-500/30 bg-green-500/10 p-6">
@@ -203,34 +193,6 @@ export default function ProfileNotificationsComingSoon() {
           )}
         </div>
       </main>
-
-      {/* Stats Footer (for admin/internal tracking) */}
-      {analytics && (
-        <div className="border-t border-white/10 px-4 py-8">
-          <div className="mx-auto max-w-4xl">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-center">
-                <div className="text-3xl font-bold text-brand-light">
-                  {analytics.totalPageViews}
-                </div>
-                <div className="mt-1 text-sm text-white/60">Page Views</div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-center">
-                <div className="text-3xl font-bold text-brand-light">
-                  {analytics.totalSignups}
-                </div>
-                <div className="mt-1 text-sm text-white/60">Waitlist Signups</div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-center">
-                <div className="text-3xl font-bold text-brand-light">
-                  {analytics.conversionRate}%
-                </div>
-                <div className="mt-1 text-sm text-white/60">Conversion Rate</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
