@@ -38,6 +38,7 @@ export async function GET() {
         duprUrl: entry.duprUrl,
         wins: scraped.player.totalWins,
         rating: scraped.player.doublesRating,
+        duprRating: scraped.player.doublesRating,
         imageUrl: scraped.player.imageUrl || undefined,
         gender: scraped.player.gender || undefined,
         birthYear: scraped.player.birthYear || undefined,
