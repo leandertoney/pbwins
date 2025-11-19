@@ -4,7 +4,7 @@ import VerifiedWinsTicker from "./VerifiedWinsTicker";
 
 export default function Header() {
   return (
-    <header className="fixed left-0 right-0 top-0 z-[9999] bg-transparent" style={{ position: 'fixed' }}>
+    <header className="bg-transparent">
       <div className="mx-auto flex max-w-[95vw] justify-end px-4 py-3 pr-10 lg:max-w-[90vw] lg:px-6 lg:pr-32">
         <VerifiedWinsTicker />
       </div>
