@@ -95,6 +95,11 @@ function truncateName(name: string, maxLength = 20): string {
   return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
 }
 
+function truncateBio(bio: string, maxLength = 80): string {
+  if (!bio) return "";
+  return bio.length > maxLength ? `${bio.slice(0, maxLength)}...` : bio;
+}
+
 export default async function SuggestedPlayers({ player }: SuggestedPlayersProps) {
   const allPlayers = await fetchAllPlayers();
   const suggestions = getSuggestedPlayers(player, allPlayers);
@@ -115,39 +120,49 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
           const cityState = [suggestedPlayer.city, suggestedPlayer.state].filter(Boolean).join(", ");
           const duprRating = getPlayerRating(suggestedPlayer);
           const profileImage = suggestedPlayer.imageUrl || "/pbwins-logo.png";
+          const winCount = getWinCount(suggestedPlayer);
+          const bio = truncateBio(suggestedPlayer.bio || "", 80);
 
           return (
             <Link
               key={suggestedPlayer._id}
               href={`/players/${slug}`}
-              className="group relative flex min-w-[200px] flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur transition-all duration-300 hover:border-white/20 hover:bg-white/10 lg:aspect-[3/2] lg:min-w-0"
+              className="group relative flex min-w-[280px] flex-row gap-3 rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur transition-all duration-300 hover:border-white/20 hover:bg-white/10 lg:min-w-0"
             >
-              {/* Profile Image */}
-              <div className="relative h-20 w-20 flex-shrink-0">
-                <div className="absolute inset-0 rounded-full bg-brand-muted/20 blur-lg transition-all duration-300 group-hover:bg-brand-muted/30" />
-                <Image
-                  src={profileImage}
-                  alt={playerName}
-                  fill
-                  sizes="80px"
-                  className="rounded-full object-cover ring-2 ring-white/10 transition-all duration-300 group-hover:ring-white/20"
-                />
-              </div>
-
-              {/* Player Info */}
-              <div className="flex flex-col items-center gap-1 text-center">
-                <h3 className="text-base font-semibold text-white transition-colors duration-300 group-hover:text-brand-light">
-                  {truncateName(playerName)}
-                </h3>
-                {cityState && (
-                  <p className="text-xs text-white/60">{truncateName(cityState, 25)}</p>
-                )}
+              {/* Left Side: Image and Rating */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative h-16 w-16 flex-shrink-0">
+                  <div className="absolute inset-0 rounded-full bg-brand-muted/20 blur-lg transition-all duration-300 group-hover:bg-brand-muted/30" />
+                  <Image
+                    src={profileImage}
+                    alt={playerName}
+                    fill
+                    sizes="64px"
+                    className="rounded-full object-cover ring-2 ring-white/10 transition-all duration-300 group-hover:ring-white/20"
+                  />
+                </div>
                 {duprRating !== null && (
-                  <div className="mt-2 rounded-lg border border-brand-muted/40 bg-gradient-to-br from-black/60 to-brand-glow/10 px-3 py-1">
-                    <p className="text-[0.65rem] font-semibold text-brand-light">
-                      {formatRating(duprRating)} DUPR
+                  <div className="rounded-lg border border-brand-muted/40 bg-gradient-to-br from-black/60 to-brand-glow/10 px-2 py-0.5">
+                    <p className="text-xs font-semibold text-brand-light">
+                      {formatRating(duprRating)}
                     </p>
                   </div>
+                )}
+              </div>
+
+              {/* Right Side: Player Info */}
+              <div className="flex flex-1 flex-col justify-center gap-1 overflow-hidden">
+                <h3 className="truncate text-sm font-semibold text-white transition-colors duration-300 group-hover:text-brand-light">
+                  {playerName}
+                </h3>
+                {cityState && (
+                  <p className="truncate text-xs text-white/60">{cityState}</p>
+                )}
+                <p className="text-xs text-white/50">
+                  {winCount} {winCount === 1 ? "win" : "wins"}
+                </p>
+                {bio && (
+                  <p className="line-clamp-2 text-xs text-white/40">{bio}</p>
                 )}
               </div>
             </Link>
