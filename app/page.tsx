@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/Footer";
+import HomeFaqSection from "@/components/HomeFaqSection";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
@@ -578,6 +579,9 @@ export default function Home() {
               )}
             </div>
         </main>
+
+        {/* FAQ Section */}
+        <HomeFaqSection />
       </div>
 
       {/* Verify Player Modal */}

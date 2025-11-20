@@ -9,6 +9,7 @@ import WinsOverTime from "@/components/player/WinsOverTime";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
 import VerifiedWinsCard from "@/components/VerifiedWinsCard";
+import PlayerMicroFaq from "@/components/PlayerMicroFaq";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -290,6 +291,10 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           <section className="mt-20">
             <h2 className="text-2xl font-semibold mb-6">Suggested Players</h2>
             <SuggestedPlayers player={player} />
+          </section>
+
+          <section className="mt-12">
+            <PlayerMicroFaq />
           </section>
         </section>
       </div>
