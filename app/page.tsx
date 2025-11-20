@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import HomeFaqSection from "@/components/HomeFaqSection";
+import VerificationLoadingModal from "@/components/VerificationLoadingModal";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
@@ -25,6 +26,16 @@ const getAgeBracket = (birthYear: number | undefined): string | null => {
   return "65+";
 };
 
+// Helper function to get flag emoji from country code
+const getCountryFlag = (countryCode: string | undefined): string | null => {
+  if (!countryCode || countryCode.length !== 2) return null;
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+};
+
 const isProPlayer = (player: PlayerRecord) => {
   if (player?.isPro) return true;
   const rating = player?.duprRating ?? player?.rating ?? player?.singlesRating;
@@ -37,6 +48,10 @@ export default function Home() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [verifyingPlayerName, setVerifyingPlayerName] = useState<string>("");
+  const [showLandingPopup, setShowLandingPopup] = useState(false);
+  const [duprUsername, setDuprUsername] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   // Filter state
   const [selectedGender, setSelectedGender] = useState<string>("");
@@ -84,6 +99,17 @@ export default function Home() {
   }, [filteredPlayers, includePros]);
   const savePlayer = useMutation(api.players.savePlayer);
 
+  // Show landing popup on first visit
+  useEffect(() => {
+    const hasSeenPopup = localStorage.getItem('hasSeenLandingPopup');
+    if (!hasSeenPopup) {
+      const timer = setTimeout(() => {
+        setShowLandingPopup(true);
+      }, 2000); // Show after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const sortedPlayers = useMemo(() => {
     if (!players) return [];
     return [...players].sort((a, b) => (b.wins ?? 0) - (a.wins ?? 0));
@@ -97,7 +123,7 @@ export default function Home() {
     if (selectedCity) filters.push(selectedCity);
     if (selectedState) filters.push(selectedState);
 
-    if (filters.length === 0) return "Leaderboard";
+    if (filters.length === 0) return "World Leaderboard";
     return `${filters.join(" • ")} Leaderboard`;
   }, [selectedGender, selectedCity, selectedState]);
 
@@ -164,9 +190,10 @@ export default function Home() {
     setIsVerifying(true);
     setError("");
     setSuccessMessage("");
+    setShowVerifyModal(false); // Close input modal
+    setVerifyingPlayerName(""); // Will be set once we get the name
 
     try {
-      // Check if player already exists
       // Fetch player data from DUPR via Browserless
       const response = await fetch("/api/dupr-browserless", {
         method: "POST",
@@ -187,6 +214,9 @@ export default function Home() {
         setIsVerifying(false);
         return;
       }
+
+      // Update the loading modal with player name
+      setVerifyingPlayerName(data.player.fullName);
 
       // Save player to Convex with all demographic data
       console.log('[Verify] Saving player to database:', {
@@ -218,7 +248,6 @@ export default function Home() {
       if (result.success) {
         setSuccessMessage(result.message || "Player verified successfully!");
         setDuprUrl("");
-        setShowVerifyModal(false);
 
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(""), 3000);
@@ -231,6 +260,7 @@ export default function Home() {
       setError("Failed to verify player. Please try again.");
     } finally {
       setIsVerifying(false);
+      setVerifyingPlayerName("");
     }
   };
 
@@ -349,8 +379,16 @@ export default function Home() {
             {/* Filter UI - Inside Container */}
             <div className="mb-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <h2 className="text-lg font-semibold text-white">{leaderboardTitle}</h2>
+                  <a
+                    href="https://dupr.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[0.65rem] text-white/40 hover:text-white/60 transition uppercase tracking-wider"
+                  >
+                    Powered by DUPR
+                  </a>
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
@@ -511,6 +549,7 @@ export default function Home() {
                       if (player.birthYear) identityParts.push(getAgeBracket(player.birthYear));
                       if (locationDisplay) identityParts.push(locationDisplay);
                       const isPro = isProPlayer(player);
+                      const countryFlag = getCountryFlag(player.country);
 
                       return (
                         <>
@@ -533,6 +572,11 @@ export default function Home() {
                               </div>
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 flex-wrap">
+                                  {countryFlag && (
+                                    <span className="text-sm" title={player.country}>
+                                      {countryFlag}
+                                    </span>
+                                  )}
                                   <Link
                                     href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
                                     className="font-medium text-sm hover:text-brand-light transition"
@@ -577,6 +621,22 @@ export default function Home() {
                   </button>
                 </div>
               )}
+
+              {/* Upgrade Banner after 10 entries */}
+              {sortedPlayers.length > 10 && displayedCount >= 10 && (
+                <div className="mt-8 mb-4 bg-gradient-to-r from-brand-muted/10 via-brand/20 to-brand-muted/10 border border-brand/30 rounded-xl p-6 text-center">
+                  <h3 className="text-xl font-bold text-white mb-2">Want the Full List?</h3>
+                  <p className="text-sm text-white/70 mb-4">
+                    Upgrade to PRO to see all {sortedPlayers.length} players on the leaderboard
+                  </p>
+                  <Link
+                    href="/upgrade"
+                    className="inline-block rounded-full bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light shadow-lg"
+                  >
+                    Upgrade to PRO
+                  </Link>
+                </div>
+              )}
             </div>
         </main>
 
@@ -605,7 +665,7 @@ export default function Home() {
             </div>
 
             <p className="text-sm text-white/90 mb-6">
-              Add your DUPR profile to create or update your pbWins page.
+              Enter your DUPR profile URL to get verified and join the leaderboard.
             </p>
 
             <div className="space-y-4">
@@ -652,8 +712,126 @@ export default function Home() {
 
               {/* Footer Note */}
               <p className="text-xs text-white/50 text-center">
-                We automatically refresh your rating and match history.
+                Your stats are automatically kept up to date.
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Animated Loading Modal */}
+      <VerificationLoadingModal
+        isOpen={isVerifying}
+        playerName={verifyingPlayerName}
+      />
+
+      {/* Error Modal (shown after verification fails) */}
+      {error && !isVerifying && !showVerifyModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-6">
+          <div className="bg-[#0E1414] rounded-2xl border border-red-500/20 shadow-[0_20px_60px_rgba(0,0,0,0.5)] max-w-md w-full p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-2">Verification Failed</h3>
+                <p className="text-sm text-white/70">{error}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setError("");
+                setShowVerifyModal(true);
+              }}
+              className="w-full rounded-lg bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light/90"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Landing Popup - Track Your Rank */}
+      {showLandingPopup && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-[#0E1414] rounded-2xl border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)] max-w-md w-full p-8">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold text-white/90">Want to know where you rank?</h2>
+              <button
+                onClick={() => {
+                  setShowLandingPopup(false);
+                  localStorage.setItem('hasSeenLandingPopup', 'true');
+                }}
+                className="text-gray-400 hover:text-white transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-white/70 mb-6">
+              Enter your DUPR username to find out.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-2">
+                  DUPR Username
+                </label>
+                <input
+                  type="text"
+                  placeholder="Your DUPR username"
+                  value={duprUsername}
+                  onChange={(e) => setDuprUsername(e.target.value)}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-brand focus:bg-white/10 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-white/60 mb-2">
+                  Email (Optional)
+                </label>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-brand focus:bg-white/10 transition"
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  // Store username and email
+                  if (duprUsername) {
+                    localStorage.setItem('duprUsername', duprUsername);
+                    if (userEmail) {
+                      localStorage.setItem('userEmail', userEmail);
+                      // TODO: Send to backend/database
+                      console.log('Captured:', { duprUsername, userEmail });
+                    }
+                  }
+                  setShowLandingPopup(false);
+                  localStorage.setItem('hasSeenLandingPopup', 'true');
+                }}
+                disabled={!duprUsername}
+                className="w-full rounded-lg bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                Track My Rank
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowLandingPopup(false);
+                  localStorage.setItem('hasSeenLandingPopup', 'true');
+                }}
+                className="w-full text-xs text-white/50 hover:text-white/70 transition"
+              >
+                Skip for now
+              </button>
             </div>
           </div>
         </div>

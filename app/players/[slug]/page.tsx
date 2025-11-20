@@ -141,6 +141,17 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
 
+  // Get country flag emoji
+  const getCountryFlag = (countryCode: string | undefined): string | null => {
+    if (!countryCode || countryCode.length !== 2) return null;
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  };
+  const countryFlag = getCountryFlag(player.country);
+
   // Calculate age group from birth year
   const getAgeBracket = (birthYear: number | undefined): string | null => {
     if (!birthYear) return null;
@@ -190,7 +201,14 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
+                    {countryFlag && (
+                      <span className="text-3xl" title={player.country}>
+                        {countryFlag}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     {player.verifiedSince && (
                       <MetaPill

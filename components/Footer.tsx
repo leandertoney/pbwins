@@ -20,34 +20,46 @@ export default function Footer() {
   return (
     <>
       <footer className="border-t border-white/10 bg-[#050505] text-sm text-gray-400">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-xs uppercase tracking-[0.4em] text-white/60">
-            Designed and Developed by
-            <Link
-              href="https://universoleappstudios.com"
-              className="ml-2 text-brand font-semibold hover:text-brand-light"
-              target="_blank"
-              rel="noreferrer"
-            >
-              UNIVERSOLE APP STUDIOS
-            </Link>
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-            {footerLinks.map((link) => (
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-center text-xs uppercase tracking-[0.4em] text-white/60">
+              Designed and Developed by
               <Link
-                key={link.label}
-                href={link.href}
-                className="text-white/70 transition hover:text-brand"
+                href="https://universoleappstudios.com"
+                className="ml-2 text-brand font-semibold hover:text-brand-light"
+                target="_blank"
+                rel="noreferrer"
               >
-                {link.label}
+                UNIVERSOLE APP STUDIOS
               </Link>
-            ))}
-            <button
-              onClick={() => setShowAdvertise(true)}
-              className="cursor-pointer text-white/70 transition hover:text-brand"
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+              {footerLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-white/70 transition hover:text-brand"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <button
+                onClick={() => setShowAdvertise(true)}
+                className="cursor-pointer text-white/70 transition hover:text-brand"
+              >
+                Advertise
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-center">
+            <a
+              href="https://dupr.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[0.65rem] text-white/30 hover:text-white/50 transition uppercase tracking-wider"
             >
-              Advertise
-            </button>
+              Powered by DUPR
+            </a>
           </div>
         </div>
       </footer>
