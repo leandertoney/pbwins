@@ -203,7 +203,7 @@ export default function VerificationLoadingModal({
         {/* Footer Note */}
         <div className="mt-8 pt-6 border-t border-white/5">
           <p className="text-xs text-white/40 text-center">
-            This may take 30-45 seconds. We're verifying your complete profile.
+            This may take 30-45 seconds. We&apos;re verifying your complete profile.
           </p>
         </div>
       </div>

@@ -107,7 +107,7 @@ export async function GET() {
                 singlesRating = parseFloat(statsData.result.singles.rating);
               }
             }
-          } catch (apiError) {
+          } catch (_apiError) {
             console.log(`[Cron] API fetch for demographics failed for ${entry.name}, continuing with scraped data`);
           }
         }

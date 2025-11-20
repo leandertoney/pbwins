@@ -13,7 +13,7 @@ import PlayerMicroFaq from "@/components/PlayerMicroFaq";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
-import { getPlayerRating, formatRating } from "@/lib/playerUtils";
+import { getPlayerRating } from "@/lib/playerUtils";
 
 export const revalidate = 900;
 
