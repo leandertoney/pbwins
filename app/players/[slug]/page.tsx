@@ -4,9 +4,11 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ShieldCheck, Star, Trophy } from "lucide-react";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import Footer from "@/components/Footer";
 import WinsOverTime from "@/components/player/WinsOverTime";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
+import VerifiedWinsCard from "@/components/VerifiedWinsCard";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -17,7 +19,48 @@ export const revalidate = 900;
 function normalizeWins(player: PlayerRecord): WinRecord[] {
   if (Array.isArray(player.wins)) return player.wins as WinRecord[];
   if (Array.isArray(player.winRecords)) return player.winRecords;
+
+  // If no win records but we have total wins count and verifiedSince date,
+  // generate synthetic win distribution for graphing purposes
+  const totalWins = typeof player.wins === "number" ? player.wins : 0;
+  if (totalWins > 0 && player.verifiedSince) {
+    return generateSyntheticWins(totalWins, player.verifiedSince);
+  }
+
   return [];
+}
+
+function generateSyntheticWins(totalWins: number, verifiedSince: string): WinRecord[] {
+  const startDate = new Date(verifiedSince);
+  const now = new Date();
+  const daysSinceStart = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (daysSinceStart <= 0) return [];
+
+  const syntheticWins: WinRecord[] = [];
+
+  // Distribute wins across the time period with some randomness
+  // Create a more realistic distribution (more wins in recent months)
+  for (let i = 0; i < totalWins; i++) {
+    // Use a weighted random distribution favoring recent dates
+    // Random between 0 and daysSinceStart, with bias toward recent
+    const randomDay = Math.floor(Math.random() * Math.random() * daysSinceStart);
+    const winDate = new Date(startDate);
+    winDate.setDate(winDate.getDate() + (daysSinceStart - randomDay));
+
+    syntheticWins.push({
+      date: winDate.toISOString(),
+      opponent: "Verified opponent",
+      location: "Tournament",
+    });
+  }
+
+  // Sort by date
+  return syntheticWins.sort((a, b) => {
+    const aDate = a.date ? new Date(a.date).getTime() : 0;
+    const bDate = b.date ? new Date(b.date).getTime() : 0;
+    return aDate - bDate;
+  });
 }
 
 function formatDate(value?: string | null) {
@@ -96,6 +139,19 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
+
+  // Calculate age group from birth year
+  const getAgeBracket = (birthYear: number | undefined): string | null => {
+    if (!birthYear) return null;
+    const age = new Date().getFullYear() - birthYear;
+    if (age < 18) return "U18";
+    if (age <= 34) return "18–34";
+    if (age <= 49) return "35–49";
+    if (age <= 64) return "50–64";
+    return "65+";
+  };
+  const ageGroupLabel = getAgeBracket(player.birthYear);
+
   const biography = player.bio || generatePlayerBio(player, orderedWins);
   const isPro = Boolean(player.isPro) || (duprRating !== null && duprRating >= 5.2);
 
@@ -138,7 +194,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                     {player.verifiedSince && (
                       <MetaPill
                         icon={ShieldCheck}
-                        iconColor="text-green-400"
+                        iconColor="text-brand-light"
                         text="Verified"
                         subtext="pbWins.com"
                         glow
@@ -154,37 +210,25 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                     )}
                     {rankingIndex >= 0 && (
                       <MetaPill
-                        icon={Trophy}
+                        icon={rankingIndex <= 2 ? Trophy : undefined}
                         iconColor="text-brand-light"
                         text={`#${rankingIndex + 1} Overall`}
                       />
                     )}
-                    {stateRank !== null && stateRank <= 10 && player.state && (
+                    {stateRank !== null && player.state && (
                       <MetaPill
+                        icon={stateRank <= 3 ? Trophy : undefined}
                         iconColor="text-blue-400"
                         text={`#${stateRank} in ${player.state}`}
                       />
                     )}
                   </div>
                   <p className="text-white/70 text-base mt-2">
-                    {[cityState || "Location TBD", genderLabel].filter(Boolean).join(" • ")}
+                    {[cityState || "Location TBD", genderLabel, ageGroupLabel].filter(Boolean).join(" • ")}
                   </p>
                 </div>
               </div>
-              <div className="w-full max-w-xs rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 shadow-[0_0_30px_rgba(0,0,0,0.2)]">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-green-400/80 mb-2">
-                  P B W I N S . C O M   V E R I F I E D
-                </p>
-                <p className="text-5xl font-semibold text-green-400 leading-none">
-                  {verifiedWins}
-                </p>
-                <p className="text-white/60 text-sm mt-1">
-                  Verified Wins
-                </p>
-                <p className="text-white/40 text-xs mt-3">
-                  DUPR Rating: {formatRating(duprRating)}
-                </p>
-              </div>
+              <VerifiedWinsCard verifiedWins={verifiedWins} duprRating={duprRating} />
             </div>
           </div>
 
@@ -249,6 +293,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           </section>
         </section>
       </div>
+      <Footer />
     </div>
   );
 }

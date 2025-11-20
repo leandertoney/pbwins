@@ -57,3 +57,26 @@ export const recalculateProStatus = mutation({
     return { updated };
   },
 });
+
+// Get players missing DUPR ratings or verified dates
+export const getPlayersNeedingBackfill = query({
+  args: {},
+  handler: async (ctx) => {
+    const players = await ctx.db.query("players").collect();
+
+    const needingBackfill = players.filter(p => {
+      const missingRating = !p.duprRating;
+      const missingVerifiedDate = !p.verifiedSince;
+      return missingRating || missingVerifiedDate;
+    });
+
+    return needingBackfill.map(p => ({
+      _id: p._id,
+      name: p.name,
+      duprUrl: p.duprUrl,
+      duprRating: p.duprRating,
+      verifiedSince: p.verifiedSince,
+      wins: p.wins,
+    }));
+  },
+});

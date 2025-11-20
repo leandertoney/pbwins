@@ -540,7 +540,7 @@ export default function Home() {
                                     {player.name || "Unknown"}
                                   </Link>
                                   {isPro && (
-                                    <span className="inline-flex items-center justify-center rounded-full border border-white/20 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 px-2 py-[1px] text-[0.5rem] font-semibold uppercase tracking-[0.35em] text-white/80 shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+                                    <span className="text-[0.55rem] font-bold uppercase tracking-[0.25em] text-brand/70 ml-1" style={{ textShadow: '0 0 8px rgba(149, 232, 75, 0.3)' }}>
                                       PRO
                                     </span>
                                   )}

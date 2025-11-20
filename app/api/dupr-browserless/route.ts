@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loginAndGetBrowser, extractPlayerData } from "@/lib/duprClient.js";
+import { loginAndGetBrowser, extractPlayerData, extractFirstMatchDate } from "@/lib/duprClient.js";
 
 const DUPR_URL_REGEX = /player\/(\d+)/;
 
@@ -44,11 +44,16 @@ export async function POST(req: Request) {
     const playerData = await extractPlayerData(page);
     console.log("[Browserless] Extracted data:", playerData);
 
+    // Extract first match date (for verifiedSince)
+    const firstMatchDate = await extractFirstMatchDate(page);
+    console.log("[Browserless] First match date:", firstMatchDate);
+
     await page.close();
 
     // Get additional profile info from DUPR API for demographics
     let gender = null;
     let birthYear = null;
+    let ageGroup = null;
     let city = null;
     let state = null;
     let country = null;
@@ -76,6 +81,9 @@ export async function POST(req: Request) {
 
           const age = profileData.result?.age ? parseInt(profileData.result.age, 10) : null;
           birthYear = age ? new Date().getFullYear() - age : null;
+
+          // Extract age group (e.g., "19-49", "50+", etc.)
+          ageGroup = profileData.result?.ageGroup || null;
 
           locationRaw = profileData.result?.shortAddress || null;
           if (locationRaw) {
@@ -112,6 +120,16 @@ export async function POST(req: Request) {
       }
     }
 
+    // Calculate years active if we have first match date
+    let yearsActive = null;
+    if (firstMatchDate) {
+      const firstDate = new Date(firstMatchDate);
+      const now = new Date();
+      const diffInMs = now.getTime() - firstDate.getTime();
+      const diffInYears = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
+      yearsActive = Math.max(0.1, parseFloat(diffInYears.toFixed(1))); // Minimum 0.1 years
+    }
+
     return NextResponse.json({
       success: true,
       player: {
@@ -123,10 +141,13 @@ export async function POST(req: Request) {
         imageUrl: imageUrl,
         gender: gender,
         birthYear: birthYear,
+        ageGroup: ageGroup,
         city: city,
         state: state,
         country: country,
         locationRaw: locationRaw,
+        verifiedSince: firstMatchDate,
+        yearsActive: yearsActive,
       },
     });
   } catch (error: unknown) {

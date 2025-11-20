@@ -16,6 +16,7 @@ export default defineSchema({
     gender: v.optional(v.string()),        // "M" or "F"
     birthYear: v.optional(v.number()),     // Player birth year (e.g., 1989)
     age: v.optional(v.float64()),
+    ageGroup: v.optional(v.string()),      // Age group/division (e.g., "19-49", "50+")
     city: v.optional(v.string()),          // e.g., "Lancaster"
     state: v.optional(v.string()),         // e.g., "PA"
     country: v.optional(v.string()),       // e.g., "US"

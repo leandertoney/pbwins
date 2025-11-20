@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default function ProfileNotificationsComingSoon() {
   const [email, setEmail] = useState("");
@@ -193,6 +194,7 @@ export default function ProfileNotificationsComingSoon() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
