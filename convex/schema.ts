@@ -44,11 +44,18 @@ export default defineSchema({
     createdAt: v.number(),
     month: v.string(),
     checkoutSessionId: v.optional(v.string()),
+    // Sponsor business info (filled after payment)
+    businessName: v.optional(v.string()),
+    tagline: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),      // Whether info is completed and should show
+    onboardedAt: v.optional(v.number()),    // When they completed onboarding
   })
     .index("by_month", ["month"])
     .index("by_subscription", ["stripeSubscriptionId"])
     .index("by_checkout", ["checkoutSessionId"])
-    .index("by_email_month", ["email", "month"]),
+    .index("by_email_month", ["email", "month"])
+    .index("by_active_month", ["isActive", "month"]),
   // Feature interest tracking for coming soon features
   featureInterest: defineTable({
     featureName: v.string(),           // e.g., "profile-notifications"
@@ -82,8 +89,14 @@ export default defineSchema({
     start: v.string(),                 // Contest start date (ISO string)
     last_seen: v.number(),             // Timestamp of last interaction
     createdAt: v.number(),
+    // Link to verified player record
+    playerId: v.optional(v.id("players")),
+    // Cached December wins for performance
+    decemberWins: v.optional(v.number()),
+    lastUpdated: v.optional(v.number()), // Timestamp of last win count update
   })
     .index("by_contest", ["contest"])
     .index("by_email", ["email"])
-    .index("by_contest_email", ["contest", "email"]),
+    .index("by_contest_email", ["contest", "email"])
+    .index("by_playerId", ["playerId"]),
 });

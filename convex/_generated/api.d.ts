@@ -14,6 +14,7 @@ import type * as featureInterest from "../featureInterest.js";
 import type * as migrations from "../migrations.js";
 import type * as players from "../players.js";
 import type * as sponsorSlots from "../sponsorSlots.js";
+import type * as winsmas from "../winsmas.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   players: typeof players;
   sponsorSlots: typeof sponsorSlots;
+  winsmas: typeof winsmas;
 }>;
 
 /**
