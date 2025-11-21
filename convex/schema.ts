@@ -73,4 +73,17 @@ export default defineSchema({
   })
     .index("by_feature", ["featureName"])
     .index("by_viewed_at", ["viewedAt"]),
+  // Contest entries (e.g., WINSMAS)
+  contestEntries: defineTable({
+    contest: v.string(),               // e.g., "winsmas"
+    username: v.optional(v.string()),  // Player username/name
+    email: v.optional(v.string()),     // Contact email
+    entered: v.boolean(),              // Confirmation of entry
+    start: v.string(),                 // Contest start date (ISO string)
+    last_seen: v.number(),             // Timestamp of last interaction
+    createdAt: v.number(),
+  })
+    .index("by_contest", ["contest"])
+    .index("by_email", ["email"])
+    .index("by_contest_email", ["contest", "email"]),
 });
