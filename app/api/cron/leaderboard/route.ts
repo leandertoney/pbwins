@@ -16,7 +16,15 @@ function getErrorMessage(error: unknown) {
   return String(error);
 }
 
+// Force dynamic rendering - never statically generate this route at build time
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
+  // Skip heavy scraping during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({ status: 'skipped during build' });
+  }
+
   const completed: Array<{ player: string; status: string; details?: string }> = [];
   let browser;
 
