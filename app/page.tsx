@@ -536,9 +536,10 @@ export default function Home() {
                 ) : (
                   <>
                     {limitedPlayers.map((player, index) => {
-                      const rank = index + 1;
+                      // Calculate rank based on position in full sorted array, not limited view
+                      const rank = sortedPlayers.findIndex(p => p._id === player._id) + 1;
                       const medalEmojis = ['🥇', '🥈', '🥉'];
-                      const displayRank = rank <= 3 ? medalEmojis[index] : rank;
+                      const displayRank = rank <= 3 ? medalEmojis[rank - 1] : rank;
                       const isHighlighted = highlightedPlayerId === player._id;
 
                       const locationParts = [];
