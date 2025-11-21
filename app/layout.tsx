@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import Header from "@/components/Header";
+import WinsmasBanner from "@/components/WinsmasBanner";
 
 export const metadata: Metadata = {
   title: "pbWins - Verified Pickleball Wins Database",
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
         <Providers>
+          <WinsmasBanner />
           <Header />
           {children}
         </Providers>
