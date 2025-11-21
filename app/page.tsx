@@ -241,6 +241,8 @@ export default function Home() {
         locationRaw: data.player.locationRaw || undefined,
         losses: data.player.totalLosses || undefined,
         singlesRating: data.player.singlesRating || undefined,
+        verifiedSince: data.player.verifiedSince || undefined,
+        yearsActive: data.player.yearsActive || undefined,
       });
 
       console.log('[Verify] Database save result:', result);
