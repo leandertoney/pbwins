@@ -622,8 +622,8 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Upgrade Banner after 10 entries */}
-              {sortedPlayers.length > 10 && displayedCount >= 10 && (
+              {/* Upgrade Banner after 100 entries */}
+              {sortedPlayers.length > 100 && displayedCount >= 100 && (
                 <div className="mt-8 mb-4 bg-gradient-to-r from-brand-muted/10 via-brand/20 to-brand-muted/10 border border-brand/30 rounded-xl p-6 text-center">
                   <h3 className="text-xl font-bold text-white mb-2">Want the Full List?</h3>
                   <p className="text-sm text-white/70 mb-4">
