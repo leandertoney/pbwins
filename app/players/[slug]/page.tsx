@@ -131,6 +131,21 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     }
   }
 
+  // Calculate country-level ranking
+  let countryRank: number | null = null;
+  if (player.country) {
+    const countryPlayers = allPlayers.filter((p) => p.country === player.country);
+    const sortedByWinsInCountry = [...countryPlayers].sort((a, b) => {
+      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+      return bw - aw;
+    });
+    const countryRankIndex = sortedByWinsInCountry.findIndex((p) => p._id === player._id);
+    if (countryRankIndex >= 0) {
+      countryRank = countryRankIndex + 1;
+    }
+  }
+
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
   const duprRating = getPlayerRating(player);
@@ -201,14 +216,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
-                    {countryFlag && (
-                      <span className="text-3xl" title={player.country}>
-                        {countryFlag}
-                      </span>
-                    )}
-                  </div>
+                  <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     {player.verifiedSince && (
                       <MetaPill
@@ -240,6 +248,16 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                         iconColor="text-blue-400"
                         text={`#${stateRank} in ${player.state}`}
                       />
+                    )}
+                    {countryFlag && (
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10">
+                        <span className="text-xs font-medium text-white/80">
+                          {countryFlag}
+                          {countryRank && countryRank <= 10 && (
+                            <span className="ml-1 text-[0.65rem] text-white/40">#{countryRank}</span>
+                          )}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <p className="text-white/70 text-base mt-2">
