@@ -48,7 +48,12 @@ export async function POST(req: Request) {
     const firstMatchDate = await extractFirstMatchDate(page);
     console.log("[Browserless] First match date:", firstMatchDate);
 
-    await page.close();
+    // Close page - handle case where browser connection is already closed
+    try {
+      await page.close();
+    } catch (e) {
+      console.log("[Browserless] Page already closed");
+    }
 
     // Get additional profile info from DUPR API for demographics
     let gender = null;

@@ -9,7 +9,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api.js";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
-const BROWSERLESS_API_URL = 'http://localhost:3001';
+// Try different ports since Next.js may use 3000 or 3001
+const BROWSERLESS_API_URL = process.env.API_URL || 'http://localhost:3001';
 
 if (!CONVEX_URL) {
   console.error('❌ NEXT_PUBLIC_CONVEX_URL not found in environment');
@@ -40,7 +41,10 @@ async function backfillPlayer(player) {
     if (!response.ok) {
       const errorData = await response.json();
       console.log('❌ API error:', errorData.error);
-      return { success: false, reason: errorData.error };
+      if (errorData.details) {
+        console.log('   Details:', errorData.details);
+      }
+      return { success: false, reason: errorData.details || errorData.error };
     }
 
     const data = await response.json();

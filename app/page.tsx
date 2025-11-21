@@ -280,14 +280,15 @@ export default function Home() {
 
       {/* MAIN CONTENT */}
       <div className="relative z-0 pl-[200px] pr-[200px]">
-        <main className="flex-1 flex flex-col items-center justify-start pt-0 pb-6 lg:pt-1 lg:pb-12 text-center overflow-visible w-full max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide">
+        <main className="flex-1 flex flex-col items-center justify-start pb-6 lg:pb-12 text-center overflow-visible w-full max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide -mt-[40px]">
         {/* Logo above heading */}
           <Image
             src="/pbwins-logo.png"
             alt="pbWins"
             width={200}
-            height={200}
-            className="mx-auto mt-1 mb-4 rounded-full bg-transparent"
+            height={110}
+            className="mx-auto mb-6 rounded-full bg-transparent m-0"
+            style={{ height: '110px' }}
             priority
           />
 
@@ -296,7 +297,7 @@ export default function Home() {
           </h1>
 
           {/* Player search bar and verify button */}
-          <div className="flex w-full max-w-full gap-3 mb-2 items-center justify-center">
+          <div className="flex w-full max-w-full gap-3 mb-4 items-center justify-center">
             {/* Search bar for existing players - 55-60% width, centered */}
             <div className="relative w-full max-w-[60%]">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -756,7 +757,7 @@ export default function Home() {
       {/* Landing Popup - Track Your Rank */}
       {showLandingPopup && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="bg-[#0E1414] rounded-2xl border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.5)] max-w-md w-full p-8">
+          <div className="bg-[#0E1414] rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] max-w-md w-full p-8">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-2xl font-bold text-white/90">Want to know where you rank?</h2>
               <button
@@ -772,21 +773,21 @@ export default function Home() {
               </button>
             </div>
 
-            <p className="text-sm text-white/70 mb-6">
-              Enter your DUPR username to find out.
+            <p className="text-sm text-white/90 mb-6">
+              Add your DUPR profile to see where you rank on the leaderboard.
             </p>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-2">
-                  DUPR Username
+                  DUPR Profile URL
                 </label>
                 <input
                   type="text"
-                  placeholder="Your DUPR username"
+                  placeholder="https://dashboard.dupr.com/dashboard/player/..."
                   value={duprUsername}
                   onChange={(e) => setDuprUsername(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-brand focus:bg-white/10 transition"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 focus:outline-none focus:border-brand focus:bg-white/10 transition"
                 />
               </div>
 
@@ -799,28 +800,32 @@ export default function Home() {
                   placeholder="your@email.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-4 py-3 text-sm text-white/90 focus:outline-none focus:border-brand focus:bg-white/10 transition"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 focus:outline-none focus:border-brand focus:bg-white/10 transition"
                 />
               </div>
 
               <button
                 onClick={() => {
-                  // Store username and email
+                  // Store URL and email, then open verification modal
                   if (duprUsername) {
-                    localStorage.setItem('duprUsername', duprUsername);
+                    setDuprUrl(duprUsername);
                     if (userEmail) {
                       localStorage.setItem('userEmail', userEmail);
                       // TODO: Send to backend/database
-                      console.log('Captured:', { duprUsername, userEmail });
+                      console.log('Captured email:', userEmail);
                     }
+                    setShowLandingPopup(false);
+                    localStorage.setItem('hasSeenLandingPopup', 'true');
+                    // Trigger verification automatically
+                    setTimeout(() => {
+                      handleVerify();
+                    }, 100);
                   }
-                  setShowLandingPopup(false);
-                  localStorage.setItem('hasSeenLandingPopup', 'true');
                 }}
                 disabled={!duprUsername}
                 className="w-full rounded-lg bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                Track My Rank
+                Get Verified
               </button>
 
               <button
