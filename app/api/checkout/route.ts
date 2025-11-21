@@ -71,5 +71,5 @@ export async function POST(req: Request) {
     checkoutSessionId: session.id,
   });
 
-  return NextResponse.json({ id: session.id });
+  return NextResponse.json({ id: session.id, url: session.url });
 }
