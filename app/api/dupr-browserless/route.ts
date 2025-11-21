@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     // Close page - handle case where browser connection is already closed
     try {
       await page.close();
-    } catch (e) {
+    } catch (_e) {
       console.log("[Browserless] Page already closed");
     }
 
