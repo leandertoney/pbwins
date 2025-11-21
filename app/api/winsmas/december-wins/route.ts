@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { loginAndGetBrowser, extractMatchHistory } from "@/lib/duprClient.js";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+
+interface MatchData {
+  date: string | null;
+  result: string;
+  event?: string;
+  location?: string;
+}
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
 if (!CONVEX_URL) {
@@ -67,7 +75,7 @@ export async function POST(req: Request) {
     }
 
     // Filter for December 2025 wins only
-    const decemberWins = allMatches.filter((match) => {
+    const decemberWins = allMatches.filter((match: MatchData) => {
       if (!match.date) return false;
 
       const matchDate = new Date(match.date);
@@ -87,7 +95,7 @@ export async function POST(req: Request) {
 
     // Update the contest entry with December win count
     await convexClient.mutation(api.winsmas.updateDecemberWins, {
-      playerId,
+      playerId: playerId as Id<"players">,
       decemberWins: decemberWins.length,
     });
 
@@ -95,7 +103,7 @@ export async function POST(req: Request) {
       success: true,
       decemberWins: decemberWins.length,
       totalMatches: allMatches.length,
-      wins: decemberWins.map((w) => ({
+      wins: decemberWins.map((w: MatchData) => ({
         date: w.date,
         event: w.event,
         location: w.location,
@@ -137,7 +145,7 @@ export async function GET(req: Request) {
 
     // Query the contest entry to get cached count
     const entry = await convexClient.query(api.winsmas.hasEnteredWinsmas, {
-      playerId,
+      playerId: playerId as Id<"players">,
     });
 
     if (!entry.hasEntered || !entry.entry) {

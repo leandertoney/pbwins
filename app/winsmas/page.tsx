@@ -1,11 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
 import Link from "next/link";
+import { Id } from "@/convex/_generated/dataModel";
+
+interface PlayerData {
+  _id: Id<"players">;
+  name: string;
+  duprUrl: string;
+  wins: number;
+  rating: number;
+  imageUrl?: string;
+}
 
 export default function WinsmasPage() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -14,7 +24,7 @@ export default function WinsmasPage() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [playerData, setPlayerData] = useState<any>(null);
+  const [playerData, setPlayerData] = useState<PlayerData | null>(null);
 
   const joinWinsmas = useMutation(api.winsmas.joinWinsmas);
 
@@ -79,15 +89,15 @@ export default function WinsmasPage() {
 
       setSuccessMessage("Successfully verified and joined Winsmas!");
       setShowVerifyModal(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Verification error:", err);
-      setError(err.message || "Failed to verify player");
+      setError(err instanceof Error ? err.message : "Failed to verify player");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleJoinWinsmas = async (playerId?: string) => {
+  const handleJoinWinsmas = async (playerId?: Id<"players">) => {
     if (!playerId && !playerData) {
       setShowVerifyModal(true);
       return;
@@ -98,14 +108,14 @@ export default function WinsmasPage() {
 
     try {
       const result = await joinWinsmas({
-        playerId: playerId || playerData._id,
+        playerId: playerId || playerData!._id,
       });
 
       setSuccessMessage(result.message);
       setTimeout(() => setSuccessMessage(""), 5000);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Join error:", err);
-      setError(err.message || "Failed to join Winsmas");
+      setError(err instanceof Error ? err.message : "Failed to join Winsmas");
     } finally {
       setIsJoining(false);
     }
