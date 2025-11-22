@@ -25,8 +25,8 @@ export default function WinsmasModal({ isOpen, onClose }: WinsmasModalProps) {
 
     try {
       // Get username from localStorage (if user has verified before)
-      const username = localStorage.getItem("userEmail") || undefined;
-      const storedEmail = localStorage.getItem("userEmail");
+      const username = typeof window !== "undefined" ? localStorage.getItem("userEmail") || undefined : undefined;
+      const storedEmail = typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
 
       // Check if we need email
       if (!storedEmail && !email) {
@@ -46,7 +46,7 @@ export default function WinsmasModal({ isOpen, onClose }: WinsmasModalProps) {
       });
 
       // Save email to localStorage if provided
-      if (email && !storedEmail) {
+      if (typeof window !== "undefined" && email && !storedEmail) {
         localStorage.setItem("userEmail", email);
       }
 
