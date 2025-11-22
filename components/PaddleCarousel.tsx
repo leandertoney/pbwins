@@ -9,16 +9,11 @@ const PADDLE_URLS = [
 
 export default function PaddleCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // Auto-rotate every 5 seconds
     const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % PADDLE_URLS.length);
-        setIsTransitioning(false);
-      }, 600); // Match transition duration
+      setCurrentIndex((prev) => (prev + 1) % PADDLE_URLS.length);
     }, 5000);
 
     return () => clearInterval(interval);

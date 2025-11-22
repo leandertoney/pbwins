@@ -43,8 +43,9 @@ export default function UpgradeModal({ onClose, userEmail }: UpgradeModalProps) 
       if (data.url) {
         window.location.href = data.url;
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(errorMessage);
       setLoading(false);
     }
   };
