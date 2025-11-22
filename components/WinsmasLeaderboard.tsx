@@ -43,7 +43,7 @@ export default function WinsmasLeaderboard() {
     <div className="space-y-6">
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div className="bg-gradient-to-br from-red-600/20 to-green-600/20 border border-white/10 rounded-xl p-4 text-center">
             <div className="text-3xl font-bold text-white">{stats.totalParticipants}</div>
             <div className="text-sm text-white/70 mt-1">Total Players</div>
@@ -65,14 +65,14 @@ export default function WinsmasLeaderboard() {
 
       {/* Leaderboard Table */}
       <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.4)] overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b border-white/10">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             🎄 Live Leaderboard
           </h2>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-sm text-white/70 hover:text-white transition flex items-center gap-2 disabled:opacity-50"
+            className="text-sm text-white/70 hover:text-white transition flex items-center gap-2 disabled:opacity-50 min-h-[48px] md:min-h-0 px-2 md:px-0"
           >
             <svg className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -91,11 +91,11 @@ export default function WinsmasLeaderboard() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-white/70 uppercase tracking-wider">Rank</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-white/70 uppercase tracking-wider">Player</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-white/70 uppercase tracking-wider">December Wins</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-white/70 uppercase tracking-wider">Rating</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-white/70 uppercase tracking-wider">Last Updated</th>
+                  <th className="px-2 md:px-4 py-3 text-left text-xs font-semibold text-white/70 uppercase tracking-wider">Rank</th>
+                  <th className="px-2 md:px-4 py-3 text-left text-xs font-semibold text-white/70 uppercase tracking-wider">Player</th>
+                  <th className="px-2 md:px-4 py-3 text-center text-xs font-semibold text-white/70 uppercase tracking-wider hidden md:table-cell">December Wins</th>
+                  <th className="px-2 md:px-4 py-3 text-center text-xs font-semibold text-white/70 uppercase tracking-wider hidden sm:table-cell">Rating</th>
+                  <th className="px-2 md:px-4 py-3 text-right text-xs font-semibold text-white/70 uppercase tracking-wider hidden lg:table-cell">Last Updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,9 +106,9 @@ export default function WinsmasLeaderboard() {
                   return (
                     <tr
                       key={entry.playerId}
-                      className={`border-b border-white/5 hover:bg-white/5 transition ${getRowClassName(rank)}`}
+                      className={`border-b border-white/5 hover:bg-white/5 transition min-h-[48px] ${getRowClassName(rank)}`}
                     >
-                      <td className="px-4 py-4">
+                      <td className="px-2 md:px-4 py-3 md:py-4">
                         <div className="flex items-center gap-2">
                           {medal ? (
                             <span className="text-2xl">{medal}</span>
@@ -117,10 +117,10 @@ export default function WinsmasLeaderboard() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-2 md:px-4 py-3 md:py-4">
                         <Link
                           href={`/players/${entry.slug}`}
-                          className="flex items-center gap-3 hover:text-brand-light transition group"
+                          className="flex items-center gap-2 md:gap-3 hover:text-brand-light transition group"
                         >
                           <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-white/20 group-hover:ring-brand/50 transition">
                             {entry.imageUrl ? (
@@ -147,16 +147,16 @@ export default function WinsmasLeaderboard() {
                           </div>
                         </Link>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-2 md:px-4 py-3 md:py-4 text-center hidden md:table-cell">
                         <span className="inline-flex items-center gap-1 text-2xl font-bold text-brand-light">
                           {entry.decemberWins}
                           {rank === 1 && entry.decemberWins >= 25 && <span className="text-xl">🏆</span>}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-2 md:px-4 py-3 md:py-4 text-center hidden sm:table-cell">
                         <span className="text-white/70">{entry.rating?.toFixed(2) || "—"}</span>
                       </td>
-                      <td className="px-4 py-4 text-right">
+                      <td className="px-2 md:px-4 py-3 md:py-4 text-right hidden lg:table-cell">
                         {entry.lastUpdated ? (
                           <span className="text-xs text-white/50">
                             {new Date(entry.lastUpdated).toLocaleDateString()}

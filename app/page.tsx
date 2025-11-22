@@ -281,27 +281,26 @@ export default function Home() {
       <SponsorRailsFixed />
 
       {/* MAIN CONTENT */}
-      <div className="relative z-0 pl-[200px] pr-[200px]">
-        <main className="flex-1 flex flex-col items-center justify-start pb-6 lg:pb-12 text-center overflow-visible w-full max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide -mt-[40px]">
+      <div className="relative z-0 pl-0 pr-0 md:pl-[200px] md:pr-[200px]">
+        <main className="flex-1 flex flex-col items-center justify-start pb-6 lg:pb-12 text-center overflow-visible w-full max-w-[100vw] md:max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide -mt-[40px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
             src="/pbwins-logo.png"
             alt="pbWins"
             width={200}
             height={110}
-            className="mx-auto mb-6 rounded-full bg-transparent m-0"
-            style={{ height: '110px' }}
+            className="mx-auto mb-4 md:mb-6 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
             priority
           />
 
-          <h1 className="text-[1.5rem] sm:text-[1.85rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-6 whitespace-nowrap tracking-tight w-full overflow-visible">
+          <h1 className="text-[1.2rem] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-4 md:mb-6 tracking-tight w-full">
             The database of verified pickleball wins
           </h1>
 
           {/* Player search bar and verify button */}
-          <div className="flex w-full max-w-full gap-3 mb-4 items-center justify-center">
+          <div className="flex flex-col md:flex-row w-full max-w-full gap-3 mb-4 items-stretch md:items-center justify-center">
             {/* Search bar for existing players - 55-60% width, centered */}
-            <div className="relative w-full max-w-[60%]">
+            <div className="relative w-full md:max-w-[60%]">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="7" />
@@ -313,7 +312,7 @@ export default function Home() {
                 placeholder="Search players..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-2 text-sm focus:outline-none focus:border-brand focus:bg-white/10 transition"
+                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-3 md:py-2 text-sm focus:outline-none focus:border-brand focus:bg-white/10 transition min-h-[48px] md:min-h-0"
               />
               {searchQuery && (
                 <button
@@ -361,7 +360,7 @@ export default function Home() {
             {/* Standalone Verify button */}
             <button
               onClick={() => setShowVerifyModal(true)}
-              className="rounded-full px-5 py-2.5 text-sm font-medium transition shadow-lg flex items-center gap-2 whitespace-nowrap bg-brand text-black hover:bg-brand-light/90"
+              className="rounded-full px-5 py-3 md:py-2.5 text-sm font-medium transition shadow-lg flex items-center justify-center gap-2 whitespace-nowrap bg-brand text-black hover:bg-brand-light/90 min-h-[48px] md:min-h-0 w-full md:w-auto"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -378,7 +377,7 @@ export default function Home() {
           </p>
 
           {/* Leaderboard with outline/shadow */}
-          <div className="w-full bg-black/20 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-6">
+          <div className="w-full bg-black/20 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-3 md:p-6">
             {/* Filter UI - Inside Container */}
             <div className="mb-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-3">
@@ -408,7 +407,7 @@ export default function Home() {
                   <button
                     onClick={() => setIncludePros((prev) => !prev)}
                     aria-pressed={includePros}
-                    className={`flex items-center gap-3 rounded-full border px-4 py-1.5 text-[0.6rem] font-semibold tracking-[0.35em] transition ${
+                    className={`flex items-center gap-3 rounded-full border px-4 py-2 md:py-1.5 text-[0.6rem] font-semibold tracking-[0.25em] md:tracking-[0.35em] transition min-h-[48px] md:min-h-0 ${
                       includePros
                         ? "border-brand-muted/60 bg-brand-muted/15 text-brand-light/80"
                         : "border-white/10 bg-white/5 text-white/50"
@@ -431,7 +430,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:border-brand-muted/40 transition"
+                    className="flex items-center gap-2 px-4 py-3 md:py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:border-brand-muted/40 transition min-h-[48px] md:min-h-0"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 12h12M3 20h6" />
@@ -443,15 +442,15 @@ export default function Home() {
 
               {/* Filter Controls */}
               {showFilters && (
-                <div className="bg-black/30 rounded-xl border border-white/5 p-4 space-y-3">
-                  <div className="grid grid-cols-4 gap-3">
+                <div className="bg-black/30 rounded-xl border border-white/5 p-3 md:p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                     {/* Gender Filter */}
                     <div>
                       <label className="block text-xs text-gray-400 mb-1.5">Gender</label>
                       <select
                         value={selectedGender}
                         onChange={(e) => setSelectedGender(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 md:py-2 text-sm text-white focus:outline-none focus:border-brand transition min-h-[48px] md:min-h-0"
                       >
                         <option value="">All</option>
                         {filterOptions?.genders.map(gender => (
@@ -468,7 +467,7 @@ export default function Home() {
                       <select
                         value={selectedAgeBracket}
                         onChange={(e) => setSelectedAgeBracket(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 md:py-2 text-sm text-white focus:outline-none focus:border-brand transition min-h-[48px] md:min-h-0"
                       >
                         <option value="">All</option>
                         {AGE_BRACKETS.map(bracket => (
@@ -486,7 +485,7 @@ export default function Home() {
                           setSelectedState(e.target.value);
                           setSelectedCity("");
                         }}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 md:py-2 text-sm text-white focus:outline-none focus:border-brand transition min-h-[48px] md:min-h-0"
                       >
                         <option value="">All</option>
                         {filterOptions?.states.map(state => (
@@ -501,7 +500,7 @@ export default function Home() {
                       <select
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand transition"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 md:py-2 text-sm text-white focus:outline-none focus:border-brand transition min-h-[48px] md:min-h-0"
                       >
                         <option value="">All</option>
                         {filterOptions?.cities.map(cityOption => (
@@ -519,13 +518,14 @@ export default function Home() {
                 </div>
               )}
             </div>
-              <table className="w-full text-left text-sm">
-              <thead className="text-gray-500 text-xs uppercase tracking-[0.3em] border-b border-white/5">
+              <div className="overflow-x-auto -mx-3 md:mx-0">
+              <table className="w-full text-left text-sm min-w-full">
+              <thead className="text-gray-500 text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] border-b border-white/5">
                 <tr>
-                  <th className="px-4 py-4">Rank</th>
-                  <th className="px-4 py-4">Player</th>
-                  <th className="px-4 py-4">Rating</th>
-                  <th className="px-4 py-4 font-semibold text-brand">Wins</th>
+                  <th className="px-2 md:px-4 py-3 md:py-4">Rank</th>
+                  <th className="px-2 md:px-4 py-3 md:py-4">Player</th>
+                  <th className="px-2 md:px-4 py-3 md:py-4">Rating</th>
+                  <th className="px-2 md:px-4 py-3 md:py-4 font-semibold text-brand">Wins</th>
                 </tr>
               </thead>
               <tbody>
@@ -560,10 +560,10 @@ export default function Home() {
                           <tr
                             key={player._id}
                             id={`player-row-${player._id}`}
-                            className={`border-b border-white/5 hover:bg-white/5 transition ${isHighlighted ? 'bg-brand/20 ring-2 ring-brand/40' : ''}`}
+                            className={`border-b border-white/5 hover:bg-white/5 transition min-h-[48px] ${isHighlighted ? 'bg-brand/20 ring-2 ring-brand/40' : ''}`}
                           >
-                            <td className="px-4 py-4 text-sm text-white/70">{displayRank}</td>
-                            <td className="px-4 py-4 flex items-center gap-3">
+                            <td className="px-2 md:px-4 py-3 md:py-4 text-sm text-white/70">{displayRank}</td>
+                            <td className="px-2 md:px-4 py-3 md:py-4 flex items-center gap-2 md:gap-3">
                               <div className="overflow-hidden rounded-full border h-8 w-8 border-white/10">
                                 <Image
                                   src={player.imageUrl || "/ads/pickleball-central.jpg"}
@@ -601,10 +601,10 @@ export default function Home() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-white/80 text-sm">
+                            <td className="px-2 md:px-4 py-3 md:py-4 text-white/80 text-sm">
                               {getFormattedPlayerRating(player)}
                             </td>
-                            <td className="px-4 py-4 font-bold text-brand text-lg">{player.wins ?? 0}</td>
+                            <td className="px-2 md:px-4 py-3 md:py-4 font-bold text-brand text-base md:text-lg">{player.wins ?? 0}</td>
                           </tr>
                           {/* Insert Court Crowd ad after every 25th player (25, 50, 75, 100) */}
                           {(index + 1) % 25 === 0 && <InteractiveCourtCrowdAd key={`court-crowd-ad-${index + 1}`} />}
@@ -615,11 +615,12 @@ export default function Home() {
                 )}
               </tbody>
               </table>
+              </div>
               {canLoadMore && (
                 <div className="mt-4 flex justify-center">
                   <button
                     onClick={() => setDisplayedCount((prev) => Math.min(prev + 50, 100))}
-                    className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs font-semibold uppercase tracking-[0.4em] text-white/70 hover:border-white/40 hover:text-white transition"
+                    className="rounded-full border border-white/10 bg-white/5 px-5 py-3 md:py-2 text-xs font-semibold uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/70 hover:border-white/40 hover:text-white transition min-h-[48px] md:min-h-0"
                   >
                     Load 50 more players
                   </button>
