@@ -46,7 +46,7 @@ export default function PlayerPage() {
   const isPro = Boolean(player.isPro) || (baseRating !== null && baseRating >= 5.2);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-[#0a0a0a] text-white pb-32">
+    <div className="relative flex min-h-screen flex-col bg-[#0a0a0a] text-white pb-[140px]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(0,255,176,0.25),_transparent_60%)] blur-3xl opacity-70" />
       <SponsorRailsFixed idPrefix="legacy-player" />
       <div className="relative z-0 flex-1 w-full pl-[200px] pr-[200px]">
@@ -162,7 +162,7 @@ export default function PlayerPage() {
           )}
         </main>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 w-full z-10">
+      <div className="fixed bottom-0 left-0 right-0 w-full z-10">
         <Footer />
       </div>
     </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import SponsorCircle from "./SponsorCircle";
 import SPONSORS_POOL from "@/data/sponsors";
 
@@ -18,10 +20,29 @@ export default function SponsorRailsFixed({
   rightClassName = "fixed right-4 top-[60px] h-[calc(100vh-120px)] w-[160px] hidden lg:flex flex-col justify-between items-center gap-2 z-50",
   idPrefix = "sponsor",
 }: SponsorRailsFixedProps) {
-  const [currentVisible, setCurrentVisible] = useState(() => SPONSORS_POOL.slice(0, 10));
+  // Get current month for fetching active sponsors
+  const currentMonth = new Date().toLocaleString("en-US", { month: "long" });
+  const activeSponsors = useQuery(api.sponsorSlots.getActiveSponsors, { month: currentMonth });
+
+  // Combine active sponsors with placeholder pool
+  const sponsorsPool = activeSponsors
+    ? [...activeSponsors, ...SPONSORS_POOL].slice(0, 30) // Limit combined pool to 30
+    : SPONSORS_POOL;
+
+  const [currentVisible, setCurrentVisible] = useState(() => sponsorsPool.slice(0, 10));
   const rotationIndexRef = useRef(10);
-  const lastSlotSponsorRef = useRef(SPONSORS_POOL.slice(0, 10).map((s) => getSponsorId(s)));
+  const lastSlotSponsorRef = useRef(sponsorsPool.slice(0, 10).map((s) => getSponsorId(s)));
   const currentVisibleRef = useRef(currentVisible);
+
+  // Update visible sponsors when active sponsors change
+  useEffect(() => {
+    if (activeSponsors && activeSponsors.length > 0) {
+      const newPool = [...activeSponsors, ...SPONSORS_POOL].slice(0, 30);
+      setCurrentVisible(newPool.slice(0, 10));
+      lastSlotSponsorRef.current = newPool.slice(0, 10).map((s) => getSponsorId(s));
+      rotationIndexRef.current = 10;
+    }
+  }, [activeSponsors]);
 
   useEffect(() => {
     currentVisibleRef.current = currentVisible;
@@ -48,9 +69,9 @@ export default function SponsorRailsFixed({
         let nextSponsor = null;
         let attempts = 0;
 
-        while (!nextSponsor && attempts < SPONSORS_POOL.length) {
-          const s = SPONSORS_POOL[rotationIndexRef.current];
-          rotationIndexRef.current = (rotationIndexRef.current + 1) % SPONSORS_POOL.length;
+        while (!nextSponsor && attempts < sponsorsPool.length) {
+          const s = sponsorsPool[rotationIndexRef.current];
+          rotationIndexRef.current = (rotationIndexRef.current + 1) % sponsorsPool.length;
           attempts++;
 
           const id = getSponsorId(s);
@@ -83,7 +104,7 @@ export default function SponsorRailsFixed({
 
     const interval = setInterval(rotateSponsors, 10000);
     return () => clearInterval(interval);
-  }, [triggerFlipAnimation]);
+  }, [triggerFlipAnimation, sponsorsPool]);
 
   return (
     <>

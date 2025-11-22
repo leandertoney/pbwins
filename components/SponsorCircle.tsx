@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 interface SponsorCircleProps {
   slotIndex: number;
   sponsor: { name: string; tagline: string; url?: string };
@@ -7,13 +11,38 @@ interface SponsorCircleProps {
 export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor" }: SponsorCircleProps) {
   const { base, accent, glow } = getSponsorColors(sponsor.name, slotIndex);
   const gradientLayer = `radial-gradient(circle at 30% 25%, ${glow}33, transparent 65%)`;
+  const [faviconError, setFaviconError] = useState(false);
 
   const handleClick = () => {
     window.dispatchEvent(new CustomEvent("open-sponsor-modal", { detail: sponsor }));
   };
 
+  // Extract domain from URL for favicon
+  const getFaviconUrl = (url: string) => {
+    try {
+      const domain = new URL(url).hostname;
+      // Using Google's favicon service as it's reliable and has good caching
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    } catch {
+      return null;
+    }
+  };
+
+  const faviconUrl = sponsor.url ? getFaviconUrl(sponsor.url) : null;
+  const showFavicon = faviconUrl && !faviconError;
+
   const content = (
-    <div className="flex flex-col items-center justify-center leading-tight">
+    <div className="flex flex-col items-center justify-center leading-tight gap-1">
+      {showFavicon && (
+        <div className="flex items-center justify-center w-4 h-4 rounded-full bg-white/10 backdrop-blur-sm p-0.5 mb-1">
+          <img
+            src={faviconUrl}
+            alt={`${sponsor.name} favicon`}
+            className="w-full h-full object-contain"
+            onError={() => setFaviconError(true)}
+          />
+        </div>
+      )}
       <p
         className="text-white font-semibold text-center leading-tight"
         style={{

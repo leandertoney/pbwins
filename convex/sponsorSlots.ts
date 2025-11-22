@@ -107,3 +107,56 @@ export const unlockSlot = mutation({
     }
   },
 });
+
+export const updateSponsorInfo = mutation({
+  args: {
+    checkoutSessionId: v.string(),
+    businessName: v.string(),
+    tagline: v.string(),
+    websiteUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const slot = await ctx.db
+      .query("sponsorSlots")
+      .withIndex("by_checkout", (q) => q.eq("checkoutSessionId", args.checkoutSessionId))
+      .unique();
+
+    if (!slot) {
+      throw new Error("Sponsor slot not found");
+    }
+
+    await ctx.db.patch(slot._id, {
+      businessName: args.businessName,
+      tagline: args.tagline,
+      websiteUrl: args.websiteUrl,
+      isActive: true,
+      onboardedAt: Date.now(),
+    });
+  },
+});
+
+export const getSponsorByCheckout = query({
+  args: { checkoutSessionId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("sponsorSlots")
+      .withIndex("by_checkout", (q) => q.eq("checkoutSessionId", args.checkoutSessionId))
+      .unique();
+  },
+});
+
+export const getActiveSponsors = query({
+  args: { month: v.string() },
+  handler: async (ctx, args) => {
+    const sponsors = await ctx.db
+      .query("sponsorSlots")
+      .withIndex("by_active_month", (q) => q.eq("isActive", true).eq("month", args.month))
+      .collect();
+
+    return sponsors.map((s) => ({
+      name: s.businessName || "Unnamed Sponsor",
+      tagline: s.tagline || "",
+      url: s.websiteUrl,
+    }));
+  },
+});
