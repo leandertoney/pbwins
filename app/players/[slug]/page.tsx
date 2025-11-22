@@ -209,29 +209,25 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6 sm:p-8">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:items-center">
-                <div className="relative h-32 w-32 flex-shrink-0">
-                  <div className="absolute inset-0 rounded-full bg-brand-muted/20 blur-xl" />
-                  <Image
-                    src={profileImage}
-                    alt={playerName}
-                    fill
-                    sizes="128px"
-                    className="rounded-full object-cover ring-4 ring-brand-muted/40"
-                  />
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative h-32 w-32 flex-shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-brand-muted/20 blur-xl" />
+                    <Image
+                      src={profileImage}
+                      alt={playerName}
+                      fill
+                      sizes="128px"
+                      className="rounded-full object-cover ring-4 ring-brand-muted/40"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-full border border-brand-light/20 bg-brand-light/5 px-3 py-1 backdrop-blur-sm shadow-[0_0_20px_rgba(180,255,180,0.12)]">
+                    <ShieldCheck className="h-3.5 w-3.5 text-brand-light" />
+                    <span className="text-xs font-medium text-white/90">Verified</span>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
-                    {player.verifiedSince && (
-                      <MetaPill
-                        icon={ShieldCheck}
-                        iconColor="text-brand-light"
-                        text="Verified"
-                        subtext="pbWins.com"
-                        glow
-                        glowColor="rgba(180,255,180,0.12)"
-                      />
-                    )}
                     {isPro && (
                       <MetaPill
                         icon={Star}
@@ -253,15 +249,12 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                         text={`#${stateRank} in ${player.state}`}
                       />
                     )}
-                    {countryFlag && (
-                      <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10">
-                        <span className="text-xs font-medium text-white/80">
-                          {countryFlag}
-                          {countryRank && countryRank <= 10 && (
-                            <span className="ml-1 text-[0.65rem] text-white/40">#{countryRank}</span>
-                          )}
-                        </span>
-                      </div>
+                    {countryRank !== null && countryRank <= 10 && countryFlag && (
+                      <MetaPill
+                        icon={countryRank <= 3 ? Trophy : undefined}
+                        iconColor="text-blue-400"
+                        text={`#${countryRank} in ${countryFlag}`}
+                      />
                     )}
                   </div>
                   <p className="text-white/70 text-base mt-2">
@@ -288,7 +281,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   { label: "Years Active", value: yearsActive ? `${yearsActive}` : "<1" },
                   ...(verifiedSinceYear ? [{ label: "Verified Since", value: verifiedSinceYear.toString() }] : []),
                   { label: "Win rate", value: winRate ? `${Math.round(winRate * 100)}%` : "—" },
-                  { label: "Last match", value: formatDate(orderedWins[0]?.date) },
+                  { label: "Last win date", value: formatDate(orderedWins[0]?.date) },
                   { label: "Leaderboard rank", value: rankingIndex >= 0 ? `#${rankingIndex + 1}` : "—" },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">

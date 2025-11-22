@@ -126,9 +126,13 @@ export async function POST(req: Request) {
     }
 
     // Calculate years active if we have first match date
+    // FALLBACK: If we couldn't scrape the first match date (timeout, etc.),
+    // use current date as verifiedSince to ensure the field is always populated
+    const verifiedSinceDate = firstMatchDate || new Date().toISOString();
+
     let yearsActive = null;
-    if (firstMatchDate) {
-      const firstDate = new Date(firstMatchDate);
+    if (verifiedSinceDate) {
+      const firstDate = new Date(verifiedSinceDate);
       const now = new Date();
       const diffInMs = now.getTime() - firstDate.getTime();
       const diffInYears = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
@@ -151,7 +155,7 @@ export async function POST(req: Request) {
         state: state,
         country: country,
         locationRaw: locationRaw,
-        verifiedSince: firstMatchDate,
+        verifiedSince: verifiedSinceDate,
         yearsActive: yearsActive,
       },
     });
