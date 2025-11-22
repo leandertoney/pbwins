@@ -5,57 +5,58 @@ import Link from "next/link";
 export default function WinsmasBanner() {
   return (
     <>
-      {/* Festive ticker-style banner */}
-      <div className="sticky top-0 z-40 bg-gradient-to-r from-red-600 via-green-600 to-red-600 shadow-lg overflow-hidden">
-        <div className="relative h-12 flex items-center">
-          {/* Animated snowflakes background */}
-          <div className="absolute inset-0 pointer-events-none">
-            <span className="absolute left-[10%] top-2 text-white/30 animate-pulse">❄️</span>
-            <span className="absolute left-[30%] top-1 text-white/20 animate-pulse" style={{ animationDelay: '0.5s' }}>❄️</span>
-            <span className="absolute left-[50%] top-3 text-white/30 animate-pulse" style={{ animationDelay: '1s' }}>❄️</span>
-            <span className="absolute left-[70%] top-1 text-white/20 animate-pulse" style={{ animationDelay: '1.5s' }}>❄️</span>
-            <span className="absolute left-[90%] top-2 text-white/30 animate-pulse" style={{ animationDelay: '2s' }}>❄️</span>
+      {/* Premium festive banner */}
+      <div className="sticky top-0 z-40 backdrop-blur-md bg-gradient-to-r from-[#1a0a0f] via-[#0f1a14] to-[#1a0a0f] border-b border-white/5 shadow-xl overflow-hidden">
+        <div className="relative">
+          {/* Subtle shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+
+          {/* Minimal festive accents */}
+          <div className="absolute inset-0 pointer-events-none opacity-30">
+            <span className="absolute left-[5%] top-3 text-amber-400/40 text-xs">✦</span>
+            <span className="absolute left-[25%] top-2 text-amber-300/30 text-xs">✦</span>
+            <span className="absolute left-[75%] top-3 text-amber-400/40 text-xs">✦</span>
+            <span className="absolute left-[95%] top-2 text-amber-300/30 text-xs">✦</span>
           </div>
 
-          {/* Scrolling ticker content */}
-          <div className="relative flex items-center w-full animate-marquee whitespace-nowrap">
-            <span className="inline-flex items-center gap-3 text-white font-bold text-sm sm:text-base tracking-wide px-4">
-              🎄 WINSMAS: First to 25 verified wins in December wins a Gen 3 Paddle 🎁
-              <Link
-                href="/winsmas"
-                className="inline-flex items-center gap-1.5 bg-white text-red-600 px-3 py-1 rounded-full font-semibold text-xs uppercase tracking-wider hover:bg-white/90 transition-colors shadow-md"
-              >
-                Enter Now ⛄
-              </Link>
-            </span>
-            {/* Duplicate for seamless loop */}
-            <span className="inline-flex items-center gap-3 text-white font-bold text-sm sm:text-base tracking-wide px-4">
-              🎄 WINSMAS: First to 25 verified wins in December wins a Gen 3 Paddle 🎁
-              <Link
-                href="/winsmas"
-                className="inline-flex items-center gap-1.5 bg-white text-red-600 px-3 py-1 rounded-full font-semibold text-xs uppercase tracking-wider hover:bg-white/90 transition-colors shadow-md"
-              >
-                Enter Now ⛄
-              </Link>
-            </span>
+          {/* Content */}
+          <div className="relative max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline text-amber-400/60 text-lg">✦</span>
+              <p className="text-white/90 text-sm sm:text-base font-medium tracking-wide">
+                <span className="text-amber-300/90 font-semibold">Winsmas Challenge</span>
+                <span className="hidden sm:inline text-white/50 mx-2">·</span>
+                <span className="hidden sm:inline text-white/70">First to 25 wins in December wins a Gen 3 Paddle</span>
+              </p>
+            </div>
+
+            <Link
+              href="/winsmas"
+              className="group relative px-4 sm:px-6 py-2 bg-gradient-to-r from-amber-600/20 to-amber-500/20 border border-amber-500/30 rounded-lg text-amber-100 text-sm font-medium tracking-wide hover:border-amber-400/50 hover:from-amber-600/30 hover:to-amber-500/30 transition-all duration-300 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Learn More
+                <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-400/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            </Link>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes marquee {
+        @keyframes shimmer {
           0% {
-            transform: translateX(0);
+            transform: translateX(-100%);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(100%);
           }
         }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
+        .animate-shimmer {
+          animation: shimmer 8s ease-in-out infinite;
         }
       `}</style>
     </>
