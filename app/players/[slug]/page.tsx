@@ -10,6 +10,7 @@ import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
 import VerifiedWinsCard from "@/components/VerifiedWinsCard";
 import PlayerMicroFaq from "@/components/PlayerMicroFaq";
+import VerifiedWinsTicker from "@/components/VerifiedWinsTicker";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -192,16 +193,19 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       <SponsorRailsFixed idPrefix="player" />
       <div className="relative z-10 flex w-full flex-col gap-10 pl-[200px] pr-[200px] pb-16 pt-2">
         <section className="mx-auto w-full max-w-5xl space-y-8 px-4">
-          <Link href="/" className="mx-auto mb-2 flex w-full items-center justify-center lg:mx-0 lg:justify-start">
-            <Image
-              src="/pbwins-logo.png"
-              alt="pbWins"
-              width={160}
-              height={160}
-              className="h-20 w-20 rounded-full"
-              priority
-            />
-          </Link>
+          <div className="flex w-full items-center justify-between mb-2">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/pbwins-logo.png"
+                alt="pbWins"
+                width={160}
+                height={160}
+                className="h-20 w-20 rounded-full"
+                priority
+              />
+            </Link>
+            <VerifiedWinsTicker />
+          </div>
           <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6 sm:p-8">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:items-center">
