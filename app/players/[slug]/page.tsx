@@ -190,9 +190,9 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
         <div className="absolute bottom-[-10%] right-1/2 h-[500px] w-[700px] translate-x-1/2 rounded-full bg-brand-glow/25 blur-[140px]" />
       </div>
       <SponsorRailsFixed idPrefix="player" />
-      <div className="relative z-10 flex w-full flex-col gap-10 pl-[200px] pr-[200px] pb-16 pt-8">
+      <div className="relative z-10 flex w-full flex-col gap-10 pl-[200px] pr-[200px] pb-16 pt-2">
         <section className="mx-auto w-full max-w-5xl space-y-8 px-4">
-          <Link href="/" className="mx-auto mb-4 flex w-full items-center justify-center lg:mx-0 lg:justify-start">
+          <Link href="/" className="mx-auto mb-2 flex w-full items-center justify-center lg:mx-0 lg:justify-start">
             <Image
               src="/pbwins-logo.png"
               alt="pbWins"
