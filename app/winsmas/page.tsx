@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
+import PaddleCarousel from "@/components/PaddleCarousel";
 import Link from "next/link";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -126,6 +127,17 @@ export default function WinsmasPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] text-white relative overflow-hidden">
+      {/* Logo - Home Link */}
+      <Link href="/" className="fixed top-4 left-4 z-50 group">
+        <img
+          src="/pbwins-logo.png"
+          alt="PBWins"
+          width={80}
+          height={80}
+          className="rounded-full bg-transparent transition-transform duration-300 group-hover:scale-110"
+        />
+      </Link>
+
       {/* Animated snowfall background */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {[...Array(50)].map((_, i) => (
@@ -256,7 +268,7 @@ export default function WinsmasPage() {
           <WinsmasLeaderboard />
         </section>
 
-        {/* Prize Details */}
+        {/* Prize Details - Paddle Carousel */}
         <section className="bg-gradient-to-br from-yellow-900/20 via-orange-900/20 to-yellow-900/20 border border-yellow-500/30 rounded-3xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-3">
             <span>🏆</span>
@@ -264,17 +276,11 @@ export default function WinsmasPage() {
             <span>🏆</span>
           </h2>
 
-          <div className="max-w-2xl mx-auto text-center space-y-6">
-            <div className="aspect-video bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
-              <div className="text-center space-y-2">
-                <div className="text-6xl">🎾</div>
-                <p className="text-2xl font-bold">Gen 3 Paddle</p>
-                <p className="text-white/50 text-sm">Latest technology • Premium quality</p>
-              </div>
-            </div>
+          <PaddleCarousel />
 
+          <div className="max-w-2xl mx-auto text-center space-y-6 mt-12">
             <p className="text-white/70">
-              Win the latest Gen 3 Paddle featuring cutting-edge technology and premium construction.
+              Win one of these premium paddles featuring cutting-edge technology and professional-grade construction.
               The ultimate reward for the most dedicated player this December!
             </p>
 

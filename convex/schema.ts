@@ -99,4 +99,19 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_contest_email", ["contest", "email"])
     .index("by_playerId", ["playerId"]),
+  // Leaderboard subscriptions
+  subscriptions: defineTable({
+    email: v.string(),                 // User email (primary identifier)
+    isPaid: v.boolean(),               // Whether user has active paid subscription
+    planType: v.optional(v.string()),  // "monthly" or "yearly"
+    planEndDate: v.optional(v.number()), // Timestamp when subscription ends
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    createdAt: v.number(),
+    lastUpdated: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_stripe_customer", ["stripeCustomerId"])
+    .index("by_stripe_subscription", ["stripeSubscriptionId"])
+    .index("by_paid_status", ["isPaid"]),
 });
