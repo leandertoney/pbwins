@@ -6,6 +6,9 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 
+// Disable static prerendering - this page requires runtime query params
+export const dynamic = 'force-dynamic';
+
 export default function SponsorOnboardingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();

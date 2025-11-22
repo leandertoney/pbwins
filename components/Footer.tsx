@@ -2,17 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import UpgradeModal from "@/components/UpgradeModal";
 
 const footerLinks = [
-  { label: "Upgrade to Premium", href: "#", openModal: true },
   { label: "Contact", href: "mailto:support@pbwins.com" },
   { label: "Profile Notifications (Coming Soon)", href: "/coming-soon/profile-notifications" },
 ];
 
 export default function Footer() {
   const [showAdvertise, setShowAdvertise] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     const handler = () => setShowAdvertise(true);
@@ -37,25 +34,15 @@ export default function Footer() {
               </Link>
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-              {footerLinks.map((link) =>
-                link.openModal ? (
-                  <button
-                    key={link.label}
-                    onClick={() => setShowUpgradeModal(true)}
-                    className="text-white/70 transition hover:text-brand cursor-pointer"
-                  >
-                    {link.label}
-                  </button>
-                ) : (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="text-white/70 transition hover:text-brand"
-                  >
-                    {link.label}
-                  </Link>
-                )
-              )}
+              {footerLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-white/70 transition hover:text-brand"
+                >
+                  {link.label}
+                </Link>
+              ))}
               <button
                 onClick={() => setShowAdvertise(true)}
                 className="cursor-pointer text-white/70 transition hover:text-brand"
@@ -135,9 +122,6 @@ export default function Footer() {
           </div>
         </div>
       )}
-
-      {/* Upgrade Modal */}
-      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} userEmail={null} />}
     </>
   );
 }

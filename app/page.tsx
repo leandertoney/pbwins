@@ -5,7 +5,6 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import HomeFaqSection from "@/components/HomeFaqSection";
 import VerificationLoadingModal from "@/components/VerificationLoadingModal";
-import UpgradeModal from "@/components/UpgradeModal";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
@@ -53,8 +52,6 @@ export default function Home() {
   const [showLandingPopup, setShowLandingPopup] = useState(false);
   const [duprUsername, setDuprUsername] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [storedEmail, setStoredEmail] = useState<string | null>(null);
 
   // Filter state
   const [selectedGender, setSelectedGender] = useState<string>("");
@@ -101,19 +98,6 @@ export default function Home() {
     return base.filter((player) => !isProPlayer(player));
   }, [filteredPlayers, includePros]);
   const savePlayer = useMutation(api.players.savePlayer);
-
-  // Get user email from localStorage
-  useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    setStoredEmail(email);
-  }, []);
-
-  // Check if user is paid
-  const subscription = useQuery(
-    api.subscriptions.getByEmail,
-    storedEmail ? { email: storedEmail } : "skip"
-  );
-  const isPaid = subscription?.isPaid || false;
 
   // Show landing popup on first visit
   useEffect(() => {
@@ -597,19 +581,13 @@ export default function Home() {
                                       {countryFlag}
                                     </span>
                                   )}
-                                  {isPaid ? (
-                                    <Link
-                                      href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
-                                      className="font-medium text-sm hover:text-brand-light transition"
-                                      aria-label={`Open profile for ${player.name || "player"}`}
-                                    >
-                                      {player.name || "Unknown"}
-                                    </Link>
-                                  ) : (
-                                    <span className="font-medium text-sm text-white/50">
-                                      Number {rank}
-                                    </span>
-                                  )}
+                                  <Link
+                                    href={`/players/${player.slug || slugify(player.name || String(player._id))}`}
+                                    className="font-medium text-sm hover:text-brand-light transition"
+                                    aria-label={`Open profile for ${player.name || "player"}`}
+                                  >
+                                    {player.name || "Unknown"}
+                                  </Link>
                                   {isPro && (
                                     <span className="text-[0.55rem] font-bold uppercase tracking-[0.25em] text-brand/70 ml-1" style={{ textShadow: '0 0 8px rgba(149, 232, 75, 0.3)' }}>
                                       PRO
@@ -628,26 +606,6 @@ export default function Home() {
                             </td>
                             <td className="px-2 md:px-4 py-3 md:py-4 font-bold text-brand text-base md:text-lg">{player.wins ?? 0}</td>
                           </tr>
-                          {/* Upgrade banner after row 5 for free users */}
-                          {!isPaid && rank === 5 && (
-                            <tr>
-                              <td colSpan={4} className="p-0">
-                                <div className="bg-gradient-to-r from-brand/20 via-brand/30 to-brand/20 border-y border-brand/40 p-4">
-                                  <div className="max-w-2xl mx-auto text-center">
-                                    <p className="text-white font-medium mb-2">
-                                      Unlock real player names and full leaderboard access
-                                    </p>
-                                    <button
-                                      onClick={() => setShowUpgradeModal(true)}
-                                      className="px-6 py-2 bg-brand hover:bg-brand-light text-white font-semibold rounded-lg transition shadow-lg hover:shadow-xl"
-                                    >
-                                      Upgrade to Premium
-                                    </button>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
                           {/* Insert Court Crowd ad after every 25th player (25, 50, 75, 100) */}
                           {(index + 1) % 25 === 0 && <InteractiveCourtCrowdAd key={`court-crowd-ad-${index + 1}`} />}
                         </>
@@ -666,22 +624,6 @@ export default function Home() {
                   >
                     Load 50 more players
                   </button>
-                </div>
-              )}
-
-              {/* Upgrade Banner after 100 entries */}
-              {sortedPlayers.length > 100 && displayedCount >= 100 && (
-                <div className="mt-8 mb-4 bg-gradient-to-r from-brand-muted/10 via-brand/20 to-brand-muted/10 border border-brand/30 rounded-xl p-6 text-center">
-                  <h3 className="text-xl font-bold text-white mb-2">Want the Full List?</h3>
-                  <p className="text-sm text-white/70 mb-4">
-                    Upgrade to PRO to see all {sortedPlayers.length} players on the leaderboard
-                  </p>
-                  <Link
-                    href="/upgrade"
-                    className="inline-block rounded-full bg-brand text-black px-6 py-3 text-sm font-semibold transition hover:bg-brand-light shadow-lg"
-                  >
-                    Upgrade to PRO
-                  </Link>
                 </div>
               )}
             </div>
@@ -889,9 +831,6 @@ export default function Home() {
       )}
 
       <Footer />
-
-      {/* Upgrade Modal */}
-      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} userEmail={storedEmail} />}
     </div>
   );
 }

@@ -4,28 +4,12 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import UpgradeModal from "@/components/UpgradeModal";
+import { useState } from "react";
 
 export default function WinsmasLeaderboard() {
   const leaderboard = useQuery(api.winsmas.getWinsmasLeaderboard);
   const stats = useQuery(api.winsmas.getWinsmasStats);
   const [refreshing, setRefreshing] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-
-  // Get user email from localStorage
-  useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    setUserEmail(email);
-  }, []);
-
-  // Check if user is paid
-  const subscription = useQuery(
-    api.subscriptions.getByEmail,
-    userEmail ? { email: userEmail } : "skip"
-  );
-  const isPaid = subscription?.isPaid || false;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -118,7 +102,6 @@ export default function WinsmasLeaderboard() {
                 {leaderboard.map((entry, index) => {
                   const rank = index + 1;
                   const medal = getMedalEmoji(rank);
-                  const displayName = isPaid ? entry.name : `Number ${rank}`;
 
                   return (
                     <>
@@ -136,47 +119,34 @@ export default function WinsmasLeaderboard() {
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          {isPaid ? (
-                            <Link
-                              href={`/players/${entry.slug}`}
-                              className="flex items-center gap-3 hover:text-brand-light transition group"
-                            >
-                              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-white/20 group-hover:ring-brand/50 transition">
-                                {entry.imageUrl ? (
-                                  <Image
-                                    src={entry.imageUrl}
-                                    alt={entry.name}
-                                    fill
-                                    className="object-cover"
-                                    unoptimized
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white/50 text-xl">
-                                    {entry.name[0]}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-medium text-white">{entry.name}</span>
-                                {(entry.city || entry.state) && (
-                                  <span className="text-xs text-white/50">
-                                    {[entry.city, entry.state].filter(Boolean).join(", ")}
-                                  </span>
-                                )}
-                              </div>
-                            </Link>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-white/20">
-                                <div className="w-full h-full flex items-center justify-center text-white/30 text-xl">
-                                  ?
+                          <Link
+                            href={`/players/${entry.slug}`}
+                            className="flex items-center gap-3 hover:text-brand-light transition group"
+                          >
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0 ring-2 ring-white/20 group-hover:ring-brand/50 transition">
+                              {entry.imageUrl ? (
+                                <Image
+                                  src={entry.imageUrl}
+                                  alt={entry.name}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-white/50 text-xl">
+                                  {entry.name[0]}
                                 </div>
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-medium text-white/50">{displayName}</span>
-                              </div>
+                              )}
                             </div>
-                          )}
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white">{entry.name}</span>
+                              {(entry.city || entry.state) && (
+                                <span className="text-xs text-white/50">
+                                  {[entry.city, entry.state].filter(Boolean).join(", ")}
+                                </span>
+                              )}
+                            </div>
+                          </Link>
                         </td>
                         <td className="px-4 py-4 text-center">
                           <span className="inline-flex items-center gap-1 text-2xl font-bold text-brand-light">
@@ -185,7 +155,7 @@ export default function WinsmasLeaderboard() {
                           </span>
                         </td>
                         <td className="px-4 py-4 text-center">
-                          <span className="text-white/70">{isPaid ? (entry.rating?.toFixed(2) || "—") : "—"}</span>
+                          <span className="text-white/70">{entry.rating?.toFixed(2) || "—"}</span>
                         </td>
                         <td className="px-4 py-4 text-right">
                           {entry.lastUpdated ? (
@@ -197,26 +167,6 @@ export default function WinsmasLeaderboard() {
                           )}
                         </td>
                       </tr>
-                      {/* Upgrade banner after row 5 for free users */}
-                      {!isPaid && rank === 5 && (
-                        <tr>
-                          <td colSpan={5} className="p-0">
-                            <div className="bg-gradient-to-r from-brand/20 via-brand/30 to-brand/20 border-y border-brand/40 p-4">
-                              <div className="max-w-2xl mx-auto text-center">
-                                <p className="text-white font-medium mb-2">
-                                  Unlock real player names, exact ranks, and more
-                                </p>
-                                <button
-                                  onClick={() => setShowUpgradeModal(true)}
-                                  className="px-6 py-2 bg-brand hover:bg-brand-light text-white font-semibold rounded-lg transition shadow-lg hover:shadow-xl"
-                                >
-                                  Upgrade to Premium
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
                     </>
                   );
                 })}
@@ -231,9 +181,6 @@ export default function WinsmasLeaderboard() {
           </p>
         </div>
       </div>
-
-      {/* Upgrade Modal */}
-      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} userEmail={userEmail} />}
     </div>
   );
 }
