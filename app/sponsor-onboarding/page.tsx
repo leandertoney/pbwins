@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 
-// Disable static prerendering - this page requires runtime query params
-export const dynamic = 'force-dynamic';
-
-export default function SponsorOnboardingPage() {
+function SponsorOnboardingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get("session_id");
@@ -206,5 +203,17 @@ export default function SponsorOnboardingPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SponsorOnboardingPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#080909] px-4 text-center text-white">
+        <div className="text-white/50">Loading...</div>
+      </main>
+    }>
+      <SponsorOnboardingContent />
+    </Suspense>
   );
 }
