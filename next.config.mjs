@@ -36,6 +36,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/player/:slug',
+        destination: '/players/:slug',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
