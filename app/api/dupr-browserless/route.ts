@@ -47,9 +47,10 @@ export async function POST(req: Request) {
     const playerData = await extractPlayerData(page);
     console.log("[Browserless] Extracted data:", playerData);
 
-    // Extract first match date (for verifiedSince)
-    const firstMatchDate = await extractFirstMatchDate(page);
-    console.log("[Browserless] First match date:", firstMatchDate);
+    // SKIP first match date extraction to avoid timeout - use current date as fallback
+    // This saves ~10 seconds and prevents 504 errors on Netlify
+    const firstMatchDate = null; // Will use current date as fallback below
+    console.log("[Browserless] Skipping first match date extraction (using current date as fallback)");
 
     // Close page - handle case where browser connection is already closed
     try {
