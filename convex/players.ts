@@ -78,8 +78,18 @@ export const savePlayer = mutation({
         singlesRating: args.singlesRating,
         isPro,
       };
-      if (args.verifiedSince !== undefined && !existing.verifiedSince) {
-        patchData.verifiedSince = args.verifiedSince;
+      // Update verifiedSince if not already set OR if the new value is earlier
+      if (args.verifiedSince !== undefined) {
+        if (!existing.verifiedSince) {
+          patchData.verifiedSince = args.verifiedSince;
+        } else {
+          // If both exist, keep the earlier date
+          const existingDate = new Date(existing.verifiedSince).getTime();
+          const newDate = new Date(args.verifiedSince).getTime();
+          if (newDate < existingDate) {
+            patchData.verifiedSince = args.verifiedSince;
+          }
+        }
       }
       if (args.yearsActive !== undefined) {
         patchData.yearsActive = args.yearsActive;
