@@ -156,6 +156,25 @@ DUPR scraping process breakdown:
 **Cause:** Session cookies expired (happens every 24-48 hours)
 **Fix:** Regenerate and update `DUPR_SESSION_COOKIES`
 
+### Issue: Netlify build fails with "Unexpected any" ESLint error
+**Cause:** TypeScript ESLint rule `@typescript-eslint/no-explicit-any` blocks production builds when `any` type is used
+**Fix:**
+1. Replace all `as any` with proper types
+2. For Convex IDs, use: `import { Id } from "@/convex/_generated/dataModel"`
+3. Type player IDs as: `playerId as Id<"players">`
+4. Run `npx tsc --noEmit` locally to verify before pushing
+5. **IMPORTANT:** Always check for `any` types before committing - Netlify builds fail on ESLint errors
+
+**Example:**
+```typescript
+// ❌ Bad - will fail Netlify build
+playerId: convexPlayerId as any
+
+// ✅ Good - proper typing
+import { Id } from "@/convex/_generated/dataModel";
+playerId: convexPlayerId as Id<"players">
+```
+
 ---
 
 ## Debugging Tips
@@ -193,12 +212,17 @@ node scripts/generate-session-cookies.mjs
 4. **Environment variables persist** - Best place for session data in serverless
 5. **DUPR requires authentication** - Can't use public API without credentials
 6. **First match date scraping is expensive** - Adds 10s+, skip for faster verification
+7. **ESLint blocks Netlify builds** - Always use proper types, never `as any` in production code
+8. **Two-phase verification wins** - Split slow operations into background tasks for instant UX
 
 ---
 
 ## Related Files
 
 - `/lib/duprClient.js` - Main scraping logic with login/cookie handling
-- `/app/api/dupr-browserless/route.ts` - Netlify serverless function endpoint
+- `/app/api/dupr-browserless/route.ts` - Fast verification endpoint (Phase 1: ~10s)
+- `/app/api/backfill-first-match-date/route.ts` - Background backfill endpoint (Phase 2: ~12s)
+- `/components/VerificationLoadingModal.tsx` - User-facing verification UI
 - `/scripts/generate-session-cookies.mjs` - Helper to create session cookies
 - `/scripts/backfillVerifiedSince.mjs` - Backfill script for existing players
+- `/scripts/test-verification-flow.mjs` - Test script for two-phase verification flow
