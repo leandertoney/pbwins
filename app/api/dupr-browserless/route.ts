@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loginAndGetBrowser, extractPlayerData, extractFirstMatchDate } from "@/lib/duprClient.js";
+import { loginAndGetBrowser, extractPlayerData } from "@/lib/duprClient.js";
 
 // Force dynamic rendering to prevent static generation
 export const dynamic = 'force-dynamic';
