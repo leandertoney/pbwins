@@ -1,5 +1,7 @@
 # Troubleshooting Guide - DUPR Verification Issues
 
+> **⚠️ IMPORTANT:** Always review this troubleshooting guide before pushing changes or deploying to production. Many build failures can be prevented by checking for common issues documented here.
+
 ## Timeline of Issues & Solutions
 
 ### Problem: Netlify 504 Gateway Timeout on Player Verification
@@ -173,6 +175,39 @@ playerId: convexPlayerId as any
 // ✅ Good - proper typing
 import { Id } from "@/convex/_generated/dataModel";
 playerId: convexPlayerId as Id<"players">
+```
+
+### Issue: Netlify build fails with "Failed to parse configuration" (netlify.toml)
+**Cause:** The `netlify.toml` file contains formatting issues, ANSI escape codes, or invalid TOML syntax
+**Error message:** `When resolving config file /opt/build/repo/netlify.toml: [36mCo`
+
+**Fix:**
+1. Ensure `netlify.toml` uses **no indentation** for key-value pairs (TOML doesn't require it)
+2. Remove any ANSI color codes or special characters
+3. Use simple, flat structure
+4. **IMPORTANT:** Always review TROUBLESHOOTING.md before deploying changes
+
+**Example of correct netlify.toml:**
+```toml
+[build]
+command = "npm run build"
+publish = ".next"
+
+[[plugins]]
+package = "@netlify/plugin-nextjs"
+
+[functions]
+timeout = 60
+```
+
+**Debugging:**
+```bash
+# Check for hidden characters
+od -c netlify.toml | head -20
+
+# Validate TOML syntax locally (install toml-cli first)
+npm install -g toml-cli
+toml-cli netlify.toml
 ```
 
 ---
