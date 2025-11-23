@@ -256,6 +256,21 @@ export default function Home() {
 
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(""), 3000);
+
+        // BACKGROUND TASK: Trigger backfill of first match date
+        // This runs asynchronously and won't block the user experience
+        // The accurate date will be populated within 15 seconds
+        fetch("/api/backfill-first-match-date", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            duprUrl: duprUrl,
+            playerId: result.playerId, // Convex player ID from save result
+          }),
+        }).catch((err) => {
+          // Silently log errors - don't show to user
+          console.log('[Backfill] Background task failed (non-critical):', err);
+        });
       } else {
         console.error('[Verify] Failed to save player:', result);
         setError("Failed to save player data.");

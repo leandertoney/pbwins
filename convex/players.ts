@@ -99,11 +99,11 @@ export const savePlayer = mutation({
       }
       await ctx.db.patch(existing._id, patchData);
       console.log("Updated existing player:", args.name);
-      return { success: true, updated: true, message: "Player stats updated!" };
+      return { success: true, updated: true, message: "Player stats updated!", playerId: existing._id };
     }
 
     // Insert new player record
-    await ctx.db.insert("players", {
+    const playerId = await ctx.db.insert("players", {
       name: args.name,
       slug,
       duprUrl: args.duprUrl,
@@ -128,7 +128,7 @@ export const savePlayer = mutation({
     });
 
     console.log("Inserted new player:", args.name);
-    return { success: true, updated: false, message: "Player verified successfully!" };
+    return { success: true, updated: false, message: "Player verified successfully!", playerId };
   },
 });
 
