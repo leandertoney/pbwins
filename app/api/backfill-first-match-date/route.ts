@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loginAndGetBrowser, extractFirstMatchDate } from "@/lib/duprClient.js";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 // Force dynamic rendering to prevent static generation
 export const dynamic = 'force-dynamic';
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
 
       // Update the player with accurate first match date
       await client.mutation(api.players.updatePlayerMetrics, {
-        playerId: convexPlayerId as any,
+        playerId: convexPlayerId as Id<"players">,
         verifiedSince: firstMatchDate,
         yearsActive: yearsActive,
       });
