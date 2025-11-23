@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const page = await browser.newPage();
     await page.goto(`https://dashboard.dupr.com/dashboard/player/${playerId}`, {
       waitUntil: 'networkidle2',
-      timeout: 30000,
+      timeout: 15000, // Reduced from 30s for Netlify timeout limits
     });
     console.log("[Browserless] Page loaded");
 
