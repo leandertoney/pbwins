@@ -25,7 +25,7 @@ export default function WinsmasPage() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [playerData, setPlayerData] = useState<PlayerData | null>(null);
+  const [playerData] = useState<PlayerData | null>(null);
 
   const joinWinsmas = useMutation(api.winsmas.joinWinsmas);
   const savePlayer = useMutation(api.players.savePlayer);
