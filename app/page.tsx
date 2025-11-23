@@ -194,8 +194,8 @@ export default function Home() {
     setVerifyingPlayerName(""); // Will be set once we get the name
 
     try {
-      // Fetch player data from DUPR via Browserless
-      const response = await fetch("/api/dupr-browserless", {
+      // Fetch player data from DUPR via quick API (no Browserless scraping)
+      const response = await fetch("/api/dupr-quick", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: duprUrl }),
