@@ -242,7 +242,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                         text={`#${rankingIndex + 1} Overall`}
                       />
                     )}
-                    {stateRank !== null && player.state && (
+                    {stateRank !== null && stateRank <= 10 && player.state && (
                       <MetaPill
                         icon={stateRank <= 3 ? Trophy : undefined}
                         iconColor="text-blue-400"
