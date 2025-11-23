@@ -202,7 +202,10 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        setError("Failed to verify player. Please check your URL and try again.");
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMsg = errorData.error || errorData.details || 'Failed to verify player';
+        console.error('[Verify] API error:', response.status, errorMsg);
+        setError(`Verification failed: ${errorMsg}`);
         setIsVerifying(false);
         return;
       }
