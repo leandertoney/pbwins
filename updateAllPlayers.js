@@ -47,6 +47,7 @@ async function updatePlayer(player) {
     console.log(`  - Rating: ${scrapeData.player.doublesRating}`);
     console.log(`  - Gender: ${scrapeData.player.gender || 'N/A'}, Birth Year: ${scrapeData.player.birthYear || 'N/A'}`);
     console.log(`  - Location: ${scrapeData.player.locationRaw || 'N/A'}`);
+    console.log(`  - Verified Since: ${scrapeData.player.verifiedSince || 'N/A'}, Years Active: ${scrapeData.player.yearsActive || 'N/A'}`);
 
     // Step 2: Save to Convex database
     console.log('Saving to Convex...');
@@ -69,6 +70,8 @@ async function updatePlayer(player) {
         locationRaw: scrapeData.player.locationRaw,
         losses: scrapeData.player.totalLosses,
         singlesRating: scrapeData.player.singlesRating,
+        verifiedSince: scrapeData.player.verifiedSince,
+        yearsActive: scrapeData.player.yearsActive,
       }),
     });
 

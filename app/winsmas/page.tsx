@@ -28,6 +28,7 @@ export default function WinsmasPage() {
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
 
   const joinWinsmas = useMutation(api.winsmas.joinWinsmas);
+  const savePlayer = useMutation(api.players.savePlayer);
 
   // Check if user has localStorage duprUrl (already verified)
   useEffect(() => {
@@ -64,29 +65,35 @@ export default function WinsmasPage() {
         throw new Error("Could not retrieve player information");
       }
 
-      // Save to main leaderboard
-      const saveResponse = await fetch("/api/players/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.player.fullName,
-          duprUrl,
-          wins: data.player.totalWins,
-          rating: data.player.doublesRating,
-          imageUrl: data.player.imageUrl,
-        }),
+      // Save to main leaderboard with all fields
+      const saveResult = await savePlayer({
+        name: data.player.fullName,
+        duprUrl,
+        wins: data.player.totalWins,
+        rating: data.player.doublesRating,
+        duprRating: data.player.doublesRating,
+        imageUrl: data.player.imageUrl || undefined,
+        gender: data.player.gender || undefined,
+        birthYear: data.player.birthYear || undefined,
+        city: data.player.city || undefined,
+        state: data.player.state || undefined,
+        country: data.player.country || undefined,
+        locationRaw: data.player.locationRaw || undefined,
+        losses: data.player.totalLosses || undefined,
+        singlesRating: data.player.singlesRating || undefined,
+        verifiedSince: data.player.verifiedSince || undefined,
+        yearsActive: data.player.yearsActive !== undefined ? Math.floor(data.player.yearsActive) : undefined,
       });
 
-      if (!saveResponse.ok) {
+      if (!saveResult.success) {
         throw new Error("Failed to save player");
       }
 
-      const saveData = await saveResponse.json();
-      setPlayerData(saveData.player);
+      // Save DUPR URL to localStorage
       localStorage.setItem("duprUrl", duprUrl);
 
-      // Auto-join Winsmas
-      await handleJoinWinsmas(saveData.player._id);
+      // Auto-join Winsmas - pass duprUrl instead of _id, the mutation will look it up
+      await handleJoinWinsmas();
 
       setSuccessMessage("Successfully verified and joined Winsmas!");
       setShowVerifyModal(false);

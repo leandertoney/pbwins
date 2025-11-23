@@ -242,7 +242,7 @@ export default function Home() {
         losses: data.player.totalLosses || undefined,
         singlesRating: data.player.singlesRating || undefined,
         verifiedSince: data.player.verifiedSince || undefined,
-        yearsActive: data.player.yearsActive || undefined,
+        yearsActive: data.player.yearsActive !== undefined ? Math.floor(data.player.yearsActive) : undefined,
       });
 
       console.log('[Verify] Database save result:', result);

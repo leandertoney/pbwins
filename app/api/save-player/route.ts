@@ -20,7 +20,9 @@ export async function POST(req: Request) {
       country,
       locationRaw,
       losses,
-      singlesRating
+      singlesRating,
+      verifiedSince,
+      yearsActive
     } = body;
 
     if (!name || !duprUrl || wins === undefined || rating === undefined) {
@@ -30,7 +32,33 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log('Saving player to Convex:', { name, wins, rating, gender, birthYear, city, state, country });
+    console.log('Saving player to Convex:', { name, wins, rating, gender, birthYear, city, state, country, verifiedSince, yearsActive });
+
+    // Generate premium bio if we have the necessary data
+    let bio;
+    if (verifiedSince && yearsActive !== undefined && wins !== undefined && rating !== undefined) {
+      const year = verifiedSince ? new Date(verifiedSince).getFullYear() : null;
+      const verifiedSinceText = year ? `since ${year}` : "recently";
+      const activity = yearsActive >= 3
+        ? `over ${Math.floor(yearsActive)} years`
+        : yearsActive === 0
+        ? "recently"
+        : `${Math.floor(yearsActive)} ${Math.floor(yearsActive) === 1 ? 'year' : 'years'}`;
+
+      const consistency = wins >= 100
+        ? "a dominant force"
+        : wins >= 50
+        ? "a consistent finisher"
+        : wins >= 20
+        ? "an emerging competitor"
+        : "a rising talent";
+
+      const location = city || "their region";
+      const ratingText = rating ? ` with a ${rating.toFixed(2)} rating` : "";
+      const firstName = name.split(' ')[0] || name;
+
+      bio = `${name} has been competing ${verifiedSinceText}, logging ${wins} pbWins.com Verified wins over ${activity}. Known as ${consistency}${ratingText}, ${firstName} has become one of ${location}'s most active competitors.`;
+    }
 
     const result = await client.mutation(api.players.savePlayer, {
       name,
@@ -46,6 +74,9 @@ export async function POST(req: Request) {
       locationRaw: locationRaw || undefined,
       losses: losses || undefined,
       singlesRating: singlesRating || undefined,
+      verifiedSince: verifiedSince || undefined,
+      yearsActive: yearsActive !== undefined ? Math.floor(yearsActive) : undefined,
+      bio: bio || undefined,
     });
 
     return NextResponse.json(result);
