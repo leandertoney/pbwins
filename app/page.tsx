@@ -110,6 +110,17 @@ export default function Home() {
     }
   }, []);
 
+  // Auto-refresh data every hour to keep leaderboard up-to-date
+  useEffect(() => {
+    // Refresh every 60 minutes (3,600,000 milliseconds)
+    const refreshInterval = setInterval(() => {
+      console.log('[Leaderboard] Auto-refreshing data...');
+      window.location.reload();
+    }, 60 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
   const sortedPlayers = useMemo(() => {
     if (!players) return [];
     return [...players].sort((a, b) => (b.wins ?? 0) - (a.wins ?? 0));
