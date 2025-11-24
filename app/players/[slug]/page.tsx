@@ -185,7 +185,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
 
   const profileImage = player.imageUrl || "/pbwins-logo.png";
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white">
+    <div className="relative bg-[#050505] text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-[-20%] left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-brand-glow/20 blur-[160px]" />
         <div className="absolute bottom-[-10%] right-1/2 h-[500px] w-[700px] translate-x-1/2 rounded-full bg-brand-glow/25 blur-[140px]" />
