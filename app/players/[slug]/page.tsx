@@ -108,7 +108,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     return bw - aw;
   });
   const matchesPlayer = (p: PlayerRecord) => {
-    if ((p as any)._id && (player as any)._id && (p as any)._id === (player as any)._id) return true;
+    if (p._id && player._id && p._id === player._id) return true;
     if (p.slug && player.slug && p.slug === player.slug) return true;
     if (p.name && player.name && p.name === player.name) return true;
     return false;
