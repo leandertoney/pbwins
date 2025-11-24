@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
 import { Id } from "@/convex/_generated/dataModel";
+import SponsorRailMobile from "@/components/SponsorRailMobile";
 
 const CHALLENGES = [
   {
@@ -241,11 +242,14 @@ export default function WinsmasPage() {
         <Link href="/">
           <Image src="/pbwins-logo.png" alt="pbWins" width={56} height={56} className="rounded-full" />
         </Link>
-        <div className="flex items-center gap-3 text-sm text-white/70">
-          <span>Winsmas 2025</span>
-          <span className="text-brand-light">Dec 1 - Dec 31</span>
+        <div className="flex flex-col items-end gap-1 text-right text-white/70 text-xs sm:text-sm">
+          <span className="text-sm sm:text-base font-semibold text-white/80">Winsmas 2025</span>
+          <span className="text-brand-light">Dec 1–31, 2025</span>
+          <span className="text-white/60 text-[11px] sm:text-xs">Entry closes Nov 30, 11:59 PM PT</span>
         </div>
       </header>
+      {/* Mobile sponsor strip (top) */}
+      <SponsorRailMobile idPrefix="winsmas-top" className="bg-white/5 border-b border-white/10" />
 
       <main className="max-w-6xl mx-auto px-4 pb-16 space-y-14">
         {/* Hero */}
@@ -257,6 +261,9 @@ export default function WinsmasPage() {
             </h1>
             <p className="text-lg text-white/70 max-w-xl">
               Any verified DUPR win counts—tournaments, leagues, or rec play. Pick your challenges and climb.
+            </p>
+            <p className="text-sm text-white/60">
+              Entry deadline: Nov 30, 2025 at 11:59 PM PT. Eligible wins: Dec 1–31, 2025.
             </p>
             <div className="flex flex-wrap items-center gap-3 text-sm text-white/60">
               <span className="px-3 py-1 rounded-full border border-white/10 bg-white/5">Verified wins only</span>
@@ -443,7 +450,8 @@ export default function WinsmasPage() {
           <div className="rounded-2xl border border-white/10 bg-[#0f1216] p-6 space-y-3 text-sm text-white/70">
             <h3 className="text-lg font-semibold text-white">Rules</h3>
             <ul className="space-y-2 list-disc list-inside">
-              <li>Dates: December 1–31, 2025. Verified wins only.</li>
+              <li>Entry deadline: Nov 30, 2025 at 11:59 PM PT.</li>
+              <li>Eligible wins: Dec 1–31, 2025. Verified wins only.</li>
               <li>Any DUPR-verified play counts (tourneys, leagues, rec).</li>
               <li>Join multiple challenges; prizes scale with targets.</li>
               <li>Email required for confirmations and prize delivery.</li>
@@ -451,6 +459,11 @@ export default function WinsmasPage() {
           </div>
         </section>
       </main>
+
+      {/* Mobile sponsor strip (bottom) */}
+      <div className="lg:hidden border-t border-white/10 bg-white/5">
+        <SponsorRailMobile idPrefix="winsmas-bottom" />
+      </div>
 
       {activeChallenge && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">

@@ -10,6 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import SponsorRailMobile from "@/components/SponsorRailMobile";
 import { PlayerRecord } from "@/types/player";
 import InteractiveCourtCrowdAd from "@/components/InteractiveCourtCrowdAd";
 import { getFormattedPlayerRating } from "@/lib/playerUtils";
@@ -309,26 +310,28 @@ export default function Home() {
       </div>
 
       <SponsorRailsFixed />
+      {/* Mobile sponsor strip (top) */}
+      <SponsorRailMobile idPrefix="home-top" className="bg-white/5 border-b border-white/10" />
 
       {/* MAIN CONTENT */}
       <div className="relative z-0 pl-0 pr-0 md:pl-[200px] md:pr-[200px]">
-        <main className="flex-1 flex flex-col items-center justify-start pb-6 lg:pb-12 text-center overflow-visible w-full max-w-[100vw] md:max-w-[95vw] lg:max-w-[90vw] mx-auto scrollbar-hide -mt-[40px] px-4 md:px-0">
+        <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide -mt-[80px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
             src="/pbwins-logo.png"
             alt="pbWins"
             width={200}
             height={110}
-            className="mx-auto mb-4 md:mb-6 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
+            className="mx-auto mb-2 md:mb-3 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
             priority
           />
 
-          <h1 className="text-[1.2rem] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.35rem] xl:text-[2.5rem] font-bold leading-tight mb-4 md:mb-6 tracking-tight w-full">
+          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.3rem] lg:text-[3rem] xl:text-[3.4rem] font-bold leading-tight mb-2 md:mb-4 tracking-tight w-full max-w-[52rem] mx-auto">
             The database of verified pickleball wins
           </h1>
 
           {/* Player search bar and verify button */}
-          <div className="flex flex-col md:flex-row w-full max-w-full gap-3 mb-4 items-stretch md:items-center justify-center">
+          <div className="flex flex-col md:flex-row w-full max-w-full gap-3 mb-2 items-stretch md:items-center justify-center">
             {/* Search bar for existing players - 55-60% width, centered */}
             <div className="relative w-full md:max-w-[60%]">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -860,6 +863,10 @@ export default function Home() {
         </div>
       )}
 
+      {/* Mobile sponsor strip (bottom) */}
+      <div className="lg:hidden border-t border-white/10 bg-white/5">
+        <SponsorRailMobile idPrefix="home-bottom" />
+      </div>
       <Footer />
     </div>
   );

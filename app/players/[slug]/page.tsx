@@ -10,6 +10,7 @@ import MetaPill from "@/components/MetaPill";
 import VerifiedWinsCard from "@/components/VerifiedWinsCard";
 import PlayerMicroFaq from "@/components/PlayerMicroFaq";
 import VerifiedWinsTicker from "@/components/VerifiedWinsTicker";
+import SponsorRailMobile from "@/components/SponsorRailMobile";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
@@ -236,6 +237,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
         <div className="absolute bottom-[-10%] right-1/2 h-[500px] w-[700px] translate-x-1/2 rounded-full bg-brand-glow/25 blur-[140px]" />
       </div>
       <SponsorRailsFixed idPrefix="player" />
+      <SponsorRailMobile idPrefix="player-top" className="bg-white/5 border-b border-white/10" />
       <div className="relative z-10 flex w-full flex-1 flex-col gap-10 pl-[200px] pr-[200px] pb-10 pt-2">
         <section className="mx-auto w-full max-w-5xl space-y-8 px-4">
           <div className="flex w-full items-center justify-between mb-2">
@@ -474,6 +476,9 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
             <PlayerMicroFaq />
           </section>
         </section>
+      </div>
+      <div className="lg:hidden border-t border-white/10 bg-white/5">
+        <SponsorRailMobile idPrefix="player-bottom" />
       </div>
       <div className="mt-auto">
         <Footer />
