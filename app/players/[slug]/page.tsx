@@ -163,6 +163,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   // Build rating-band comparison stats for a simple bar chart
   let bandMedianWins: number | null = null;
   let bandMaxWins: number | null = null;
+  let bandPlayersCount = 0;
 
   if (duprRating != null) {
     const bandMin = Math.max(0, duprRating - 0.25);
@@ -179,6 +180,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     });
 
     if (bandWins.length) {
+      bandPlayersCount = bandWins.length;
       const sortedWins = [...bandWins].sort((a, b) => a - b);
       const mid = Math.floor(sortedWins.length / 2);
       bandMedianWins =
@@ -413,42 +415,58 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-semibold text-white">You vs top at your level</h2>
-                <p className="text-xs text-white/50">Band: {ratingBand}</p>
-              </div>
-              {bandMaxWins ? (
-                <div className="text-right text-xs text-white/60">
-                  <div>Your wins: <span className="text-white font-semibold">{verifiedWins}</span></div>
-                  <div>Top wins: <span className="text-white font-semibold">{bandMaxWins}</span></div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">At your level</h2>
+                  <p className="text-xs text-white/50">Band: {ratingBand}</p>
                 </div>
-              ) : null}
-            </div>
-
-            {bandProgress !== null ? (
-              <div className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
-                <div className="relative h-40 w-40">
-                  <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: `conic-gradient(rgba(149, 232, 75, 0.9) ${Math.max(4, bandProgress * 360)}deg, rgba(255, 255, 255, 0.12) ${Math.max(4, bandProgress * 360)}deg 360deg)`,
-                      filter: "drop-shadow(0 0 10px rgba(149,232,75,0.25))",
-                    }}
-                  />
-                  <div className="absolute inset-4 rounded-full bg-black/70 border border-white/10 flex flex-col items-center justify-center">
-                    <p className="text-xs uppercase tracking-[0.25em] text-white/50">Progress</p>
-                    <p className="text-3xl font-semibold text-white">{Math.round(bandProgress * 100)}%</p>
-                    <p className="text-[11px] text-white/60">of top wins in this level</p>
+                {bandMaxWins ? (
+                  <div className="text-right text-xs text-white/60">
+                    <div>Your wins: <span className="text-white font-semibold">{verifiedWins}</span></div>
+                    <div>Top wins: <span className="text-white font-semibold">{bandMaxWins}</span></div>
                   </div>
+                ) : null}
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-4 items-center">
+                <div className="rounded-2xl border border-white/10 bg-black/50 p-4">
+                  <p className="text-[0.65rem] uppercase tracking-[0.35em] text-white/50">Players in level</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">{bandPlayersCount || "—"}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/50 p-4">
+                  <p className="text-[0.65rem] uppercase tracking-[0.35em] text-white/50">Typical wins</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">{bandMedianWins ?? "—"}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/50 p-4">
+                  <p className="text-[0.65rem] uppercase tracking-[0.35em] text-white/50">Top wins</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">{bandMaxWins ?? "—"}</p>
+                </div>
+
+                <div className="flex items-center justify-center">
+                  {bandProgress !== null ? (
+                    <div className="relative h-32 w-32">
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background: `conic-gradient(rgba(149, 232, 75, 0.9) ${Math.max(4, bandProgress * 360)}deg, rgba(255, 255, 255, 0.12) ${Math.max(4, bandProgress * 360)}deg 360deg)`,
+                          filter: "drop-shadow(0 0 10px rgba(149,232,75,0.25))",
+                        }}
+                      />
+                      <div className="absolute inset-4 rounded-full bg-black/70 border border-white/10 flex flex-col items-center justify-center text-center px-2">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-white/50">Progress</p>
+                        <p className="text-2xl font-semibold text-white">{Math.round(bandProgress * 100)}%</p>
+                        <p className="text-[11px] text-white/60">of top wins</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 px-6 py-4 text-center text-xs text-white/60">
+                      Not enough data yet
+                    </div>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 py-10 text-center">
-                <p className="text-lg font-semibold text-white">Not enough data yet</p>
-                <p className="mt-2 text-sm text-white/60">We’ll show your progress to the top as soon as more players verify at this level.</p>
-              </div>
-            )}
+            </div>
           </section>
 
           <section className="mt-20">
