@@ -4,29 +4,41 @@ import { query, mutation } from "./_generated/server";
 // Competition dates: December 1-31, 2025
 const WINSMAS_START = "2025-12-01";
 const WINSMAS_END = "2026-01-01"; // Exclusive end date
-const WINSMAS_CONTEST_ID = "winsmas";
+// Multiple challenge tiers for Winsmas
+const WINSMAS_CHALLENGES = [
+  { id: "winsmas-10", target: 10 },
+  { id: "winsmas-15", target: 15 },
+  { id: "winsmas-25", target: 25 },
+];
+const WINSMAS_PRIMARY_CONTEST = "winsmas-25";
 
 /**
  * Join the Winsmas competition
  * Links a verified player to the contest
  */
-export const joinWinsmas = mutation({
+export const joinChallenge = mutation({
   args: {
     playerId: v.id("players"),
-    email: v.optional(v.string()),
+    email: v.string(),
+    contestId: v.string(),
   },
   handler: async (ctx, args) => {
+    const challenge = WINSMAS_CHALLENGES.find((c) => c.id === args.contestId);
+    if (!challenge) {
+      throw new Error("Invalid contestId");
+    }
+
     // Check if already entered
     const existing = await ctx.db
       .query("contestEntries")
       .withIndex("by_playerId", (q) => q.eq("playerId", args.playerId))
-      .filter((q) => q.eq(q.field("contest"), WINSMAS_CONTEST_ID))
+      .filter((q) => q.eq(q.field("contest"), args.contestId))
       .first();
 
     if (existing) {
       return {
         success: true,
-        message: "You're already registered for Winsmas!",
+        message: "You're already registered for this challenge!",
         entryId: existing._id,
       };
     }
@@ -39,7 +51,7 @@ export const joinWinsmas = mutation({
 
     // Create entry
     const entryId = await ctx.db.insert("contestEntries", {
-      contest: WINSMAS_CONTEST_ID,
+      contest: args.contestId,
       playerId: args.playerId,
       username: player.name,
       email: args.email,
@@ -47,14 +59,13 @@ export const joinWinsmas = mutation({
       start: WINSMAS_START,
       createdAt: Date.now(),
       last_seen: Date.now(),
-      // Will be populated by cron job or on-demand refresh
       decemberWins: undefined,
       lastUpdated: undefined,
     });
 
     return {
       success: true,
-      message: "Successfully joined Winsmas! Good luck!",
+      message: "Joined! Track your wins to hit the target.",
       entryId,
     };
   },
@@ -63,21 +74,15 @@ export const joinWinsmas = mutation({
 /**
  * Check if a player has entered Winsmas
  */
-export const hasEnteredWinsmas = query({
-  args: {
-    playerId: v.id("players"),
-  },
+export const getChallengeStatus = query({
+  args: { playerId: v.id("players") },
   handler: async (ctx, args) => {
-    const entry = await ctx.db
+    const entries = await ctx.db
       .query("contestEntries")
       .withIndex("by_playerId", (q) => q.eq("playerId", args.playerId))
-      .filter((q) => q.eq(q.field("contest"), WINSMAS_CONTEST_ID))
-      .first();
+      .collect();
 
-    return {
-      hasEntered: !!entry,
-      entry: entry || null,
-    };
+    return entries.map((e) => e.contest);
   },
 });
 
@@ -85,11 +90,12 @@ export const hasEnteredWinsmas = query({
  * Get all Winsmas participants with their player data
  */
 export const getWinsmasParticipants = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { contestId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
     const entries = await ctx.db
       .query("contestEntries")
-      .withIndex("by_contest", (q) => q.eq("contest", WINSMAS_CONTEST_ID))
+      .withIndex("by_contest", (q) => q.eq("contest", contestId))
       .collect();
 
     // Fetch player data for each entry
@@ -120,11 +126,12 @@ export const getWinsmasParticipants = query({
  * Get Winsmas leaderboard sorted by December wins
  */
 export const getWinsmasLeaderboard = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { contestId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
     const entries = await ctx.db
       .query("contestEntries")
-      .withIndex("by_contest", (q) => q.eq("contest", WINSMAS_CONTEST_ID))
+      .withIndex("by_contest", (q) => q.eq("contest", contestId))
       .collect();
 
     // Fetch player data and combine with entry
@@ -180,10 +187,11 @@ export const updateDecemberWins = mutation({
     decemberWins: v.number(),
   },
   handler: async (ctx, args) => {
+    const contestId = WINSMAS_PRIMARY_CONTEST;
     const entry = await ctx.db
       .query("contestEntries")
       .withIndex("by_playerId", (q) => q.eq("playerId", args.playerId))
-      .filter((q) => q.eq(q.field("contest"), WINSMAS_CONTEST_ID))
+      .filter((q) => q.eq(q.field("contest"), contestId))
       .first();
 
     if (!entry) {
@@ -207,11 +215,12 @@ export const updateDecemberWins = mutation({
  * Get total number of Winsmas participants
  */
 export const getWinsmasStats = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { contestId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
     const entries = await ctx.db
       .query("contestEntries")
-      .withIndex("by_contest", (q) => q.eq("contest", WINSMAS_CONTEST_ID))
+      .withIndex("by_contest", (q) => q.eq("contest", contestId))
       .collect();
 
     const totalParticipants = entries.length;

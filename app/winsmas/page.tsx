@@ -1,71 +1,93 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
 import PaddleCarousel from "@/components/PaddleCarousel";
-import Link from "next/link";
 import { Id } from "@/convex/_generated/dataModel";
 
-interface PlayerData {
+const CHALLENGES = [
+  {
+    id: "winsmas-10",
+    title: "10-Win Challenge",
+    target: 10,
+    prize: "pbWins Performance Tee",
+  },
+  {
+    id: "winsmas-15",
+    title: "15-Win Challenge",
+    target: 15,
+    prize: "Premium Paddle Cover",
+  },
+  {
+    id: "winsmas-25",
+    title: "25-Win Challenge",
+    target: 25,
+    prize: "Gen 3 Paddle",
+  },
+];
+
+type PlayerData = {
   _id: Id<"players">;
   name: string;
-  duprUrl: string;
-  wins: number;
-  rating: number;
-  imageUrl?: string;
-}
+};
 
 export default function WinsmasPage() {
-  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [email, setEmail] = useState("");
   const [duprUrl, setDuprUrl] = useState("");
+  const [player, setPlayer] = useState<PlayerData | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [playerData] = useState<PlayerData | null>(null);
+  const [joinLoadingId, setJoinLoadingId] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const joinWinsmas = useMutation(api.winsmas.joinWinsmas);
   const savePlayer = useMutation(api.players.savePlayer);
+  const joinChallenge = useMutation(api.winsmas.joinChallenge);
 
-  // Check if user has localStorage duprUrl (already verified)
+  // Load any stored session
   useEffect(() => {
-    const storedDuprUrl = localStorage.getItem("duprUrl");
-    if (storedDuprUrl) {
-      setDuprUrl(storedDuprUrl);
+    const storedEmail = localStorage.getItem("winsmasEmail");
+    const storedDupr = localStorage.getItem("duprUrl");
+    const storedId = localStorage.getItem("winsmasPlayerId");
+    const storedName = localStorage.getItem("winsmasPlayerName");
+
+    if (storedEmail) setEmail(storedEmail);
+    if (storedDupr) setDuprUrl(storedDupr);
+    if (storedId && storedName) {
+      setPlayer({ _id: storedId as Id<"players">, name: storedName });
     }
   }, []);
 
+  const challengeStatus = useQuery(
+    api.winsmas.getChallengeStatus,
+    player?._id ? { playerId: player._id } : "skip"
+  ) as string[] | undefined;
+
+  const joinedSet = useMemo(() => new Set(challengeStatus || []), [challengeStatus]);
+
   const handleVerify = async () => {
-    if (!duprUrl.trim()) {
-      setError("Please enter your DUPR profile URL");
+    if (!email.trim() || !duprUrl.trim()) {
+      setMessage({ type: "error", text: "Enter your email and DUPR profile URL" });
       return;
     }
 
     setIsVerifying(true);
-    setError("");
+    setMessage(null);
 
     try {
-      // Verify player via browserless API
-      const response = await fetch("/api/dupr-browserless", {
+      const resp = await fetch("/api/dupr-browserless", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: duprUrl }),
       });
 
-      if (!response.ok) {
-        throw new Error("Verification failed");
-      }
+      if (!resp.ok) throw new Error("Verification failed");
+      const data = await resp.json();
+      if (!data.success || !data.player) throw new Error("Could not retrieve player info");
 
-      const data = await response.json();
-
-      if (!data.success || !data.player) {
-        throw new Error("Could not retrieve player information");
-      }
-
-      // Save to main leaderboard with all fields
       const saveResult = await savePlayer({
         name: data.player.fullName,
         duprUrl,
@@ -85,371 +107,258 @@ export default function WinsmasPage() {
         yearsActive: data.player.yearsActive !== undefined ? Math.floor(data.player.yearsActive) : undefined,
       });
 
-      if (!saveResult.success) {
-        throw new Error("Failed to save player");
-      }
+      if (!saveResult.success || !saveResult.playerId) throw new Error("Failed to save player");
 
-      // Save DUPR URL to localStorage
+      // Persist session
+      localStorage.setItem("winsmasEmail", email);
       localStorage.setItem("duprUrl", duprUrl);
+      localStorage.setItem("winsmasPlayerId", saveResult.playerId);
+      localStorage.setItem("winsmasPlayerName", data.player.fullName || "Player");
 
-      // Auto-join Winsmas - pass duprUrl instead of _id, the mutation will look it up
-      await handleJoinWinsmas();
-
-      setSuccessMessage("Successfully verified and joined Winsmas!");
-      setShowVerifyModal(false);
+      setPlayer({ _id: saveResult.playerId as Id<"players">, name: data.player.fullName });
+      setMessage({ type: "success", text: "Verified! Pick your challenges." });
     } catch (err) {
-      console.error("Verification error:", err);
-      setError(err instanceof Error ? err.message : "Failed to verify player");
+      console.error(err);
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Verification failed" });
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleJoinWinsmas = async (playerId?: Id<"players">) => {
-    if (!playerId && !playerData) {
-      setShowVerifyModal(true);
-      return;
-    }
-
-    setIsJoining(true);
-    setError("");
-
+  const sendConfirmationEmail = async (joinedId: string, playerName: string) => {
     try {
-      const result = await joinWinsmas({
-        playerId: playerId || playerData!._id,
+      await fetch("/api/winsmas/send-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          playerName,
+          challengeId: joinedId,
+        }),
       });
-
-      setSuccessMessage(result.message);
-      setTimeout(() => setSuccessMessage(""), 5000);
-    } catch (err) {
-      console.error("Join error:", err);
-      setError(err instanceof Error ? err.message : "Failed to join Winsmas");
-    } finally {
-      setIsJoining(false);
+    } catch (e) {
+      console.warn("Confirmation email failed", e);
     }
   };
 
-  const shareText = encodeURIComponent("I just joined Winsmas! First to 25 wins in December wins a Gen 3 Paddle 🎄 Join me at");
+  const handleJoin = async (challengeId: string) => {
+    if (!player || !player._id) {
+      setMessage({ type: "error", text: "Verify first, then join challenges." });
+      return;
+    }
+    if (!email.trim()) {
+      setMessage({ type: "error", text: "Email is required." });
+      return;
+    }
+
+    setJoinLoadingId(challengeId);
+    setMessage(null);
+    try {
+      const result = await joinChallenge({
+        playerId: player._id,
+        email,
+        contestId: challengeId,
+      });
+      setMessage({ type: "success", text: result.message || "Joined!" });
+      // Optimistic: add to joined set via localStorage-driven state
+      joinedSet.add(challengeId);
+      sendConfirmationEmail(challengeId, player.name || "Player");
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to join" });
+    } finally {
+      setJoinLoadingId(null);
+    }
+  };
+
+  const shareText = encodeURIComponent("I just joined Winsmas! Track your wins and unlock prizes.");
   const shareUrl = encodeURIComponent("https://pbwins.com/winsmas");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] text-white relative overflow-hidden">
-      {/* Logo - Home Link */}
-      <Link href="/" className="fixed top-4 left-4 z-50 group">
-        <img
-          src="/pbwins-logo.png"
-          alt="PBWins"
-          width={80}
-          height={80}
-          className="rounded-full bg-transparent transition-transform duration-300 group-hover:scale-110"
-        />
-      </Link>
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#0b0d10] to-black text-white">
+      <header className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
+        <Link href="/">
+          <Image src="/pbwins-logo.png" alt="pbWins" width={56} height={56} className="rounded-full" />
+        </Link>
+        <div className="flex items-center gap-3 text-sm text-white/70">
+          <span>Winsmas 2025</span>
+          <span className="text-brand-light">Dec 1 - Dec 31</span>
+        </div>
+      </header>
 
-      {/* Animated snowfall background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-white/20 animate-fall"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${10 + Math.random() * 10}s`,
-              fontSize: `${10 + Math.random() * 20}px`,
-            }}
-          >
-            ❄
-          </div>
-        ))}
-      </div>
-
-      {/* Christmas lights decoration */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-red-600 via-green-600 via-yellow-500 via-blue-500 to-red-600 opacity-60 animate-pulse"></div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 space-y-16">
-        {/* Hero Section */}
-        <section className="text-center space-y-8">
-          {/* Christmas ornaments */}
-          <div className="flex justify-center gap-4 mb-4">
-            <span className="text-4xl animate-bounce" style={{ animationDelay: "0s" }}>🎄</span>
-            <span className="text-4xl animate-bounce" style={{ animationDelay: "0.2s" }}>🎁</span>
-            <span className="text-4xl animate-bounce" style={{ animationDelay: "0.4s" }}>⭐</span>
-            <span className="text-4xl animate-bounce" style={{ animationDelay: "0.6s" }}>🔔</span>
-            <span className="text-4xl animate-bounce" style={{ animationDelay: "0.8s" }}>❄️</span>
+      <main className="max-w-6xl mx-auto px-4 pb-16 space-y-14">
+        {/* Hero */}
+        <section className="grid gap-10 md:grid-cols-[1.1fr,0.9fr] items-center">
+          <div className="space-y-6">
+            <p className="text-sm uppercase tracking-[0.3em] text-brand-light/80">Holiday challenge</p>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              Track your December wins. Unlock premium prizes.
+            </h1>
+            <p className="text-lg text-white/70 max-w-xl">
+              Any verified DUPR win counts—tournaments, leagues, or rec play. Pick your challenges and climb.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-white/60">
+              <span className="px-3 py-1 rounded-full border border-white/10 bg-white/5">Verified wins only</span>
+              <span className="px-3 py-1 rounded-full border border-white/10 bg-white/5">Live leaderboard</span>
+              <span className="px-3 py-1 rounded-full border border-white/10 bg-white/5">Multiple prize tiers</span>
+            </div>
+            <div className="max-w-lg p-4 rounded-2xl border border-white/10 bg-white/5">
+              <WinsmasCountdown />
+            </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-red-500 via-green-500 to-red-500 bg-clip-text text-transparent animate-pulse" style={{ fontFamily: 'Nunito, system-ui, sans-serif' }}>
-            WINSMAS 2025
-          </h1>
-
-          <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto">
-            First to <span className="text-brand-light font-bold">25 verified wins</span> in December wins a{" "}
-            <span className="text-brand-light font-bold">Gen 3 Paddle</span> 🏆
-          </p>
-
-          {/* Countdown */}
-          <div className="py-8">
-            <h2 className="text-2xl font-semibold text-white/90 mb-6">Competition Ends In:</h2>
-            <WinsmasCountdown />
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => playerData ? handleJoinWinsmas() : setShowVerifyModal(true)}
-              disabled={isJoining}
-              className="relative group px-8 py-4 bg-gradient-to-r from-red-600 to-green-600 rounded-full font-bold text-lg shadow-2xl hover:shadow-brand/50 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="relative z-10">
-                {isJoining ? "Joining..." : "🎅 Join Winsmas Now"}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
-
-            <Link
-              href="/#leaderboard"
-              className="px-8 py-4 border-2 border-white/20 rounded-full font-semibold hover:border-brand hover:bg-brand/10 transition-all duration-300"
-            >
-              Already Verified? Just Join!
-            </Link>
-          </div>
-
-          {/* Success/Error Messages */}
-          {successMessage && (
-            <div className="bg-green-600/20 border border-green-500/50 rounded-xl p-4 text-green-300">
-              {successMessage}
+          {/* Verify panel */}
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#151a1f] via-[#101417] to-[#0b0f12] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] space-y-4">
+            <h2 className="text-xl font-semibold">Verify & save your profile</h2>
+            <p className="text-sm text-white/70">Enter once. We’ll remember your email and DUPR.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">DUPR profile URL</label>
+                <input
+                  type="text"
+                  value={duprUrl}
+                  onChange={(e) => setDuprUrl(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                  placeholder="https://dashboard.dupr.com/dashboard/player/..."
+                />
+              </div>
+              <button
+                onClick={handleVerify}
+                disabled={isVerifying || !email || !duprUrl}
+                className="w-full rounded-lg bg-gradient-to-r from-red-600 to-green-600 py-3 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isVerifying ? "Verifying..." : "Verify profile"}
+              </button>
+              {player && (
+                <div className="text-xs text-white/60 flex items-center justify-between">
+                  <span>Signed in as</span>
+                  <span className="text-white font-semibold">{player.name}</span>
+                </div>
+              )}
             </div>
-          )}
-          {error && (
-            <div className="bg-red-600/20 border border-red-500/50 rounded-xl p-4 text-red-300">
-              {error}
-            </div>
-          )}
-        </section>
-
-        {/* How It Works */}
-        <section className="bg-gradient-to-br from-red-900/20 via-green-900/20 to-red-900/20 border border-white/10 rounded-3xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-            <span>🎯</span>
-            How It Works
-            <span>🎯</span>
-          </h2>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="bg-black/40 border border-white/10 rounded-xl p-6 text-center space-y-3">
-              <div className="text-5xl">1️⃣</div>
-              <h3 className="font-semibold text-lg">Get Verified</h3>
-              <p className="text-sm text-white/70">
-                Link your DUPR profile to join the pbWins leaderboard
-              </p>
-            </div>
-
-            <div className="bg-black/40 border border-white/10 rounded-xl p-6 text-center space-y-3">
-              <div className="text-5xl">2️⃣</div>
-              <h3 className="font-semibold text-lg">Join Winsmas</h3>
-              <p className="text-sm text-white/70">
-                Click the button to enter the December competition
-              </p>
-            </div>
-
-            <div className="bg-black/40 border border-white/10 rounded-xl p-6 text-center space-y-3">
-              <div className="text-5xl">3️⃣</div>
-              <h3 className="font-semibold text-lg">Rack Up Wins</h3>
-              <p className="text-sm text-white/70">
-                Play matches and win throughout December 2025
-              </p>
-            </div>
-
-            <div className="bg-black/40 border border-white/10 rounded-xl p-6 text-center space-y-3">
-              <div className="text-5xl">4️⃣</div>
-              <h3 className="font-semibold text-lg">Win the Prize!</h3>
-              <p className="text-sm text-white/70">
-                First to 25 verified wins takes home the Gen 3 Paddle
-              </p>
-            </div>
+            {message && (
+              <div
+                className={`text-sm rounded-lg border px-3 py-2 ${
+                  message.type === "success"
+                    ? "border-green-500/40 bg-green-500/10 text-green-200"
+                    : "border-red-500/40 bg-red-500/10 text-red-200"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
           </div>
         </section>
 
-        {/* Live Leaderboard */}
-        <section>
+        {/* Challenges */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Pick your challenges</h2>
+            <p className="text-sm text-white/60">Join any or all. Each has its own prize.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {CHALLENGES.map((challenge) => {
+              const joined = joinedSet.has(challenge.id);
+              return (
+                <div
+                  key={challenge.id}
+                  className="rounded-2xl border border-white/10 bg-[#0f1216] p-5 flex flex-col gap-4 shadow-[0_15px_40px_rgba(0,0,0,0.25)]"
+                >
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.25em] text-white/50">{challenge.title}</p>
+                    <h3 className="text-3xl font-bold mt-1">{challenge.target} wins</h3>
+                    <p className="text-sm text-white/60 mt-1">Prize: {challenge.prize}</p>
+                  </div>
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => handleJoin(challenge.id)}
+                    disabled={!player || joinLoadingId === challenge.id || joined}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
+                      joined
+                        ? "border-green-500/50 text-green-200 bg-green-500/10"
+                        : player
+                        ? "border-brand text-white hover:bg-brand/10"
+                        : "border-white/10 text-white/40 cursor-not-allowed"
+                    }`}
+                  >
+                    {joined ? "Joined" : joinLoadingId === challenge.id ? "Joining..." : "Join Challenge"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Leaderboard */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Winsmas leaderboard</h2>
+            <Link href="/#leaderboard" className="text-sm text-brand-light hover:text-brand">View main leaderboard →</Link>
+          </div>
           <WinsmasLeaderboard />
         </section>
 
-        {/* Prize Details - Paddle Carousel */}
-        <section className="bg-gradient-to-br from-yellow-900/20 via-orange-900/20 to-yellow-900/20 border border-yellow-500/30 rounded-3xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-            <span>🏆</span>
-            The Prize
-            <span>🏆</span>
-          </h2>
-
+        {/* Prize section */}
+        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1b1f24] via-[#14181d] to-[#0f1317] p-8 space-y-6">
+          <h2 className="text-2xl font-semibold text-center">Prizes</h2>
           <PaddleCarousel />
-
-          <div className="max-w-2xl mx-auto text-center space-y-6 mt-12">
-            <p className="text-white/70">
-              Win one of these premium paddles featuring cutting-edge technology and professional-grade construction.
-              The ultimate reward for the most dedicated player this December!
-            </p>
-
-            <div className="pt-6 border-t border-white/10">
-              <p className="text-sm text-white/50 mb-2">Want to sponsor this challenge?</p>
-              <Link
-                href="/advertise"
-                className="inline-block text-brand-light hover:text-brand transition underline"
-              >
-                Become a Sponsor →
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Share Section */}
-        <section className="bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-blue-900/20 border border-white/10 rounded-3xl p-8 md:p-12 text-center">
-          <h2 className="text-3xl font-bold mb-6">Spread the Holiday Spirit! 🎄</h2>
-          <p className="text-white/70 mb-8">
-            Challenge your friends to join Winsmas and compete for the prize
+          <p className="text-center text-white/60 max-w-3xl mx-auto">
+            Premium gear for serious players. Unlock better rewards as you climb from 10 to 25 wins.
           </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <a
-              href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-[#1DA1F2] rounded-full font-semibold hover:bg-[#1a8cd8] transition flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-              </svg>
-              Share on Twitter
-            </a>
-
-            <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-[#4267B2] rounded-full font-semibold hover:bg-[#365899] transition flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              Share on Facebook
-            </a>
-
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText("https://pbwins.com/winsmas");
-                setSuccessMessage("Link copied to clipboard!");
-                setTimeout(() => setSuccessMessage(""), 3000);
-              }}
-              className="px-6 py-3 bg-white/10 rounded-full font-semibold hover:bg-white/20 transition flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy Link
-            </button>
-          </div>
         </section>
 
-        {/* Rules & FAQ */}
-        <section className="bg-black/40 border border-white/10 rounded-3xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Rules & FAQ</h2>
-
-          <div className="space-y-6 max-w-3xl mx-auto">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-brand-light">📅 Competition Dates</h3>
-              <p className="text-white/70">December 1-31, 2025 at 11:59 PM EST</p>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-brand-light">✅ Win Verification</h3>
-              <p className="text-white/70">
-                All wins must be verified on DUPR. Your win count is automatically synced from your DUPR profile.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-brand-light">⏱️ Buffer Period</h3>
-              <p className="text-white/70">
-                Results will be finalized on January 5, 2026 to allow for late DUPR match uploads.
-                Winner announced January 6, 2026.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-brand-light">🎯 Eligibility</h3>
-              <p className="text-white/70">
-                Must be a verified player on pbWins with an active DUPR profile. Wins must occur between
-                December 1-31, 2025.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-brand-light">📦 Prize Delivery</h3>
-              <p className="text-white/70">
-                Winner will be contacted via email for shipping details. Prize ships within the continental United States.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Verification Modal */}
-      {showVerifyModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="bg-[#0E1414] rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] max-w-md w-full p-8">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-white/90">Join Winsmas</h2>
-              <button
-                onClick={() => setShowVerifyModal(false)}
-                className="text-gray-400 hover:text-white transition"
+        {/* Share & rules */}
+        <section className="grid gap-6 md:grid-cols-2 items-start">
+          <div className="rounded-2xl border border-white/10 bg-[#0f1216] p-6 space-y-4">
+            <h3 className="text-lg font-semibold">Share Winsmas</h3>
+            <p className="text-sm text-white/60">Challenge teammates and friends to join.</p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <p className="text-sm text-white/90 mb-6">
-              Enter your DUPR profile URL to get verified and automatically join the competition.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-white/60 mb-2">
-                  DUPR Profile URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://dashboard.dupr.com/dashboard/player/..."
-                  value={duprUrl}
-                  onChange={(e) => setDuprUrl(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 focus:outline-none focus:border-brand focus:bg-white/10 transition"
-                />
-              </div>
-
-              <button
-                onClick={handleVerify}
-                disabled={isVerifying || !duprUrl}
-                className="w-full rounded-lg bg-gradient-to-r from-red-600 to-green-600 text-white px-6 py-3 text-sm font-semibold transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                Share on X
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm"
               >
-                {isVerifying ? "Verifying..." : "Verify & Join Winsmas"}
+                Share on Facebook
+              </a>
+              <button
+                onClick={() => navigator.clipboard.writeText("https://pbwins.com/winsmas")}
+                className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm"
+              >
+                Copy link
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      <style jsx>{`
-        @keyframes fall {
-          to {
-            transform: translateY(100vh);
-          }
-        }
-        .animate-fall {
-          animation: fall linear infinite;
-        }
-      `}</style>
+          <div className="rounded-2xl border border-white/10 bg-[#0f1216] p-6 space-y-3 text-sm text-white/70">
+            <h3 className="text-lg font-semibold text-white">Rules</h3>
+            <ul className="space-y-2 list-disc list-inside">
+              <li>Dates: December 1–31, 2025. Verified wins only.</li>
+              <li>Any DUPR-verified play counts (tourneys, leagues, rec).</li>
+              <li>Join multiple challenges; prizes scale with targets.</li>
+              <li>Email required for confirmations and prize delivery.</li>
+            </ul>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
