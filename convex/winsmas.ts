@@ -148,52 +148,57 @@ export const getWinsmasParticipants = query({
 export const getWinsmasLeaderboard = query({
   args: { contestId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
-    const entries = await ctx.db
-      .query("contestEntries")
-      .withIndex("by_contest", (q) => q.eq("contest", contestId))
-      .collect();
+    try {
+      const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
+      const entries = await ctx.db
+        .query("contestEntries")
+        .withIndex("by_contest", (q) => q.eq("contest", contestId))
+        .collect();
 
-    // Fetch player data and combine with entry
-    const leaderboard = await Promise.all(
-      entries.map(async (entry) => {
-        if (!entry.playerId) {
-          return null;
+      // Fetch player data and combine with entry
+      const leaderboard = await Promise.all(
+        entries.map(async (entry) => {
+          if (!entry.playerId) {
+            return null;
+          }
+
+          const player = await ctx.db.get(entry.playerId);
+          if (!player) {
+            return null;
+          }
+
+          return {
+            playerId: player._id,
+            name: player.name,
+            slug: player.slug,
+            imageUrl: player.imageUrl,
+            rating: player.duprRating || player.rating,
+            decemberWins: entry.decemberWins || 0,
+            lastUpdated: entry.lastUpdated,
+            entryId: entry._id,
+            city: player.city,
+            state: player.state,
+            country: player.country,
+          };
+        })
+      );
+
+      // Filter out nulls and sort by December wins descending
+      const validEntries = leaderboard.filter((entry) => entry !== null);
+
+      validEntries.sort((a, b) => {
+        // Sort by December wins (descending), then by name (ascending) for ties
+        if (b.decemberWins !== a.decemberWins) {
+          return b.decemberWins - a.decemberWins;
         }
+        return a.name.localeCompare(b.name);
+      });
 
-        const player = await ctx.db.get(entry.playerId);
-        if (!player) {
-          return null;
-        }
-
-        return {
-          playerId: player._id,
-          name: player.name,
-          slug: player.slug,
-          imageUrl: player.imageUrl,
-          rating: player.duprRating || player.rating,
-          decemberWins: entry.decemberWins || 0,
-          lastUpdated: entry.lastUpdated,
-          entryId: entry._id,
-          city: player.city,
-          state: player.state,
-          country: player.country,
-        };
-      })
-    );
-
-    // Filter out nulls and sort by December wins descending
-    const validEntries = leaderboard.filter((entry) => entry !== null);
-
-    validEntries.sort((a, b) => {
-      // Sort by December wins (descending), then by name (ascending) for ties
-      if (b.decemberWins !== a.decemberWins) {
-        return b.decemberWins - a.decemberWins;
-      }
-      return a.name.localeCompare(b.name);
-    });
-
-    return validEntries;
+      return validEntries;
+    } catch (e) {
+      console.error("[winsmas:getWinsmasLeaderboard]", e);
+      return [];
+    }
   },
 });
 
