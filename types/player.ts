@@ -34,4 +34,8 @@ export type PlayerRecord = {
   verifiedSince?: string | null;
   yearsActive?: number | null;
   totalWins?: number;
+  rankOverall?: number | null;
+  rankState?: number | null;
+  rankCountry?: number | null;
+  rankPercentile?: number | null;
 };
