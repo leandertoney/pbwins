@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 const isProRating = (rating?: number | null) => {
   return typeof rating === "number" && rating >= 5.2;
@@ -98,6 +99,7 @@ export const savePlayer = mutation({
         patchData.bio = args.bio;
       }
       await ctx.db.patch(existing._id, patchData);
+      await recomputeRanks(ctx, existing._id);
       console.log("Updated existing player:", args.name);
       return { success: true, updated: true, message: "Player stats updated!", playerId: existing._id };
     }
@@ -128,9 +130,52 @@ export const savePlayer = mutation({
     });
 
     console.log("Inserted new player:", args.name);
+    await recomputeRanks(ctx, playerId);
     return { success: true, updated: false, message: "Player verified successfully!", playerId };
   },
 });
+
+async function recomputeRanks(ctx: any, playerId: Id<"players">) {
+  const player = await ctx.db.get(playerId);
+  if (!player) return;
+
+  const allPlayers = await ctx.db.query("players").collect();
+
+  const sortedByWins = [...allPlayers];
+  if (!sortedByWins.find((p) => p._id === playerId)) {
+    sortedByWins.push(player);
+  }
+  sortedByWins.sort((a, b) => (b.wins ?? 0) - (a.wins ?? 0));
+  const overallIndex = sortedByWins.findIndex((p) => p._id === playerId);
+  const rankOverall = overallIndex >= 0 ? overallIndex + 1 : null;
+  const rankPercentile =
+    overallIndex >= 0 && sortedByWins.length > 0
+      ? Math.round((1 - overallIndex / sortedByWins.length) * 100)
+      : null;
+
+  let rankState: number | null = null;
+  if (player.state) {
+    const statePlayers = sortedByWins.filter((p) => p.state === player.state);
+    const stateIndex = statePlayers.findIndex((p) => p._id === playerId);
+    rankState =
+      stateIndex >= 0 ? stateIndex + 1 : statePlayers.length + 1;
+  }
+
+  let rankCountry: number | null = null;
+  if (player.country) {
+    const countryPlayers = sortedByWins.filter((p) => p.country === player.country);
+    const countryIndex = countryPlayers.findIndex((p) => p._id === playerId);
+    rankCountry =
+      countryIndex >= 0 ? countryIndex + 1 : countryPlayers.length + 1;
+  }
+
+  await ctx.db.patch(playerId, {
+    rankOverall: rankOverall ?? undefined,
+    rankState: rankState ?? undefined,
+    rankCountry: rankCountry ?? undefined,
+    rankPercentile: rankPercentile ?? undefined,
+  });
+}
 
 export const getBySlug = query({
   args: { slug: v.string() },

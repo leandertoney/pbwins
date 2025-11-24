@@ -93,6 +93,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   if (!player) {
     notFound();
   }
+  const allPlayers = (await fetchAllPlayers()) as PlayerRecord[];
 
   const wins = normalizeWins(player);
   const orderedWins = [...wins].sort((a, b) => {
@@ -101,78 +102,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     return bDate - aDate;
   });
 
-  const allPlayers = (await fetchAllPlayers()) as PlayerRecord[];
-  const sortedByWins = [...allPlayers].sort((a, b) => {
-    const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-    const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-    return bw - aw;
-  });
-  const matchesPlayer = (p: PlayerRecord) => {
-    if (p._id && player._id && p._id === player._id) return true;
-    if (p.slug && player.slug && p.slug === player.slug) return true;
-    if (p.name && player.name && p.name === player.name) return true;
-    return false;
-  };
-
-  let rankingIndex = sortedByWins.findIndex(matchesPlayer);
-  if (rankingIndex < 0) {
-    sortedByWins.push(player);
-    sortedByWins.sort((a, b) => {
-      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-      return bw - aw;
-    });
-    rankingIndex = sortedByWins.findIndex(matchesPlayer);
-  }
-
-  // Calculate state-level ranking
-  let stateRank: number | null = null;
-  if (player.state) {
-    const statePlayers = allPlayers.filter((p) => p.state === player.state);
-    const sortedByWinsInState = [...statePlayers].sort((a, b) => {
-      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-      return bw - aw;
-    });
-    let stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
-    if (stateRankIndex < 0) {
-      sortedByWinsInState.push(player);
-      sortedByWinsInState.sort((a, b) => {
-        const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-        const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-        return bw - aw;
-      });
-      stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
-    }
-    if (stateRankIndex >= 0) {
-      stateRank = stateRankIndex + 1;
-    }
-  }
-
-  // Calculate country-level ranking
-  let countryRank: number | null = null;
-  if (player.country) {
-    const countryPlayers = allPlayers.filter((p) => p.country === player.country);
-    const sortedByWinsInCountry = [...countryPlayers].sort((a, b) => {
-      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-      return bw - aw;
-    });
-    let countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
-    if (countryRankIndex < 0) {
-      sortedByWinsInCountry.push(player);
-      sortedByWinsInCountry.sort((a, b) => {
-        const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
-        const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
-        return bw - aw;
-      });
-      countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
-    }
-    if (countryRankIndex >= 0) {
-      countryRank = countryRankIndex + 1;
-    }
-  }
-
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
   const duprRating = getPlayerRating(player);
@@ -180,11 +109,10 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
-  const totalPlayersCount = sortedByWins.length;
-  const globalPercentile =
-    rankingIndex >= 0 && totalPlayersCount > 0
-      ? Math.round((1 - rankingIndex / totalPlayersCount) * 100)
-      : null;
+  const rankOverall = player.rankOverall ?? null;
+  const globalPercentile = player.rankPercentile ?? null;
+  const stateRank = player.rankState ?? null;
+  const countryRank = player.rankCountry ?? null;
   const { ratingBandLabel, ratingBandRange, ratingBand } = (() => {
     if (duprRating == null) return { ratingBandLabel: "—", ratingBandRange: "—", ratingBand: "—" };
     if (duprRating < 3.5) return { ratingBandLabel: "Recreational", ratingBandRange: "<3.5", ratingBand: "Recreational (<3.5)" };
@@ -203,7 +131,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     const bandMin = Math.max(0, duprRating - 0.25);
     const bandMax = duprRating + 0.25;
 
-    const bandPlayers = sortedByWins.filter((p) => {
+    const bandPlayers = allPlayers.filter((p) => {
       const r = getPlayerRating(p);
       return r != null && r >= bandMin && r <= bandMax;
     });
@@ -322,11 +250,11 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                         text="Pro Player"
                       />
                     )}
-                    {rankingIndex >= 0 && (
+                    {rankOverall && (
                       <MetaPill
-                        icon={rankingIndex <= 2 ? Trophy : undefined}
+                        icon={rankOverall <= 3 ? Trophy : undefined}
                         iconColor="text-brand-light"
-                        text={`#${rankingIndex + 1} Overall`}
+                        text={`#${rankOverall} Overall`}
                       />
                     )}
                     {stateRank !== null && stateRank <= 10 && player.state && (
@@ -384,7 +312,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   },
                   {
                     label: "Leaderboard Rank",
-                    value: rankingIndex >= 0 ? `#${rankingIndex + 1}` : "—",
+                    value: rankOverall ? `#${rankOverall}` : "—",
                   },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">

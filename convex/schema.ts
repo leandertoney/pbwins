@@ -28,6 +28,10 @@ export default defineSchema({
     verifiedSince: v.optional(v.string()), // ISO date of earliest verified match
     yearsActive: v.optional(v.number()),   // Computed years active
     bio: v.optional(v.string()),           // Premium generated bio
+    rankOverall: v.optional(v.number()),
+    rankState: v.optional(v.number()),
+    rankCountry: v.optional(v.number()),
+    rankPercentile: v.optional(v.number()),
   })
     .index("by_slug", ["slug"])
     .index("by_duprUrl", ["duprUrl"])
