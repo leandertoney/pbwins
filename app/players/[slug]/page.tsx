@@ -64,13 +64,6 @@ function generateSyntheticWins(totalWins: number, verifiedSince: string): WinRec
   });
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "—";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const player = await fetchPlayerBySlug(params.slug);
   if (!player) {
