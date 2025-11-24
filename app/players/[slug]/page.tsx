@@ -170,6 +170,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   // Build rating-band comparison stats for a simple bar chart
   let bandMedianWins: number | null = null;
   let bandMaxWins: number | null = null;
+  let bandPeers: PlayerRecord[] = [];
 
   if (duprRating != null) {
     const bandMin = Math.max(0, duprRating - 0.25);
@@ -179,6 +180,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const r = getPlayerRating(p);
       return r != null && r >= bandMin && r <= bandMax;
     });
+    bandPeers = bandPlayers;
 
     const bandWins = bandPlayers.map((p) => {
       const winsArr = normalizeWins(p);
@@ -415,29 +417,39 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
             )}
           </section>
 
-          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
+          <section className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Verified Wins</h2>
+              <h2 className="text-lg font-semibold text-white">Top players at your level</h2>
+              <p className="text-xs text-white/50">Band: {ratingBand}</p>
             </div>
-            {verifiedWins > 0 ? (
+            {bandPeers.length ? (
               <div className="divide-y divide-white/5">
-                {orderedWins.slice(0, 8).map((win, idx) => (
-                  <div key={idx} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{win.opponent || "Verified opponent"}</p>
-                      <p className="text-xs text-white/50">{win.location || "Pickleball venue"}</p>
+                {bandPeers.slice(0, 5).map((p) => {
+                  const peerRating = getPlayerRating(p);
+                  const peerCityState = [p.city, p.state].filter(Boolean).join(", ");
+                  const peerWins = normalizeWins(p).length || (typeof p.wins === "number" ? p.wins : 0);
+
+                  return (
+                    <div key={p._id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{p.name}</p>
+                        <p className="text-xs text-white/50">{peerCityState || "Location TBD"}</p>
+                      </div>
+                      <div className="flex items-center gap-6 text-sm text-white/80">
+                        <span className="text-white/60">Wins: <span className="text-white">{peerWins}</span></span>
+                        <span className="text-white/60">Rating: <span className="text-white">{peerRating?.toFixed(2) ?? "—"}</span></span>
+                      </div>
                     </div>
-                    <div className="text-sm text-white/70">{formatDate(win.date)}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 py-12 text-center">
-                <p className="text-lg font-semibold text-white">No verified wins yet</p>
-                <p className="mt-2 text-sm text-white/60">This player is just getting started on pbWins.com.</p>
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 py-10 text-center">
+                <p className="text-lg font-semibold text-white">Not enough players in this band yet</p>
+                <p className="mt-2 text-sm text-white/60">As more players verify at this level, you’ll see them here.</p>
               </div>
             )}
-          </div>
+          </section>
 
           <section className="mt-20">
             <h2 className="text-2xl font-semibold mb-6">Suggested Players</h2>
