@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { ShieldCheck, Star, Trophy } from "lucide-react";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
 import Footer from "@/components/Footer";
-import WinsOverTime from "@/components/player/WinsOverTime";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
 import VerifiedWinsCard from "@/components/VerifiedWinsCard";
@@ -156,6 +155,63 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
+  const totalPlayersCount = sortedByWins.length;
+  const globalPercentile =
+    rankingIndex >= 0 && totalPlayersCount > 0
+      ? Math.round((1 - rankingIndex / totalPlayersCount) * 100)
+      : null;
+  const ratingBand = (() => {
+    if (duprRating == null) return "—";
+    if (duprRating < 3.5) return "Recreational";
+    if (duprRating < 4.0) return "Intermediate (3.5–3.9)";
+    if (duprRating < 4.5) return "Advanced (4.0–4.4)";
+    if (duprRating < 5.0) return "Elite (4.5–4.9)";
+    return "Pro Level (5.0+)";
+  })();
+
+  // Build rating-band comparison stats for a simple bar chart
+  let bandMedianWins: number | null = null;
+  let bandMaxWins: number | null = null;
+
+  if (duprRating != null) {
+    const bandMin = Math.max(0, duprRating - 0.25);
+    const bandMax = duprRating + 0.25;
+
+    const bandPlayers = sortedByWins.filter((p) => {
+      const r = getPlayerRating(p);
+      return r != null && r >= bandMin && r <= bandMax;
+    });
+
+    const bandWins = bandPlayers.map((p) => {
+      const winsArr = normalizeWins(p);
+      return winsArr.length || (typeof p.wins === "number" ? p.wins : 0);
+    });
+
+    if (bandWins.length) {
+      const sortedWins = [...bandWins].sort((a, b) => a - b);
+      const mid = Math.floor(sortedWins.length / 2);
+      bandMedianWins =
+        sortedWins.length % 2 === 0
+          ? Math.round((sortedWins[mid - 1] + sortedWins[mid]) / 2)
+          : sortedWins[mid];
+      bandMaxWins = Math.max(...sortedWins);
+    }
+  }
+
+  const comparisonBars = (() => {
+    const you = verifiedWins;
+    const typical = bandMedianWins ?? null;
+    const top = bandMaxWins ?? null;
+
+    const values = [you, typical ?? 0, top ?? 0];
+    const max = Math.max(...values, 1);
+
+    return [
+      { key: "you", label: "You", value: you, max },
+      { key: "typical", label: "Typical at your level", value: typical, max },
+      { key: "top", label: "Top at your level", value: top, max },
+    ];
+  })();
 
   // Get country flag emoji
   const getCountryFlag = (countryCode: string | undefined): string | null => {
@@ -276,13 +332,28 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Quick Facts</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {[
+                {[ 
                   { label: "Verified Wins", value: verifiedWins.toString() },
-                  { label: "Years Active", value: yearsActive ? `${yearsActive}` : "<1" },
                   ...(verifiedSinceYear ? [{ label: "Verified Since", value: verifiedSinceYear.toString() }] : []),
-                  { label: "Win rate", value: winRate ? `${Math.round(winRate * 100)}%` : "—" },
-                  { label: "Last win date", value: formatDate(orderedWins[0]?.date) },
-                  { label: "Leaderboard rank", value: rankingIndex >= 0 ? `#${rankingIndex + 1}` : "—" },
+                  {
+                    label: "Top Worldwide",
+                    value: globalPercentile != null ? `Top ${globalPercentile}%` : "—",
+                  },
+                  {
+                    label: "Skill Level",
+                    value: ratingBand,
+                  },
+                  {
+                    label: "State Rank",
+                    value:
+                      stateRank !== null && stateRank !== undefined && player.state
+                        ? `#${stateRank} in ${player.state}`
+                        : "—",
+                  },
+                  {
+                    label: "Leaderboard Rank",
+                    value: rankingIndex >= 0 ? `#${rankingIndex + 1}` : "—",
+                  },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">
                     <p className="text-[0.65rem] uppercase tracking-[0.4em] text-white/50">
@@ -295,7 +366,48 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
             </div>
           </div>
 
-          <WinsOverTime wins={orderedWins} />
+          <section className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-white">
+                How your wins compare at your level
+              </h2>
+            </div>
+
+            {comparisonBars.some((b) => b.value != null) ? (
+              <div className="mt-4 flex h-56 items-end gap-6">
+                {comparisonBars.map((bar) => (
+                  <div key={bar.key} className="flex-1 flex flex-col items-center">
+                    <div className="flex-1 flex items-end w-full">
+                      {bar.value != null ? (
+                        <div
+                          className={`w-full rounded-t-xl ${
+                            bar.key === "you"
+                              ? "bg-brand-glow/80"
+                              : "bg-white/10"
+                          }`}
+                          style={{
+                            height: `${Math.max(8, (bar.value / bar.max) * 100)}%`,
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-2 rounded-t-xl bg-white/5" />
+                      )}
+                    </div>
+                    <p className="mt-3 text-xs uppercase tracking-[0.2em] text-white/50 text-center">
+                      {bar.label}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {bar.value != null ? bar.value : "—"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-white/60">
+                Not enough data yet to compare wins at your level.
+              </p>
+            )}
+          </section>
 
           <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
             <div className="flex items-center justify-between mb-4">
