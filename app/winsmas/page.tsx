@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
-import PaddleCarousel from "@/components/PaddleCarousel";
 import { Id } from "@/convex/_generated/dataModel";
 
 const CHALLENGES = [
@@ -15,19 +14,19 @@ const CHALLENGES = [
     id: "winsmas-10",
     title: "10-Win Challenge",
     target: 10,
-    prize: "pbWins Performance Tee",
+    prize: "3-pack of premium pickleballs",
   },
   {
     id: "winsmas-15",
     title: "15-Win Challenge",
     target: 15,
-    prize: "Premium Paddle Cover",
+    prize: "Performance tee or apparel piece",
   },
   {
     id: "winsmas-25",
     title: "25-Win Challenge",
     target: 25,
-    prize: "Gen 3 Paddle",
+    prize: "Pro-level paddle from a leading brand",
   },
 ];
 
@@ -43,6 +42,16 @@ export default function WinsmasPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [joinLoadingId, setJoinLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [sponsorChallengeId, setSponsorChallengeId] = useState<string | null>(null);
+  const [sponsorSubmitting, setSponsorSubmitting] = useState(false);
+  const [sponsorMessage, setSponsorMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [sponsorForm, setSponsorForm] = useState({
+    name: "",
+    brand: "",
+    contactEmail: "",
+    website: "",
+    note: "",
+  });
 
   const savePlayer = useMutation(api.players.savePlayer);
   const joinChallenge = useMutation(api.winsmas.joinChallenge);
@@ -67,6 +76,10 @@ export default function WinsmasPage() {
   ) as string[] | undefined;
 
   const joinedSet = useMemo(() => new Set(challengeStatus || []), [challengeStatus]);
+  const activeChallenge = useMemo(
+    () => CHALLENGES.find((c) => c.id === sponsorChallengeId) || null,
+    [sponsorChallengeId]
+  );
 
   const handleVerify = async () => {
     if (!email.trim() || !duprUrl.trim()) {
@@ -168,6 +181,54 @@ export default function WinsmasPage() {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to join" });
     } finally {
       setJoinLoadingId(null);
+    }
+  };
+
+  const handleSponsorSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!activeChallenge) return;
+    if (!sponsorForm.name.trim() || !sponsorForm.contactEmail.trim()) {
+      setSponsorMessage({ type: "error", text: "Name and email are required." });
+      return;
+    }
+
+    setSponsorSubmitting(true);
+    setSponsorMessage(null);
+    try {
+      const resp = await fetch("/api/winsmas/sponsor-inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...sponsorForm,
+          challengeId: activeChallenge.id,
+          challengeTitle: activeChallenge.title,
+        }),
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => null);
+        throw new Error(data?.error || "Failed to send inquiry");
+      }
+
+      setSponsorMessage({
+        type: "success",
+        text: "Thanks! We'll be in touch shortly.",
+      });
+      setSponsorForm({
+        name: "",
+        brand: "",
+        contactEmail: "",
+        website: "",
+        note: "",
+      });
+    } catch (error) {
+      console.error(error);
+      setSponsorMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Failed to send inquiry",
+      });
+    } finally {
+      setSponsorSubmitting(false);
     }
   };
 
@@ -293,6 +354,13 @@ export default function WinsmasPage() {
                   >
                     {joined ? "Joined" : joinLoadingId === challenge.id ? "Joining..." : "Join Challenge"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setSponsorChallengeId(challenge.id)}
+                    className="text-xs text-white/50 hover:text-brand-light transition text-left"
+                  >
+                    Sponsor this challenge
+                  </button>
                 </div>
               );
             })}
@@ -308,13 +376,37 @@ export default function WinsmasPage() {
           <WinsmasLeaderboard />
         </section>
 
-        {/* Prize section */}
-        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1b1f24] via-[#14181d] to-[#0f1317] p-8 space-y-6">
-          <h2 className="text-2xl font-semibold text-center">Prizes</h2>
-          <PaddleCarousel />
-          <p className="text-center text-white/60 max-w-3xl mx-auto">
-            Premium gear for serious players. Unlock better rewards as you climb from 10 to 25 wins.
-          </p>
+        {/* Sponsor highlight */}
+        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#13161b] via-[#0f1216] to-[#0b0f12] p-8 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <h2 className="text-2xl font-semibold">Sponsor Winsmas</h2>
+            <p className="text-sm text-white/60">
+              Brands can claim challenge visibility: balls, apparel, or paddles.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {CHALLENGES.map((challenge) => (
+              <div
+                key={`sponsor-${challenge.id}`}
+                className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2"
+              >
+                <p className="text-xs uppercase tracking-[0.25em] text-white/50">{challenge.title}</p>
+                <p className="text-lg font-semibold text-white">
+                  {challenge.prize}
+                </p>
+                <p className="text-sm text-white/60">
+                  Feature your brand on this challenge card and confirmation emails.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSponsorChallengeId(challenge.id)}
+                  className="text-xs text-brand-light hover:text-brand underline"
+                >
+                  Contact about sponsoring →
+                </button>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Share & rules */}
@@ -359,6 +451,114 @@ export default function WinsmasPage() {
           </div>
         </section>
       </main>
+
+      {activeChallenge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0f1216] p-6 shadow-2xl">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-white/50">Sponsor Inquiry</p>
+                <h2 className="text-xl font-semibold text-white mt-1">
+                  {activeChallenge.title}
+                </h2>
+              </div>
+              <button
+                onClick={() => {
+                  setSponsorChallengeId(null);
+                  setSponsorMessage(null);
+                }}
+                className="text-white/50 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-white/70 mb-4">
+              Fill out the form below and our team will reach out with placement details for the{" "}
+              {activeChallenge.title.toLowerCase()}.
+            </p>
+            <form className="space-y-3" onSubmit={handleSponsorSubmit}>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  value={sponsorForm.name}
+                  onChange={(e) => setSponsorForm((prev) => ({ ...prev, name: e.target.value }))}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                  required
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">
+                    Brand / Company
+                  </label>
+                  <input
+                    type="text"
+                    value={sponsorForm.brand}
+                    onChange={(e) => setSponsorForm((prev) => ({ ...prev, brand: e.target.value }))}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={sponsorForm.contactEmail}
+                    onChange={(e) => setSponsorForm((prev) => ({ ...prev, contactEmail: e.target.value }))}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">
+                  Website (optional)
+                </label>
+                <input
+                  type="text"
+                  value={sponsorForm.website}
+                  onChange={(e) => setSponsorForm((prev) => ({ ...prev, website: e.target.value }))}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.25em] text-white/50 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  value={sponsorForm.note}
+                  onChange={(e) => setSponsorForm((prev) => ({ ...prev, note: e.target.value }))}
+                  rows={3}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-brand resize-none"
+                  placeholder="Share what you’d like to feature..."
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={sponsorSubmitting}
+                className="w-full rounded-full border border-brand/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-brand-light transition hover:bg-brand/15 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sponsorSubmitting ? "Sending..." : "Send inquiry"}
+              </button>
+            </form>
+            {sponsorMessage && (
+              <div
+                className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+                  sponsorMessage.type === "success"
+                    ? "border-green-500/40 bg-green-500/10 text-green-200"
+                    : "border-red-500/40 bg-red-500/10 text-red-200"
+                }`}
+              >
+                {sponsorMessage.text}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -114,7 +114,16 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     return false;
   };
 
-  const rankingIndex = sortedByWins.findIndex(matchesPlayer);
+  let rankingIndex = sortedByWins.findIndex(matchesPlayer);
+  if (rankingIndex < 0) {
+    sortedByWins.push(player);
+    sortedByWins.sort((a, b) => {
+      const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+      const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+      return bw - aw;
+    });
+    rankingIndex = sortedByWins.findIndex(matchesPlayer);
+  }
 
   // Calculate state-level ranking
   let stateRank: number | null = null;
@@ -125,7 +134,16 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
       return bw - aw;
     });
-    const stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
+    let stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
+    if (stateRankIndex < 0) {
+      sortedByWinsInState.push(player);
+      sortedByWinsInState.sort((a, b) => {
+        const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+        const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+        return bw - aw;
+      });
+      stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
+    }
     if (stateRankIndex >= 0) {
       stateRank = stateRankIndex + 1;
     }
@@ -140,7 +158,16 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
       return bw - aw;
     });
-    const countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
+    let countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
+    if (countryRankIndex < 0) {
+      sortedByWinsInCountry.push(player);
+      sortedByWinsInCountry.sort((a, b) => {
+        const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+        const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+        return bw - aw;
+      });
+      countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
+    }
     if (countryRankIndex >= 0) {
       countryRank = countryRankIndex + 1;
     }
