@@ -94,6 +94,17 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     notFound();
   }
   const allPlayers = (await fetchAllPlayers()) as PlayerRecord[];
+  const sortedByWins = [...allPlayers].sort((a, b) => {
+    const aw = normalizeWins(a).length || (typeof a.wins === "number" ? a.wins : 0);
+    const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
+    return bw - aw;
+  });
+  const matchesPlayer = (p: PlayerRecord) => {
+    if (p._id && player._id && p._id === player._id) return true;
+    if (p.slug && player.slug && p.slug === player.slug) return true;
+    if (p.name && player.name && p.name === player.name) return true;
+    return false;
+  };
 
   const wins = normalizeWins(player);
   const orderedWins = [...wins].sort((a, b) => {
@@ -109,10 +120,29 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
-  const rankOverall = player.rankOverall ?? null;
-  const globalPercentile = player.rankPercentile ?? null;
-  const stateRank = player.rankState ?? null;
-  const countryRank = player.rankCountry ?? null;
+  let rankOverall = player.rankOverall ?? null;
+  let stateRank = player.rankState ?? null;
+  let countryRank = player.rankCountry ?? null;
+
+  if (rankOverall == null) {
+    const idx = sortedByWins.findIndex(matchesPlayer);
+    rankOverall = idx >= 0 ? idx + 1 : null;
+  }
+  if (stateRank == null && player.state) {
+    const statePlayers = sortedByWins.filter((p) => p.state === player.state);
+    const idx = statePlayers.findIndex(matchesPlayer);
+    stateRank = idx >= 0 ? idx + 1 : null;
+  }
+  if (countryRank == null && player.country) {
+    const countryPlayers = sortedByWins.filter((p) => p.country === player.country);
+    const idx = countryPlayers.findIndex(matchesPlayer);
+    countryRank = idx >= 0 ? idx + 1 : null;
+  }
+
+  const globalPercentile =
+    rankOverall != null && sortedByWins.length > 0
+      ? Math.round((1 - (rankOverall - 1) / sortedByWins.length) * 100)
+      : player.rankPercentile ?? null;
   const { ratingBandLabel, ratingBandRange, ratingBand } = (() => {
     if (duprRating == null) return { ratingBandLabel: "—", ratingBandRange: "—", ratingBand: "—" };
     if (duprRating < 3.5) return { ratingBandLabel: "Recreational", ratingBandRange: "<3.5", ratingBand: "Recreational (<3.5)" };
