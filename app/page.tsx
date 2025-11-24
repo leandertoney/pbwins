@@ -99,13 +99,14 @@ export default function Home() {
   }, [filteredPlayers, includePros]);
   const savePlayer = useMutation(api.players.savePlayer);
 
-  // Show landing popup on first visit
+  // Show landing popup on first visit, but only after a longer delay and only if not already verified
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('hasSeenLandingPopup');
-    if (!hasSeenPopup) {
+    const storedDupr = localStorage.getItem('duprUrl');
+    if (!hasSeenPopup && !storedDupr) {
       const timer = setTimeout(() => {
         setShowLandingPopup(true);
-      }, 2000); // Show after 2 seconds
+      }, 12000); // 12s delay to avoid interrupting immediately
       return () => clearTimeout(timer);
     }
   }, []);
