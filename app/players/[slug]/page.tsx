@@ -170,7 +170,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   // Build rating-band comparison stats for a simple bar chart
   let bandMedianWins: number | null = null;
   let bandMaxWins: number | null = null;
-  let bandPeers: PlayerRecord[] = [];
 
   if (duprRating != null) {
     const bandMin = Math.max(0, duprRating - 0.25);
@@ -180,7 +179,6 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const r = getPlayerRating(p);
       return r != null && r >= bandMin && r <= bandMax;
     });
-    bandPeers = bandPlayers;
 
     const bandWins = bandPlayers.map((p) => {
       const winsArr = normalizeWins(p);
@@ -197,6 +195,10 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       bandMaxWins = Math.max(...sortedWins);
     }
   }
+
+  const bandProgress = bandMaxWins && bandMaxWins > 0
+    ? Math.min(1, verifiedWins / bandMaxWins)
+    : null;
 
   const comparisonBars = (() => {
     const you = verifiedWins;
@@ -418,35 +420,40 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Top players at your level</h2>
-              <p className="text-xs text-white/50">Band: {ratingBand}</p>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-white">You vs top at your level</h2>
+                <p className="text-xs text-white/50">Band: {ratingBand}</p>
+              </div>
+              {bandMaxWins ? (
+                <div className="text-right text-xs text-white/60">
+                  <div>Your wins: <span className="text-white font-semibold">{verifiedWins}</span></div>
+                  <div>Top wins: <span className="text-white font-semibold">{bandMaxWins}</span></div>
+                </div>
+              ) : null}
             </div>
-            {bandPeers.length ? (
-              <div className="divide-y divide-white/5">
-                {bandPeers.slice(0, 5).map((p) => {
-                  const peerRating = getPlayerRating(p);
-                  const peerCityState = [p.city, p.state].filter(Boolean).join(", ");
-                  const peerWins = normalizeWins(p).length || (typeof p.wins === "number" ? p.wins : 0);
 
-                  return (
-                    <div key={p._id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{p.name}</p>
-                        <p className="text-xs text-white/50">{peerCityState || "Location TBD"}</p>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm text-white/80">
-                        <span className="text-white/60">Wins: <span className="text-white">{peerWins}</span></span>
-                        <span className="text-white/60">Rating: <span className="text-white">{peerRating?.toFixed(2) ?? "—"}</span></span>
-                      </div>
-                    </div>
-                  );
-                })}
+            {bandProgress !== null ? (
+              <div className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
+                <div className="relative h-40 w-40">
+                  <div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: `conic-gradient(rgba(149, 232, 75, 0.9) ${Math.max(4, bandProgress * 360)}deg, rgba(255, 255, 255, 0.12) ${Math.max(4, bandProgress * 360)}deg 360deg)`,
+                      filter: "drop-shadow(0 0 10px rgba(149,232,75,0.25))",
+                    }}
+                  />
+                  <div className="absolute inset-4 rounded-full bg-black/70 border border-white/10 flex flex-col items-center justify-center">
+                    <p className="text-xs uppercase tracking-[0.25em] text-white/50">Progress</p>
+                    <p className="text-3xl font-semibold text-white">{Math.round(bandProgress * 100)}%</p>
+                    <p className="text-[11px] text-white/60">of top wins in this level</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 py-10 text-center">
-                <p className="text-lg font-semibold text-white">Not enough players in this band yet</p>
-                <p className="mt-2 text-sm text-white/60">As more players verify at this level, you’ll see them here.</p>
+                <p className="text-lg font-semibold text-white">Not enough data yet</p>
+                <p className="mt-2 text-sm text-white/60">We’ll show your progress to the top as soon as more players verify at this level.</p>
               </div>
             )}
           </section>
