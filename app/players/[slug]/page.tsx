@@ -151,13 +151,13 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     rankingIndex >= 0 && totalPlayersCount > 0
       ? Math.round((1 - rankingIndex / totalPlayersCount) * 100)
       : null;
-  const ratingBand = (() => {
-    if (duprRating == null) return "—";
-    if (duprRating < 3.5) return "Recreational";
-    if (duprRating < 4.0) return "Intermediate (3.5–3.9)";
-    if (duprRating < 4.5) return "Advanced (4.0–4.4)";
-    if (duprRating < 5.0) return "Elite (4.5–4.9)";
-    return "Pro Level (5.0+)";
+  const { ratingBandLabel, ratingBandRange, ratingBand } = (() => {
+    if (duprRating == null) return { ratingBandLabel: "—", ratingBandRange: "—", ratingBand: "—" };
+    if (duprRating < 3.5) return { ratingBandLabel: "Recreational", ratingBandRange: "<3.5", ratingBand: "Recreational (<3.5)" };
+    if (duprRating < 4.0) return { ratingBandLabel: "Intermediate", ratingBandRange: "3.5–3.9", ratingBand: "Intermediate (3.5–3.9)" };
+    if (duprRating < 4.5) return { ratingBandLabel: "Advanced", ratingBandRange: "4.0–4.4", ratingBand: "Advanced (4.0–4.4)" };
+    if (duprRating < 5.0) return { ratingBandLabel: "Elite", ratingBandRange: "4.5–4.9", ratingBand: "Elite (4.5–4.9)" };
+    return { ratingBandLabel: "Pro Level", ratingBandRange: "5.0+", ratingBand: "Pro Level (5.0+)" };
   })();
 
   // Build rating-band comparison stats for a simple bar chart
@@ -338,7 +338,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   },
                   {
                     label: "Skill Level",
-                    value: ratingBand,
+                    value: ratingBandRange ?? "—",
+                    subLabel: ratingBandLabel ?? undefined,
                   },
                   {
                     label: "State Rank",
@@ -357,6 +358,9 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                       {stat.label}
                     </p>
                     <p className="mt-3 text-2xl font-semibold text-white">{stat.value}</p>
+                    {stat.subLabel ? (
+                      <p className="text-xs text-white/50 mt-1">{stat.subLabel}</p>
+                    ) : null}
                   </div>
                 ))}
               </div>
