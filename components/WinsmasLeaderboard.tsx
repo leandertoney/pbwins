@@ -7,8 +7,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function WinsmasLeaderboard() {
-  const leaderboard = useQuery(api.winsmas.getWinsmasLeaderboard, { contestId: "winsmas-25" });
-  const stats = useQuery(api.winsmas.getWinsmasStats, { contestId: "winsmas-25" });
+  const leaderboard = useQuery(api.winsmas.getWinsmasLeaderboard);
+  const stats = useQuery(api.winsmas.getWinsmasStats);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
