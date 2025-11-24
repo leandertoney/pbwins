@@ -372,18 +372,18 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
             </div>
 
             {comparisonBars.some((b) => b.value != null) ? (
-              <div className="mt-4 flex h-56 items-end gap-6">
+              <div className="mt-4 flex h-56 items-stretch gap-6">
                 {comparisonBars.map((bar) => (
-                  <div key={bar.key} className="flex-1 flex flex-col items-center">
-                    <div className="flex-1 flex items-end w-full">
+                  <div key={bar.key} className="flex-1 flex flex-col items-center h-full">
+                    <div className="flex-1 flex items-end w-full h-full">
                       {bar.value != null ? (
                         <div
-                          className={`w-full rounded-t-xl ${
-                            bar.key === "you"
-                              ? "bg-brand-glow/80"
-                              : "bg-white/10"
-                          }`}
+                          className="w-full rounded-t-xl"
                           style={{
+                            background:
+                              bar.key === "you"
+                                ? "rgba(149, 232, 75, 0.8)"
+                                : "rgba(255, 255, 255, 0.08)",
                             height: `${Math.max(8, (bar.value / bar.max) * 100)}%`,
                           }}
                         />
