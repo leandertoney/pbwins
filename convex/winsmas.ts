@@ -87,6 +87,26 @@ export const getChallengeStatus = query({
 });
 
 /**
+ * Fetch a single contest entry for a player
+ */
+export const getContestEntryByPlayer = query({
+  args: {
+    playerId: v.id("players"),
+    contestId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const contestId = args.contestId || WINSMAS_PRIMARY_CONTEST;
+    const entry = await ctx.db
+      .query("contestEntries")
+      .withIndex("by_playerId", (q) => q.eq("playerId", args.playerId))
+      .filter((q) => q.eq(q.field("contest"), contestId))
+      .first();
+
+    return entry || null;
+  },
+});
+
+/**
  * Get all Winsmas participants with their player data
  */
 export const getWinsmasParticipants = query({

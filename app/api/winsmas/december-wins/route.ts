@@ -144,25 +144,26 @@ export async function GET(req: Request) {
     }
 
     // Query the contest entry to get cached count
-    const entry = await convexClient.query(api.winsmas.hasEnteredWinsmas, {
+    const entry = await convexClient.query(api.winsmas.getContestEntryByPlayer, {
       playerId: playerId as Id<"players">,
+      contestId: "winsmas-25",
     });
 
-    if (!entry.hasEntered || !entry.entry) {
+    if (!entry) {
       return NextResponse.json({
         error: "Player not entered in Winsmas",
       }, { status: 404 });
     }
 
-    const cacheAge = entry.entry.lastUpdated
-      ? Date.now() - entry.entry.lastUpdated
+    const cacheAge = entry.lastUpdated
+      ? Date.now() - entry.lastUpdated
       : null;
 
     const cacheExpired = !cacheAge || cacheAge > 6 * 60 * 60 * 1000; // 6 hours
 
     return NextResponse.json({
-      decemberWins: entry.entry.decemberWins || 0,
-      lastUpdated: entry.entry.lastUpdated,
+      decemberWins: entry.decemberWins || 0,
+      lastUpdated: entry.lastUpdated,
       cacheAge,
       cacheExpired,
     });
