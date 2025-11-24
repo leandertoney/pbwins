@@ -15,7 +15,7 @@ import { generatePlayerBio } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
 import { getPlayerRating } from "@/lib/playerUtils";
 
-export const revalidate = 900;
+export const dynamic = "force-dynamic";
 
 function normalizeWins(player: PlayerRecord): WinRecord[] {
   if (Array.isArray(player.wins)) return player.wins as WinRecord[];
@@ -107,7 +107,14 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
     return bw - aw;
   });
-  const rankingIndex = sortedByWins.findIndex((p) => p._id === player._id);
+  const matchesPlayer = (p: PlayerRecord) => {
+    if ((p as any)._id && (player as any)._id && (p as any)._id === (player as any)._id) return true;
+    if (p.slug && player.slug && p.slug === player.slug) return true;
+    if (p.name && player.name && p.name === player.name) return true;
+    return false;
+  };
+
+  const rankingIndex = sortedByWins.findIndex(matchesPlayer);
 
   // Calculate state-level ranking
   let stateRank: number | null = null;
@@ -118,7 +125,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
       return bw - aw;
     });
-    const stateRankIndex = sortedByWinsInState.findIndex((p) => p._id === player._id);
+    const stateRankIndex = sortedByWinsInState.findIndex(matchesPlayer);
     if (stateRankIndex >= 0) {
       stateRank = stateRankIndex + 1;
     }
@@ -133,7 +140,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       const bw = normalizeWins(b).length || (typeof b.wins === "number" ? b.wins : 0);
       return bw - aw;
     });
-    const countryRankIndex = sortedByWinsInCountry.findIndex((p) => p._id === player._id);
+    const countryRankIndex = sortedByWinsInCountry.findIndex(matchesPlayer);
     if (countryRankIndex >= 0) {
       countryRank = countryRankIndex + 1;
     }
