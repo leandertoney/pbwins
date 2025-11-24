@@ -11,7 +11,7 @@ import VerifiedWinsCard from "@/components/VerifiedWinsCard";
 import PlayerMicroFaq from "@/components/PlayerMicroFaq";
 import VerifiedWinsTicker from "@/components/VerifiedWinsTicker";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
-import { generatePlayerBio, determineYearsActive } from "@/lib/generatePlayerBio";
+import { generatePlayerBio } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
 import { getPlayerRating } from "@/lib/playerUtils";
 
@@ -149,9 +149,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
   const totalWins = orderedWins.length || (typeof player.wins === "number" ? player.wins : 0);
   const verifiedWins = totalWins;
   const duprRating = getPlayerRating(player);
-  const yearsActive = player.yearsActive ?? determineYearsActive(orderedWins, player.createdAt, player.verifiedSince);
   const verifiedSinceYear = player.verifiedSince ? new Date(player.verifiedSince).getFullYear() : null;
-  const winRate = player.losses ? totalWins / (totalWins + player.losses) : null;
   const playerName = player.firstName || player.lastName ? `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim() : player.name;
   const cityState = [player.city, player.state].filter(Boolean).join(", ");
   const genderLabel = player.gender === "M" ? "Male" : player.gender === "F" ? "Female" : player.gender ?? "";
