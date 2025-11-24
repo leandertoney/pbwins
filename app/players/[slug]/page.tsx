@@ -205,9 +205,9 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
     const max = Math.max(...values, 1);
 
     return [
-      { key: "you", label: "You", value: you, max },
-      { key: "typical", label: "Typical at your level", value: typical, max },
-      { key: "top", label: "Top at your level", value: top, max },
+      { key: "you", label: "You", value: you, max, color: "rgba(149, 232, 75, 0.9)" },
+      { key: "typical", label: "Typical at your level", value: typical, max, color: "rgba(255, 255, 255, 0.12)" },
+      { key: "top", label: "Top at your level", value: top, max, color: "rgba(80, 173, 255, 0.35)" },
     ];
   })();
 
@@ -369,6 +369,17 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
               <h2 className="text-lg font-semibold text-white">
                 How your wins compare at your level
               </h2>
+              <div className="flex items-center gap-4 text-xs text-white/70">
+                {comparisonBars.map((bar) => (
+                  <div key={bar.key} className="flex items-center gap-2">
+                    <span
+                      className="h-3 w-3 rounded-sm border border-white/10"
+                      style={{ background: bar.color }}
+                    />
+                    <span>{bar.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {comparisonBars.some((b) => b.value != null) ? (
@@ -380,10 +391,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                         <div
                           className="w-full rounded-t-xl"
                           style={{
-                            background:
-                              bar.key === "you"
-                                ? "rgba(149, 232, 75, 0.8)"
-                                : "rgba(255, 255, 255, 0.08)",
+                            background: bar.color,
                             height: `${Math.max(8, (bar.value / bar.max) * 100)}%`,
                           }}
                         />
