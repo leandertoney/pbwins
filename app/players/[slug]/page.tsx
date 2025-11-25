@@ -238,7 +238,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       </div>
       <SponsorRailsFixed idPrefix="player" />
       <SponsorBarMobileFixed idPrefix="player" position="top" />
-      <div className="relative z-10 flex w-full flex-1 flex-col gap-4 lg:gap-10 px-0 lg:pl-[200px] lg:pr-[200px] pb-8 pt-4 lg:pt-2 lg:pb-10">
+      <div className="relative z-10 flex w-full flex-1 flex-col gap-4 lg:gap-10 px-0 lg:pl-[200px] lg:pr-[200px] pb-24 pt-24 lg:pt-2 lg:pb-10">
         <section className="mx-auto w-full max-w-5xl space-y-4 lg:space-y-8 px-4">
           <div className="flex w-full items-center justify-between mb-2">
             <Link href="/" className="flex items-center">
@@ -477,8 +477,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           </section>
         </section>
       </div>
-      <SponsorBarMobileFixed idPrefix="player" position="bottom" />
       <Footer />
+      <SponsorBarMobileFixed idPrefix="player" position="bottom" />
     </div>
   );
 }
