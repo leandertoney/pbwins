@@ -8,7 +8,6 @@ import { api } from "@/convex/_generated/api";
 import WinsmasCountdown from "@/components/WinsmasCountdown";
 import WinsmasLeaderboard from "@/components/WinsmasLeaderboard";
 import { Id } from "@/convex/_generated/dataModel";
-import SponsorRailMobile from "@/components/SponsorRailMobile";
 
 const CHALLENGES = [
   {
@@ -248,8 +247,6 @@ export default function WinsmasPage() {
           <span className="text-white/60 text-[11px] sm:text-xs">Entry closes Nov 30, 11:59 PM PT</span>
         </div>
       </header>
-      {/* Mobile sponsor strip (top) */}
-      <SponsorRailMobile idPrefix="winsmas-top" className="bg-white/5 border-b border-white/10" />
 
       <main className="max-w-6xl mx-auto px-4 pb-16 space-y-14">
         {/* Hero */}
@@ -459,11 +456,6 @@ export default function WinsmasPage() {
           </div>
         </section>
       </main>
-
-      {/* Mobile sponsor strip (bottom) */}
-      <div className="lg:hidden border-t border-white/10 bg-white/5">
-        <SponsorRailMobile idPrefix="winsmas-bottom" />
-      </div>
 
       {activeChallenge && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">

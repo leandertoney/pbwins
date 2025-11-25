@@ -10,7 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 import slugify from "@/lib/slugify";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
-import SponsorRailMobile from "@/components/SponsorRailMobile";
+import SponsorBarMobileFixed from "@/components/SponsorBarMobileFixed";
 import { PlayerRecord } from "@/types/player";
 import InteractiveCourtCrowdAd from "@/components/InteractiveCourtCrowdAd";
 import { getFormattedPlayerRating } from "@/lib/playerUtils";
@@ -310,11 +310,11 @@ export default function Home() {
       </div>
 
       <SponsorRailsFixed />
-      {/* Mobile sponsor strip (top) */}
-      <SponsorRailMobile idPrefix="home-top" className="bg-white/5 border-b border-white/10" />
+      {/* Mobile sponsor bars (fixed top/bottom) */}
+      <SponsorBarMobileFixed idPrefix="home" position="top" />
 
       {/* MAIN CONTENT */}
-      <div className="relative z-0 pl-0 pr-0 md:pl-[200px] md:pr-[200px]">
+      <div className="relative z-0 pl-0 pr-0 md:pl-[200px] md:pr-[200px] pt-24 pb-24 lg:pt-0 lg:pb-0">
         <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide -mt-[80px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
@@ -863,10 +863,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Mobile sponsor strip (bottom) */}
-      <div className="lg:hidden border-t border-white/10 bg-white/5">
-        <SponsorRailMobile idPrefix="home-bottom" />
-      </div>
+      <SponsorBarMobileFixed idPrefix="home" position="bottom" />
       <Footer />
     </div>
   );

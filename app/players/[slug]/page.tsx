@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ShieldCheck, Star, Trophy } from "lucide-react";
 import SponsorRailsFixed from "@/components/SponsorRailsFixed";
+import SponsorBarMobileFixed from "@/components/SponsorBarMobileFixed";
 import Footer from "@/components/Footer";
 import SuggestedPlayers from "@/components/SuggestedPlayers";
 import MetaPill from "@/components/MetaPill";
@@ -237,8 +238,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
         <div className="absolute bottom-[-10%] right-1/2 h-[500px] w-[700px] translate-x-1/2 rounded-full bg-brand-glow/25 blur-[140px]" />
       </div>
       <SponsorRailsFixed idPrefix="player" />
-      <SponsorRailMobile idPrefix="player-top" className="bg-white/5 border-b border-white/10" />
-      <div className="relative z-10 flex w-full flex-1 flex-col gap-10 pl-[200px] pr-[200px] pb-10 pt-2">
+      <SponsorBarMobileFixed idPrefix="player" position="top" />
+      <div className="relative z-10 flex w-full flex-1 flex-col gap-10 pl-[200px] pr-[200px] pb-20 pt-8 lg:pt-2 lg:pb-10">
         <section className="mx-auto w-full max-w-5xl space-y-8 px-4">
           <div className="flex w-full items-center justify-between mb-2">
             <Link href="/" className="flex items-center">
@@ -477,9 +478,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
           </section>
         </section>
       </div>
-      <div className="lg:hidden border-t border-white/10 bg-white/5">
-        <SponsorRailMobile idPrefix="player-bottom" />
-      </div>
+      <SponsorBarMobileFixed idPrefix="player" position="bottom" />
       <div className="mt-auto">
         <Footer />
       </div>
