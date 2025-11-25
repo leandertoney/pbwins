@@ -4,7 +4,12 @@ import { PlayerRecord } from "@/types/player";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const players = await fetchAllPlayers();
+  let players: PlayerRecord[] = [];
+  try {
+    players = await fetchAllPlayers();
+  } catch (error) {
+    console.error("[sitemap] Failed to fetch players:", error);
+  }
 
   const playerEntries = players.map((player: PlayerRecord) => ({
     url: `${baseUrl}/players/${createPlayerSlug(player)}`,
