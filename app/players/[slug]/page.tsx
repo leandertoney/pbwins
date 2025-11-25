@@ -231,7 +231,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
 
   const profileImage = player.imageUrl || "/pbwins-logo.png";
   return (
-    <div className="relative flex min-h-screen flex-col bg-[#050505] text-white">
+    <div className="relative flex flex-col bg-[#050505] text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-[-20%] left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-brand-glow/20 blur-[160px]" />
         <div className="absolute bottom-[-10%] right-1/2 h-[500px] w-[700px] translate-x-1/2 rounded-full bg-brand-glow/25 blur-[140px]" />
@@ -478,9 +478,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
         </section>
       </div>
       <SponsorBarMobileFixed idPrefix="player" position="bottom" />
-      <div className="mt-auto">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }
