@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import SponsorCircle from "./SponsorCircle";
@@ -18,6 +18,7 @@ interface SponsorRailMobileProps {
 export default function SponsorRailMobile({ idPrefix = "mobile-sponsor", className = "" }: SponsorRailMobileProps) {
   const currentMonth = useMemo(() => new Date().toLocaleString("en-US", { month: "long" }), []);
   const activeSponsors = useQuery(api.sponsorSlots.getActiveSponsors, { month: currentMonth });
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const sponsors = useMemo(() => {
     if (activeSponsors && activeSponsors.length > 0) {
@@ -26,8 +27,38 @@ export default function SponsorRailMobile({ idPrefix = "mobile-sponsor", classNa
     return SPONSORS_POOL.slice(0, 10);
   }, [activeSponsors]);
 
+  // Auto-scroll the mobile sponsor rail horizontally, with manual scroll still allowed
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let rafId: number;
+    let lastTs: number | null = null;
+    const speed = 30; // px per second
+
+    const step = (ts: number) => {
+      if (lastTs != null) {
+        const deltaSeconds = (ts - lastTs) / 1000;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+
+        if (maxScroll > 0) {
+          container.scrollLeft += speed * deltaSeconds;
+
+          if (container.scrollLeft >= maxScroll - 1) {
+            container.scrollLeft = 0;
+          }
+        }
+      }
+      lastTs = ts;
+      rafId = window.requestAnimationFrame(step);
+    };
+
+    rafId = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [sponsors.length]);
+
   return (
-    <div className={`lg:hidden w-full overflow-x-auto px-4 py-3 ${className}`}>
+    <div ref={scrollContainerRef} className={`lg:hidden w-full overflow-x-auto px-4 py-3 ${className}`}>
       <div className="flex gap-3">
         {sponsors.map((sponsor, idx) => (
           <div key={`${idPrefix}-${idx}`} className="flex-shrink-0">

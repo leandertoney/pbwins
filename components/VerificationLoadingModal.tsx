@@ -18,17 +18,17 @@ export default function VerificationLoadingModal({
   const stages = {
     basic: {
       label: 'Connecting to DUPR',
-      duration: 3000, // 3 seconds
+      duration: 8000, // 8 seconds
       targetProgress: 30,
     },
     history: {
       label: 'Loading player data',
-      duration: 5000, // 5 seconds
+      duration: 12000, // 12 seconds
       targetProgress: 80,
     },
     processing: {
       label: 'Finalizing verification',
-      duration: 2000, // 2 seconds
+      duration: 10000, // 10 seconds
       targetProgress: 100,
     },
   };
@@ -203,7 +203,7 @@ export default function VerificationLoadingModal({
         {/* Footer Note */}
         <div className="mt-8 pt-6 border-t border-white/5">
           <p className="text-xs text-white/40 text-center">
-            This usually takes 10-15 seconds. Hang tight!
+            This usually takes around 30 seconds. Hang tight!
           </p>
         </div>
       </div>

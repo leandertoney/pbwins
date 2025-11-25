@@ -315,7 +315,7 @@ export default function Home() {
 
       {/* MAIN CONTENT */}
       <div className="relative z-0 pl-0 pr-0 md:px-6 lg:px-0 lg:pl-[200px] lg:pr-[200px] pt-24 pb-24 lg:pt-0 lg:pb-0">
-        <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide -mt-[80px] px-4 md:px-0">
+        <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide mt-4 lg:-mt-[80px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
             src="/pbwins-logo.png"

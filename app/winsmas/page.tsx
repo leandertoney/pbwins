@@ -451,6 +451,8 @@ export default function WinsmasPage() {
               <li>Eligible wins: Dec 1–31, 2025. Verified wins only.</li>
               <li>Any DUPR-verified play counts (tourneys, leagues, rec).</li>
               <li>Join multiple challenges; prizes scale with targets.</li>
+              <li>Prizes are awarded by age bracket, one prize per bracket per challenge.</li>
+              <li>Only the first three age brackets to complete a challenge will earn prizes; other brackets are bragging rights only.</li>
               <li>Email required for confirmations and prize delivery.</li>
             </ul>
           </div>
