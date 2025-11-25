@@ -6,9 +6,10 @@ interface SponsorCircleProps {
   slotIndex: number;
   sponsor: { name: string; tagline: string; url?: string };
   idPrefix?: string;
+  isMobile?: boolean;
 }
 
-export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor" }: SponsorCircleProps) {
+export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor", isMobile = false }: SponsorCircleProps) {
   const { base, accent, glow } = getSponsorColors(sponsor.name, slotIndex);
   const gradientLayer = `radial-gradient(circle at 30% 25%, ${glow}33, transparent 65%)`;
   const [faviconError, setFaviconError] = useState(false);
@@ -32,8 +33,8 @@ export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor"
   const showFavicon = faviconUrl && !faviconError;
 
   const content = (
-    <div className="flex flex-col items-center justify-center leading-tight gap-1">
-      {showFavicon && (
+    <div className={`flex flex-col items-center justify-center leading-tight ${isMobile ? 'gap-0.5' : 'gap-1'}`}>
+      {showFavicon && !isMobile && (
         <div className="flex items-center justify-center w-4 h-4 rounded-full bg-white/10 backdrop-blur-sm p-0.5 mb-1">
           <img
             src={faviconUrl}
@@ -47,12 +48,12 @@ export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor"
         className="text-white font-semibold text-center leading-tight"
         style={{
           whiteSpace: "normal",
-          fontSize: "clamp(7.5px, 1vw, 12px)",
-          WebkitTextStroke: "1.1px rgba(0,0,0,0.65)",
+          fontSize: isMobile ? "clamp(6px, 1vw, 9px)" : "clamp(7.5px, 1vw, 12px)",
+          WebkitTextStroke: isMobile ? "0.8px rgba(0,0,0,0.65)" : "1.1px rgba(0,0,0,0.65)",
           paintOrder: "stroke fill",
           textShadow: "0px 1px 2px rgba(0,0,0,0.55)",
-          paddingLeft: "4px",
-          paddingRight: "4px",
+          paddingLeft: isMobile ? "2px" : "4px",
+          paddingRight: isMobile ? "2px" : "4px",
           display: "-webkit-box",
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
@@ -69,12 +70,12 @@ export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor"
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
-          fontSize: "clamp(7px, 1vw, 11px)",
+          fontSize: isMobile ? "clamp(5.5px, 1vw, 8px)" : "clamp(7px, 1vw, 11px)",
           lineHeight: 1.2,
-          WebkitTextStroke: "0.8px rgba(0,0,0,0.5)",
+          WebkitTextStroke: isMobile ? "0.6px rgba(0,0,0,0.5)" : "0.8px rgba(0,0,0,0.5)",
           paintOrder: "stroke fill",
           textShadow: "0px 1px 2px rgba(0,0,0,0.45)",
-          marginTop: "3px",
+          marginTop: isMobile ? "1px" : "3px",
         }}
       >
         {sponsor.tagline}
@@ -89,8 +90,9 @@ export default function SponsorCircle({ slotIndex, sponsor, idPrefix = "sponsor"
     boxShadow: `0 8px 24px rgba(0,0,0,0.55), 0 0 18px ${glow}44`,
   } as const;
 
-  const wrapperClassName =
-    "flex items-center justify-center w-[140px] h-[140px] rounded-full border transition-all duration-300 hover:scale-105 text-center px-4";
+  const wrapperClassName = isMobile
+    ? "flex items-center justify-center w-[85px] h-[85px] rounded-full border transition-all duration-300 hover:scale-105 text-center px-2"
+    : "flex items-center justify-center w-[140px] h-[140px] rounded-full border transition-all duration-300 hover:scale-105 text-center px-4";
 
   return (
     <div id={`${idPrefix}-slot-${slotIndex}`} className="sponsor-circle">

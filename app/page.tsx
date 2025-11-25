@@ -314,24 +314,24 @@ export default function Home() {
       <SponsorBarMobileFixed idPrefix="home" position="top" />
 
       {/* MAIN CONTENT */}
-      <div className="relative z-0 pl-0 pr-0 md:px-6 lg:px-0 lg:pl-[200px] lg:pr-[200px] pt-24 pb-24 lg:pt-0 lg:pb-0">
-        <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide mt-4 lg:-mt-[80px] px-4 md:px-0">
+      <div className="relative z-0 pl-0 pr-0 md:px-6 lg:px-0 lg:pl-[200px] lg:pr-[200px] pt-8 pb-8 lg:pt-0 lg:pb-0">
+        <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide mt-2 lg:-mt-[80px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
             src="/pbwins-logo.png"
             alt="pbWins"
             width={200}
             height={110}
-            className="mx-auto mb-1 md:mb-2 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
+            className="mx-auto mb-1 md:mb-2 rounded-full bg-transparent m-0 w-[65px] md:w-[200px] h-auto"
             priority
           />
 
-          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] 2xl:text-[3.2rem] font-bold leading-tight -mt-1 md:-mt-2 mb-2 md:mb-4 tracking-tight w-full mx-auto">
+          <h1 className="text-[1.1rem] sm:text-[1.7rem] md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] 2xl:text-[3.2rem] font-bold leading-tight -mt-1 md:-mt-2 mb-2 md:mb-4 tracking-tight w-full mx-auto">
             The database of verified pickleball wins
           </h1>
 
           {/* Player search bar and verify button */}
-          <div className="flex flex-col md:flex-row w-full max-w-full gap-3 mb-2 items-stretch md:items-center justify-center">
+          <div className="flex flex-col md:flex-row w-full max-w-full gap-2 mb-2 items-stretch md:items-center justify-center">
             {/* Search bar for existing players - 55-60% width, centered */}
             <div className="relative w-full md:max-w-[60%]">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -345,7 +345,7 @@ export default function Home() {
                 placeholder="Search players..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-3 md:py-2 text-sm focus:outline-none focus:border-brand focus:bg-white/10 transition min-h-[48px] md:min-h-0"
+                className="w-full rounded-full border border-white/10 bg-white/5 px-10 py-2.5 md:py-2 text-sm focus:outline-none focus:border-brand focus:bg-white/10 transition"
               />
               {searchQuery && (
                 <button
@@ -393,7 +393,7 @@ export default function Home() {
             {/* Standalone Verify button */}
             <button
               onClick={() => setShowVerifyModal(true)}
-              className="rounded-full px-5 py-3 md:py-2.5 text-sm font-medium transition shadow-lg flex items-center justify-center gap-2 whitespace-nowrap bg-brand text-black hover:bg-brand-light/90 min-h-[48px] md:min-h-0 w-full md:w-auto"
+              className="rounded-full px-5 py-2.5 md:py-2.5 text-sm font-medium transition shadow-lg flex items-center justify-center gap-2 whitespace-nowrap bg-brand text-black hover:bg-brand-light/90 w-full md:w-auto"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
