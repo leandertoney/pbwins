@@ -11,7 +11,6 @@ import MetaPill from "@/components/MetaPill";
 import VerifiedWinsCard from "@/components/VerifiedWinsCard";
 import PlayerMicroFaq from "@/components/PlayerMicroFaq";
 import VerifiedWinsTicker from "@/components/VerifiedWinsTicker";
-import SponsorRailMobile from "@/components/SponsorRailMobile";
 import { fetchPlayerBySlug, fetchAllPlayers } from "@/lib/players";
 import { generatePlayerBio } from "@/lib/generatePlayerBio";
 import { PlayerRecord, WinRecord } from "@/types/player";
