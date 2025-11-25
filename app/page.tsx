@@ -314,7 +314,7 @@ export default function Home() {
       <SponsorBarMobileFixed idPrefix="home" position="top" />
 
       {/* MAIN CONTENT */}
-      <div className="relative z-0 pl-0 pr-0 md:pl-[200px] md:pr-[200px] pt-24 pb-24 lg:pt-0 lg:pb-0">
+      <div className="relative z-0 pl-0 pr-0 md:px-6 lg:px-0 lg:pl-[200px] lg:pr-[200px] pt-24 pb-24 lg:pt-0 lg:pb-0">
         <main className="flex-1 flex flex-col items-center justify-start pb-4 lg:pb-8 text-center overflow-visible w-full mx-auto scrollbar-hide -mt-[80px] px-4 md:px-0">
         {/* Logo above heading */}
           <Image
@@ -326,8 +326,8 @@ export default function Home() {
             priority
           />
 
-          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.3rem] lg:text-[3rem] xl:text-[3.4rem] font-bold leading-tight mb-2 md:mb-4 tracking-tight w-full max-w-[52rem] mx-auto">
-            The database of verified pickleball wins
+          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] 2xl:text-[3.2rem] font-bold leading-tight mb-2 md:mb-4 tracking-tight w-full mx-auto">
+            All verified pickleball wins
           </h1>
 
           {/* Player search bar and verify button */}
