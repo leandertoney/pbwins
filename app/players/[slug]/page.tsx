@@ -238,8 +238,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
       </div>
       <SponsorRailsFixed idPrefix="player" />
       <SponsorBarMobileFixed idPrefix="player" position="top" />
-      <div className="relative z-10 flex w-full flex-1 flex-col gap-10 pl-[200px] pr-[200px] pb-20 pt-8 lg:pt-2 lg:pb-10">
-        <section className="mx-auto w-full max-w-5xl space-y-8 px-4">
+      <div className="relative z-10 flex w-full flex-1 flex-col gap-4 lg:gap-10 px-0 lg:pl-[200px] lg:pr-[200px] pb-8 pt-4 lg:pt-2 lg:pb-10">
+        <section className="mx-auto w-full max-w-5xl space-y-4 lg:space-y-8 px-4">
           <div className="flex w-full items-center justify-between mb-2">
             <Link href="/" className="flex items-center">
               <Image
@@ -247,17 +247,17 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                 alt="pbWins"
                 width={160}
                 height={160}
-                className="h-20 w-20 rounded-full"
+                className="h-14 w-14 lg:h-20 lg:w-20 rounded-full"
                 priority
               />
             </Link>
             <VerifiedWinsTicker />
           </div>
-          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-6 sm:p-8">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:items-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative h-32 w-32 flex-shrink-0">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.4)] p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col gap-4 lg:gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-1 flex-col gap-4 sm:gap-6 sm:flex-row sm:items-center">
+                <div className="flex flex-col items-center gap-2 lg:gap-3">
+                  <div className="relative h-24 w-24 lg:h-32 lg:w-32 flex-shrink-0">
                     <div className="absolute inset-0 rounded-full bg-brand-muted/20 blur-xl" />
                     <Image
                       src={profileImage}
@@ -273,8 +273,8 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h1 className="text-4xl font-semibold text-white">{playerName}</h1>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <h1 className="text-2xl lg:text-4xl font-semibold text-white">{playerName}</h1>
+                  <div className="flex flex-wrap items-center gap-1.5 lg:gap-2 mt-1 lg:mt-2">
                     {isPro && (
                       <MetaPill
                         icon={Star}
@@ -304,7 +304,7 @@ export default async function PlayerProfilePage({ params }: { params: { slug: st
                       />
                     )}
                   </div>
-                  <p className="text-white/70 text-base mt-2">
+                  <p className="text-white/70 text-sm lg:text-base mt-1 lg:mt-2">
                     {[cityState || "Location TBD", genderLabel, ageGroupLabel].filter(Boolean).join(" • ")}
                   </p>
                 </div>

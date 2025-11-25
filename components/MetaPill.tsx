@@ -19,7 +19,7 @@ export default function MetaPill({
 }: MetaPillProps) {
   return (
     <div
-      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10"
+      className="inline-flex items-center gap-1 lg:gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 lg:px-3 lg:py-1.5 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10"
       style={
         glow
           ? {
@@ -28,14 +28,14 @@ export default function MetaPill({
           : undefined
       }
     >
-      {Icon && <Icon className={`h-3.5 w-3.5 ${iconColor}`} />}
+      {Icon && <Icon className={`h-3 w-3 lg:h-3.5 lg:w-3.5 ${iconColor}`} />}
       <div className="flex items-center gap-1">
         {subtext && (
-          <span className="text-[0.6rem] font-medium uppercase tracking-wider text-white/50">
+          <span className="text-[0.55rem] lg:text-[0.6rem] font-medium uppercase tracking-wider text-white/50">
             {subtext}
           </span>
         )}
-        <span className="text-xs font-medium text-white/80">{text}</span>
+        <span className="text-[0.7rem] lg:text-xs font-medium text-white/80">{text}</span>
       </div>
     </div>
   );
