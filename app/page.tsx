@@ -322,11 +322,11 @@ export default function Home() {
             alt="pbWins"
             width={200}
             height={110}
-            className="mx-auto mb-2 md:mb-3 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
+            className="mx-auto mb-1 md:mb-2 rounded-full bg-transparent m-0 w-[120px] md:w-[200px] h-auto"
             priority
           />
 
-          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] 2xl:text-[3.2rem] font-bold leading-tight mb-2 md:mb-4 tracking-tight w-full mx-auto">
+          <h1 className="text-[1.3rem] sm:text-[1.7rem] md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] 2xl:text-[3.2rem] font-bold leading-tight -mt-1 md:-mt-2 mb-2 md:mb-4 tracking-tight w-full mx-auto">
             The database of verified pickleball wins
           </h1>
 
