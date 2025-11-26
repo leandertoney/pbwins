@@ -115,6 +115,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
           const cityState = [suggestedPlayer.city, suggestedPlayer.state].filter(Boolean).join(", ");
           const duprRating = getPlayerRating(suggestedPlayer);
           const profileImage = suggestedPlayer.imageUrl || "/pbwins-logo.png";
+          const isExternalImage = suggestedPlayer.imageUrl?.startsWith("http");
 
           return (
             <Link
@@ -130,6 +131,7 @@ export default async function SuggestedPlayers({ player }: SuggestedPlayersProps
                   alt={playerName}
                   fill
                   sizes="80px"
+                  unoptimized={isExternalImage}
                   className="rounded-full object-cover ring-2 ring-white/10 transition-all duration-300 group-hover:ring-white/20"
                 />
               </div>

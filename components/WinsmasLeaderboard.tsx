@@ -129,6 +129,7 @@ export default function WinsmasLeaderboard() {
                                   src={entry.imageUrl}
                                   alt={entry.name}
                                   fill
+                                  sizes="40px"
                                   className="object-cover"
                                   unoptimized
                                 />

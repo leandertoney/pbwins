@@ -64,6 +64,7 @@ export default function AdRotator({ className = "", slots = 1 }: AdRotatorProps)
             alt={ad.title}
             fill
             sizes="(max-width: 1024px) 100vw, 320px"
+            priority={ad.slotIndex === 0}
             className="pointer-events-none object-cover transition duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/90" />
